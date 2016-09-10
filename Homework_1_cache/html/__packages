@@ -1,4 +1,10 @@
 base
+methods
+datasets
+utils
+grDevices
+graphics
+stats
 lattice
 survival
 Formula
@@ -13,6 +19,5 @@ tidyr
 plyr
 dplyr
 stringr
-e1071
 knitcitations
 bibtex

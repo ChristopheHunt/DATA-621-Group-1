@@ -1,14 +1,17 @@
 ---
 title: "Homework 1"
 author: "Group 1"
-date: ""
+date: ''
 output:
   pdf_document:
-    toc: true
-    toc_depth: 2
-    number_sections: true
     includes:
-          in_header: header.tex
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r, include = FALSE}
@@ -20,6 +23,8 @@ library(tidyr)
 library(plyr)
 library(dplyr)
 library(stringr)
+library(e1071)
+library(corrplot)
 library(knitcitations)
 library(bibtex)
 ```
@@ -46,11 +51,9 @@ The purpose of this report is to determine the batting, baserun, pitching, and f
 
 # Data Exploration  
 
-
-
 Please note that each record has the performance of the team for the given year, with all of the statistics adjusted to match the performance of a 162 game season. 
 
-The following table provides the descriptive statistics regarding our data set. You will find that 
+The following table provides the descriptive statistics regarding our the available data set. You will find that 
 
 Describe the size and the variables in the moneyball training data set. Consider that too much detail will cause a
 manager to lose interest while too little detail will make the manager consider that you aren't doing your job. Some
@@ -61,14 +64,48 @@ You should have your own thoughts on what to tell the boss. These are just ideas
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
 colnames(df) <- mapvalues(as.vector(colnames(df)), 
                             from = str_trim(data_dictionary$VARIABLE.NAME..), to = as.vector(data_dictionary$DEFINITION))
-descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), descript = "Descriptive Statistics") 
+digits <- c(1) 
+
+descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), 
+                        descript = "Descriptive Statistics", digits = digits) 
+
+for (i in seq(1:length(descriptive))){for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
+    }
+     descriptive[[i]]$counts <- (descriptive[[i]]$counts[-c(4,7,8:10,11)])
+     
+     descriptive[[i]]$counts[7] <- round(sapply(df[i+1], function(x) median(x, na.rm=TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[7] <- "median"
+     
+     descriptive[[i]]$counts[8] <- round(sapply(df[i+1], function(x) sd(x, na.rm=TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[8] <- "sd"
+     
+     descriptive[[i]]$counts[9] <- round(sapply(df[i+1], function(x) skewness(x, na.rm=TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[9] <- "skewness"
+     
+     descriptive[[i]]$counts[10] <- round(sapply(df[i+1], function(x) kurtosis(x, na.rm=TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[10] <- "kurtosis"
+     
+     descriptive[[i]]$counts <- (descriptive[[i]]$counts[c(1:4,7:8,5:6,9:10)])
+     
+}
+
 latex(descriptive, file = '')
 ```
 
-a. Mean / Standard Deviation / Median
-b. Bar Chart or Box Plot of the data
+\newpage
+
 c. Is the data correlated to the target variable (or to other variables?)
-d. Are any of the variables missing and need to be imputed "fixed"?
+
+Correlation Matrix
+
+```{r, results='asis', echo = FALSE }
+
+#or <- rcorr(as.matrix(df %>% select(-`Identification Variable (do not use)`)), type="pearson")
+x <- corrplot(cor(df %>% select(-`Identification Variable (do not use)`), use="complete.obs"),
+          method="square",  tl.col = "black", tl.cex=.5, type="lower"
+       )
+  
+```
 
 \newpage
 
@@ -82,7 +119,7 @@ c. Transform data by putting it into buckets
 d. Mathematical transforms such as log or square root (or use Box-Cox)
 e. Combine variables (such as ratios or adding or multiplying) to create new variables
 
-\newpage
+
 
 # Build Models
 Using the training data set, build at least three different multiple linear regression models, using different variables
