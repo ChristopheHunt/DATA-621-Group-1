@@ -19,13 +19,14 @@ library(magrittr)
 library(tidyr)
 library(dplyr)
 ```
-# DATA EXPLORATION 
+# Data Exploration  
+
+The following table provides the descriptive statistics regarding our data set. You will find that 
 
 Describe the size and the variables in the moneyball training data set. Consider that too much detail will cause a
 manager to lose interest while too little detail will make the manager consider that you aren't doing your job. Some
 suggestions are given below. Please do NOT treat this as a check list of things to do to complete the assignment.
 You should have your own thoughts on what to tell the boss. These are just ideas.
-
 
 ```{r, echo=FALSE, results='asis'}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
@@ -40,7 +41,7 @@ d. Are any of the variables missing and need to be imputed "fixed"?
 
 \newpage
 
-# DATA PREPARATION 
+# Data Preparation  
 
 Describe how you have transformed the data by changing the original variables or creating new variables. If you
 did transform the data or create new variables, discuss why you did this. Here are some possible transformations.
@@ -52,7 +53,7 @@ e. Combine variables (such as ratios or adding or multiplying) to create new var
 
 \newpage
 
-# BUILD MODELS 
+# Build Models
 Using the training data set, build at least three different multiple linear regression models, using different variables
 (or the same variables with different transformations). Since we have not yet covered automated variable
 selection methods, you should select the variables manually (unless you previously learned Forward or Stepwise
