@@ -14,6 +14,28 @@ output:
     toc_depth: '2'
 ---
 
+\begin{center}
+\bigskip
+\bigskip
+\bigskip
+Prepared for:\\
+\medskip
+Dr. Nathan Bastian\\
+\smallskip
+City University of New York - Data 621\\
+\bigskip
+Prepared by:\\
+\medskip
+Group 1\\ 
+\medskip
+Senthil Dhanapal\\ 
+\smallskip
+Yadu Chittampalli\\
+\smallskip
+Christophe Hunt\\  
+
+\end{center}
+
 ```{r, include = FALSE}
 library(Hmisc)
 library(xlsx)
@@ -35,13 +57,14 @@ download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Da
 data_dictionary <- read.xlsx("Data Dictionary HW1 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW1 - Group 1", full.names = TRUE))
 ```
+\newpage
 
 
 # Introduction
 
-The ability to analyize and predict performance of a team using many dimensions is critical to competitive success in the professional Baseball industry. Therefore, we analyized the records of numerous professional baseball team from the years 1871 to 2006. Our hope is that the following report and the resulting predictive models will better inform the organization and assist in making data driven decisions moving forward. 
+The ability to analyize and predict performance of a professional baseball team using many dimensions is critical to competitive success for our organization. Therefore, we have analyzed the records of numerous professional baseball team from the years 1871 to 2006. Our hope is that the following report and the resulting predictive models will better inform the organization and assist in making data driven decisions moving forward. 
 
-"The goal of a baseball team is to win more games than any other team. Since one team has very little control over the number of games other teams win, the goal is essentially to win as many games as possible. Therefore, it is of interest to measure the player's contribution to the team's wins." Grabiner, B. D. [^1] 
+"The goal of a baseball team is to win more games than any other team. Since one team has very little control over the number of games other teams win, the goal is essentially to win as many games as possible. Therefore, it is of interest to measure the player's contribution to the team's wins." Grabiner, B. D. [^1] While we do not variables at the individual player's contribution level, we do have the entire teams contributions as an aggregate and will analyze that information. 
 
 [^1]: (Grabiner, B. D. (n.d.). [The Sabermetric Manifesto.](http://seanlahman.com/baseball-archive/sabermetrics/sabermetric-manifesto/) Retrieved September 10, 2016 from http://seanlahman.com/baseball-archive/sabermetrics/sabermetric-manifesto/) 
 
@@ -53,21 +76,19 @@ The purpose of this report is to determine the batting, baserun, pitching, and f
 
 Please note that each record has the performance of the team for the given year, with all of the statistics adjusted to match the performance of a 162 game season. 
 
-The following table provides the descriptive statistics regarding our the available data set. You will find that 
 
-Describe the size and the variables in the moneyball training data set. Consider that too much detail will cause a
-manager to lose interest while too little detail will make the manager consider that you aren't doing your job. Some
-suggestions are given below. Please do NOT treat this as a check list of things to do to complete the assignment.
-You should have your own thoughts on what to tell the boss. These are just ideas.
+The following table provides the detailed descriptive statistics regarding our variable of interest - Number of Wins and our possible explanatory variables. 
+
 
 ```{r, echo=FALSE, results='asis'}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
+
 colnames(df) <- mapvalues(as.vector(colnames(df)), 
                             from = str_trim(data_dictionary$VARIABLE.NAME..), to = as.vector(data_dictionary$DEFINITION))
 digits <- c(1) 
 
 descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), 
-                        descript = "Descriptive Statistics", digits = digits) 
+                        descript = "Table 1 : Descriptive Statistics", digits = digits) 
 
 for (i in seq(1:length(descriptive))){for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
     }
@@ -94,17 +115,11 @@ latex(descriptive, file = '')
 
 \newpage
 
-c. Is the data correlated to the target variable (or to other variables?)
-
 Correlation Matrix
 
-```{r, results='asis', echo = FALSE }
-
-#or <- rcorr(as.matrix(df %>% select(-`Identification Variable (do not use)`)), type="pearson")
-x <- corrplot(cor(df %>% select(-`Identification Variable (do not use)`), use="complete.obs"),
-          method="square",  tl.col = "black", tl.cex=.5, type="lower"
-       )
-  
+```{r, results='asis', echo = FALSE, fig.cap= "Correlation Plot of Training Data Set" }
+cor_matrix <- cor(df %>% select(-`Identification Variable (do not use)`), use="complete.obs",  method = c("pearson"))
+corrplot(cor_matrix, method="square",  order="hclust", addrect=2, tl.col = "black", tl.cex=.5, na.label = "NA")
 ```
 
 \newpage
@@ -121,7 +136,7 @@ e. Combine variables (such as ratios or adding or multiplying) to create new var
 
 
 
-# Build Models
+# Models Built
 Using the training data set, build at least three different multiple linear regression models, using different variables
 (or the same variables with different transformations). Since we have not yet covered automated variable
 selection methods, you should select the variables manually (unless you previously learned Forward or Stepwise
@@ -134,7 +149,7 @@ even though it is counter intuitive? Why? The boss needs to know.
 
 \newpage
 
-# Select Models 
+# Selected Model 
 Decide on the criteria for selecting the best multiple linear regression model. Will you select a model with slightly
 worse performance if it makes more sense or is more parsimonious? Discuss why you selected your model.
 For the multiple linear regression model, will you use a metric such as Adjusted R2
@@ -146,10 +161,12 @@ mean squared error, (b) R2
 
 # Appendix A
 
+## Citations
+
 ## Data Dictionary
 
 ```{r, results='asis', echo=FALSE, cache=TRUE}
 kable(data_dictionary)
 ```
 
-## R code used in document
+## R source code
