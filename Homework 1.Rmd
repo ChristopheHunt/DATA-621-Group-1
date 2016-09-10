@@ -7,8 +7,18 @@ output:
     toc: true
     toc_depth: 2
     number_sections: true
+    includes:
+          in_header: header.tex
 ---
 
+```{r, include = FALSE}
+library(Hmisc)
+library(xlsx)
+library(knitr)
+library(magrittr)
+library(tidyr)
+library(dplyr)
+```
 # DATA EXPLORATION 
 
 Describe the size and the variables in the moneyball training data set. Consider that too much detail will cause a
@@ -16,8 +26,11 @@ manager to lose interest while too little detail will make the manager consider 
 suggestions are given below. Please do NOT treat this as a check list of things to do to complete the assignment.
 You should have your own thoughts on what to tell the boss. These are just ideas.
 
-```{r, include=FALSE}
+
+```{r, echo=FALSE, results='asis'}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
+descriptive <- describe(df %>% select(-INDEX), descript = "Descriptive Statistics") 
+latex(descriptive, file = '')
 ```
 
 a. Mean / Standard Deviation / Median
@@ -52,7 +65,7 @@ even though it is counter intuitive? Why? The boss needs to know.
 
 \newpage
 
-# SELECT MODELS 
+# Select Models 
 Decide on the criteria for selecting the best multiple linear regression model. Will you select a model with slightly
 worse performance if it makes more sense or is more parsimonious? Discuss why you selected your model.
 For the multiple linear regression model, will you use a metric such as Adjusted R2
@@ -63,5 +76,17 @@ mean squared error, (b) R2
 , (c) F-statistic, and (d) residual plots. Make predictions using the evaluation data set.
 
 # Appendix A
+
+## Data Dictionary
+
+```{r, include=FALSE, cache=TRUE}
+download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Data%20Dictionary.xlsx?raw=true", 
+              destfile = "Data Dictionary HW1 - Group 1.xlsx", mode='wb')
+x <- read.xlsx("Data Dictionary HW1 - Group 1.xlsx", sheetIndex = 1)
+file.remove(dir(getwd(), pattern = "Data Dictionary HW1 - Group 1", full.names = TRUE))
+```
+```{r, results='asis', echo=FALSE, cache=TRUE}
+kable(x)
+```
 
 ## R code used in document
