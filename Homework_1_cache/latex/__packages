@@ -8,3 +8,8 @@ rJava
 xlsxjars
 xlsx
 knitr
+magrittr
+tidyr
+plyr
+dplyr
+stringr

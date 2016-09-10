@@ -17,9 +17,38 @@ library(xlsx)
 library(knitr)
 library(magrittr)
 library(tidyr)
+library(plyr)
 library(dplyr)
+library(stringr)
+library(knitcitations)
+library(bibtex)
 ```
+
+```{r, include=FALSE, cache=TRUE}
+download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Data%20Dictionary.xlsx?raw=true", 
+              destfile = "Data Dictionary HW1 - Group 1.xlsx", mode='wb')
+data_dictionary <- read.xlsx("Data Dictionary HW1 - Group 1.xlsx", sheetIndex = 1)
+file.remove(dir(getwd(), pattern = "Data Dictionary HW1 - Group 1", full.names = TRUE))
+```
+
+
+# Introduction
+
+The ability to analyize and predict performance of a team using many dimensions is critical to competitive success in the professional Baseball industry. Therefore, we analyized the records of numerous professional baseball team from the years 1871 to 2006. Our hope is that the following report and the resulting predictive models will better inform the organization and assist in making data driven decisions moving forward. 
+
+"The goal of a baseball team is to win more games than any other team. Since one team has very little control over the number of games other teams win, the goal is essentially to win as many games as possible. Therefore, it is of interest to measure the player's contribution to the team's wins." Grabiner, B. D. [^1] 
+
+[^1]: (Grabiner, B. D. (n.d.). [The Sabermetric Manifesto.](http://seanlahman.com/baseball-archive/sabermetrics/sabermetric-manifesto/) Retrieved September 10, 2016 from http://seanlahman.com/baseball-archive/sabermetrics/sabermetric-manifesto/) 
+
+# Statement of the Problem
+
+The purpose of this report is to determine the batting, baserun, pitching, and fielding effects on a baseball team's ability to win.  
+
 # Data Exploration  
+
+
+
+Please note that each record has the performance of the team for the given year, with all of the statistics adjusted to match the performance of a 162 game season. 
 
 The following table provides the descriptive statistics regarding our data set. You will find that 
 
@@ -30,7 +59,9 @@ You should have your own thoughts on what to tell the boss. These are just ideas
 
 ```{r, echo=FALSE, results='asis'}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
-descriptive <- describe(df %>% select(-INDEX), descript = "Descriptive Statistics") 
+colnames(df) <- mapvalues(as.vector(colnames(df)), 
+                            from = str_trim(data_dictionary$VARIABLE.NAME..), to = as.vector(data_dictionary$DEFINITION))
+descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), descript = "Descriptive Statistics") 
 latex(descriptive, file = '')
 ```
 
@@ -80,14 +111,8 @@ mean squared error, (b) R2
 
 ## Data Dictionary
 
-```{r, include=FALSE, cache=TRUE}
-download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Data%20Dictionary.xlsx?raw=true", 
-              destfile = "Data Dictionary HW1 - Group 1.xlsx", mode='wb')
-x <- read.xlsx("Data Dictionary HW1 - Group 1.xlsx", sheetIndex = 1)
-file.remove(dir(getwd(), pattern = "Data Dictionary HW1 - Group 1", full.names = TRUE))
-```
 ```{r, results='asis', echo=FALSE, cache=TRUE}
-kable(x)
+kable(data_dictionary)
 ```
 
 ## R code used in document
