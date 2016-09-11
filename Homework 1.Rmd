@@ -88,8 +88,9 @@ digits <- c(1)
 descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), 
                         descript = "Table 1 : Descriptive Statistics", digits = digits) 
 
-for (i in seq(1:length(descriptive))){for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
-    }
+for (i in seq(1:length(descriptive))){
+                     for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
+                                         }
      descriptive[[i]]$counts <- (descriptive[[i]]$counts[-c(4,7,8:10,11)])
      
      descriptive[[i]]$counts[7] <- round(sapply(df[i+1], function(x) median(x, na.rm=TRUE)), digits = digits)
@@ -108,10 +109,23 @@ latex(descriptive, file = '')
 
 Correlation Matrix
 
-```{r, results='asis', echo = FALSE, fig.cap= "Correlation Plot of Training Data Set" }
-cor_matrix <- cor(df %>% select(-`Identification Variable (do not use)`), use="everything",  method = c("pearson"))
-corrplot(cor_matrix, method="square", tl.col = "black", tl.cex=.5, na.label = " ")
+```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE}
+library(missForest)
+set.seed(124)
+
+imputed_df <- df %>% 
+              select(-`Identification Variable (do not use)`) %>%
+              missForest()
+
+imputed_df_m <- as.matrix(imputed_df$ximp)
+
+cor_matrix <- cor(imputed_df_m, use="everything",  method = c("pearson"))
 ```
+
+```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE}
+corrplot(cor_matrix, order="hclust", addrect=2, method="square", tl.col = "black", tl.cex=.5, na.label = " ")
+```
+
 
 \newpage
 

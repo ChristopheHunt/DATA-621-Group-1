@@ -17,3 +17,8 @@ e1071
 corrplot
 knitcitations
 bibtex
+randomForest
+foreach
+iterators
+itertools
+missForest
