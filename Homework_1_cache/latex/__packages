@@ -14,5 +14,6 @@ plyr
 dplyr
 stringr
 e1071
+corrplot
 knitcitations
 bibtex
