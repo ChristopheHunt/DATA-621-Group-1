@@ -64,7 +64,7 @@ file.remove(dir(getwd(), pattern = "Data Dictionary HW1 - Group 1", full.names =
 
 The ability to analyize and predict performance of a professional baseball team using many dimensions is critical to competitive success for our organization. Therefore, we have analyzed the records of numerous professional baseball team from the years 1871 to 2006. Our hope is that the following report and the resulting predictive models will better inform the organization and assist in making data driven decisions moving forward. 
 
-"The goal of a baseball team is to win more games than any other team. Since one team has very little control over the number of games other teams win, the goal is essentially to win as many games as possible. Therefore, it is of interest to measure the player's contribution to the team's wins." Grabiner, B. D. [^1] While we do not variables at the individual player's contribution level, we do have the entire teams contributions as an aggregate and will analyze that information. 
+"The goal of a baseball team is to win more games than any other team. Since one team has very little control over the number of games other teams win, the goal is essentially to win as many games as possible. Therefore, it is of interest to measure the player's contribution to the team's wins." Grabiner, B. D. [^1] While we do not have the variables at the player's individual contribution level, we do have the entire teams contributions as an aggregate and will analyze that information. 
 
 [^1]: (Grabiner, B. D. (n.d.). [The Sabermetric Manifesto.](http://seanlahman.com/baseball-archive/sabermetrics/sabermetric-manifesto/) Retrieved September 10, 2016 from http://seanlahman.com/baseball-archive/sabermetrics/sabermetric-manifesto/) 
 
@@ -74,11 +74,11 @@ The purpose of this report is to determine the batting, baserun, pitching, and f
 
 # Data Exploration  
 
-Please note that each record has the performance of the team for the given year, with all of the statistics adjusted to match the performance of a 162 game season. 
+Note that each record has the performance of the team for the given year, with all of the statistics adjusted to match the performance of a 162 game season. The following Table 1 - Descriptive Statistics provides the detailed descriptive statistics regarding our variable of interest - Number of Wins and our possible explanatory variables. 
 
+We noted that several variables were missing a nontrivial amount of observations and these variables; Strikeouts by batters, Stolen Bases, Caught stealing, Batters hit by pitch (get a free base), Strikeouts by pitcher, Double plays will require us to address the missing values for further analysis. 
 
-The following table provides the detailed descriptive statistics regarding our variable of interest - Number of Wins and our possible explanatory variables. 
-
+Additionally, variables 
 
 ```{r, echo=FALSE, results='asis'}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
