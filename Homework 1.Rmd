@@ -82,7 +82,7 @@ We noted that several variables were missing a nontrivial amount of observations
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
 
 colnames(df) <- mapvalues(as.vector(colnames(df)), 
-                            from = str_trim(data_dictionary$VARIABLE.NAME..), to = as.vector(data_dictionary$DEFINITION))
+                            from = str_trim(data_dictionary$VARIABLE.NAME..), to = as.vector(str_trim(data_dictionary$DEFINITION)))
 digits <- c(1) 
 
 descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), 
@@ -113,11 +113,11 @@ Correlation Matrix
 library(missForest)
 set.seed(124)
 
-imputed_df <- df %>% 
+imputed_data <- df %>% 
               select(-`Identification Variable (do not use)`) %>%
               missForest()
 
-imputed_df_m <- as.matrix(imputed_df$ximp)
+imputed_df_m <- as.matrix(imputed_data$ximp)
 
 cor_matrix <- cor(imputed_df_m, use="everything",  method = c("pearson"))
 ```
@@ -142,6 +142,14 @@ e. Combine variables (such as ratios or adding or multiplying) to create new var
 
 
 # Models Built
+
+```{r}
+imputed_df <- as.data.frame(imputed_data$ximp)
+lmfit = lm( data = imputed_df, `Number of wins` ~ `Homeruns by batters (4B)` + `Caught stealing` + `Strikeouts by batters`)
+summary(lmfit)
+plot(lmfit)
+````
+
 Using the training data set, build at least three different multiple linear regression models, using different variables
 (or the same variables with different transformations). Since we have not yet covered automated variable
 selection methods, you should select the variables manually (unless you previously learned Forward or Stepwise
