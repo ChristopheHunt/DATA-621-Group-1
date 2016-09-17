@@ -57,6 +57,14 @@ plot(fit2)
 base hits, double plays, walks allowed
 
 1. DATA EXPLORATION (25 Points)
+The variables were correlated to the target variable which is the targeted number of wins. The variables were correlated three at a time. In each of those batches, at least one variable was anticipated to have a positive effect and at least one was anticipated to have a negative effect. 
+
+The skewness of each variable was obtained. The two variables with a significant amount of skew were the number of base hits by batters and the number of walks allowed. Correspondingly, these two variables had a skew of 1.57 and 6.74. 
+
+Histograms of all of the variables were plotted so that the distribution of the data could be visualized. The reason for the strong skew in the number of walks allowed was because of the excessive number of outliers.
+
+The standard deviations for the base hits and the number of walks allowed are both very high (144.6 and 166.4). This implies that both variables are spread out over a wider range of values.  
+
 Describe the size and the variables in the moneyball training data set. Consider that too much detail will cause a
 manager to lose interest while too little detail will make the manager consider that you aren't doing your job. Some
 suggestions are given below. Please do NOT treat this as a check list of things to do to complete the assignment.
@@ -72,9 +80,7 @@ First, two variables that had a really large number of missing data points were 
 
 Next, the missing values in the remaining columns were replaced by the column means. 
 
-The skewness of each variable was obtained. The two variables with a significant amount of skew were the number of base hits by batters and the number of walks allowed. Correspondingly, these two variables had a skew of 1.57 and 6.74. 
-
-Histograms of all of the variables were plotted so that the distribution of the data could be visualized. The reason for the strong skew in the number of walks allowed was because of the excessive number of outliers. Thus, the rows containing all of these outliers were removed from the original dataset. After all of these rows were removed, the skew in the number of walks allowed was significantly reduced to below 1. 
+The rows containing all of the outliers were removed from the original dataset to reduce the skewness. After all of these rows were removed, the skew in the number of walks allowed was significantly reduced to below 1. 
 
 The Box-Cox transformation was done on the number of base hits by batters. As a result of this transformation, the skew in the number of base hits by batters was significantly reduced to below 1.
 
