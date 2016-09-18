@@ -76,7 +76,8 @@ The purpose of this report is to determine the batting, baserun, pitching, and f
 
 Note that each record has the performance of the team for the given year, with all of the statistics adjusted to match the performance of a 162 game season. The following Table 1 - Descriptive Statistics provides the detailed descriptive statistics regarding our variable of interest - Number of Wins and our possible explanatory variables. 
 
-We noted that several variables were missing a nontrivial amount of observations and these variables; Strikeouts by batters, Stolen Bases, Caught stealing, Batters hit by pitch (get a free base), Strikeouts by pitcher, and Double plays will require us to address the missing values for further analysis. 
+We noted that several variables were missing a nontrivial amount of observations and these variables are Strikeouts by batters, Stolen Bases, Caught stealing, Batters hit by pitch (get a free base), Strikeouts by pitcher, and Double plays. So we will need to address the missing values for further analysis. 
+
 
 ```{r, echo=FALSE, results='asis'}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
@@ -105,31 +106,40 @@ for (i in seq(1:length(descriptive))){
 latex(descriptive, file = '')
 ```
 
-\newpage
+## Imputing Missing Values  
 
-Correlation Matrix
+In order to address the missing values in our variables we used a nonparametric imputation method (Random Forest) to impute missing values. We chose a nonparametric method due to several variables having significant skew and greater than expected kurtosis values.  
 
 ```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE}
 library(missForest)
-set.seed(124)
+library(foreach)
+library(doParallel)
+cl <- makeCluster(2)
+registerDoParallel(cl)
+
+set.seed(1234)
 
 imputed_data <- df %>% 
               select(-`Identification Variable (do not use)`) %>%
-              missForest()
-
-imputed_df_m <- as.matrix(imputed_data$ximp)
-
-cor_matrix <- cor(imputed_df_m, use="everything",  method = c("pearson"))
+              missForest(maxiter = 10, ntree = 100, parallelize = 'forests')
 ```
 
-```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE}
+## Correlation Matrix 
+
+After competing the imputation, we can implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is our results and interestingly, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR). 
+
+```{r, fig.cap= "Correlation Plot of Training Data Set with imputed values", echo = FALSE}
+imputed_df_m <- as.matrix(imputed_data$ximp)
+cor_matrix <- cor(imputed_df_m, use="everything",  method = c("pearson"))
 corrplot(cor_matrix, order="hclust", addrect=2, method="square", tl.col = "black", tl.cex=.5, na.label = " ")
 ```
-
 
 \newpage
 
 # Data Preparation  
+
+
+
 
 Describe how you have transformed the data by changing the original variables or creating new variables. If you
 did transform the data or create new variables, discuss why you did this. Here are some possible transformations.
@@ -138,7 +148,6 @@ b. Create flags to suggest if a variable was missing
 c. Transform data by putting it into buckets
 d. Mathematical transforms such as log or square root (or use Box-Cox)
 e. Combine variables (such as ratios or adding or multiplying) to create new variables
-
 
 
 # Models Built
