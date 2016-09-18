@@ -6,94 +6,108 @@ output: pdf_document
 ---
 
 ```{r}
-moneyball = read.csv("moneyball-training-data.csv", header = T)
-apply(moneyball, 2, function(x) sum(is.na(x))) #to check number of NA's
-newmoneyball = subset(moneyball, select = -c(INDEX, TEAM_BASERUN_CS, TEAM_BATTING_HBP))
-c = colMeans(newmoneyball, na.rm = T)
-i = which(is.na(newmoneyball), arr.ind = T)
-newmoneyball[i] = c[i[,2]]
-
-library(matrixStats)
-library(moments)
-colSds(as.matrix(newmoneyball[,c(1,2,11,ncol(newmoneyball))]))
-
-boxplot(newmoneyball[,c(1,2,11,ncol(newmoneyball))])
-skewness(newmoneyball)[c(1,2,11,ncol(newmoneyball))]
-```
-
-```{r}
-layout(matrix(c(1,2,3,4), 2, 2))
-hist(newmoneyball$TARGET_WINS, main = ("Histogram of Number of Wins"), xlab = ("Number of Wins"))
-hist(newmoneyball$TEAM_BATTING_H, main = ("Histogram of Base Hits"), xlab = ("Base Hits"))
-hist(newmoneyball$TEAM_PITCHING_BB, main = ("Histogram of Walks by Batters"), xlab = ("Walks by Batters"))
-hist(newmoneyball$TEAM_FIELDING_DP, main = ("Histogram of Double Plays"), xlab = ("Double Plays"))
-```
-
-```{r}
-newmoneyball$tf = is.element(newmoneyball$TEAM_PITCHING_BB, boxplot.stats(newmoneyball$TEAM_PITCHING_BB)$out)
-newmoneyballnooutliers = subset(newmoneyball, tf == FALSE)
-skewness(newmoneyballnooutliers)[c(1,2,11,14)]
-```
-
-```{r}
 fit = lm(TARGET_WINS ~ TEAM_BATTING_H + TEAM_FIELDING_DP + TEAM_PITCHING_BB, data = newmoneyball)
 layout(matrix(c(1,2,3,4), 2, 2))
 summary(fit)
 plot(fit)
 ```
 
-```{r}
+base hits, double plays, walks allowed
+
+1. DATA EXPLORATION (25 Points)
+
+```{r, echo=FALSE}
+library(moments)
+moneyball = read.csv("moneyball-training-data.csv", header = T)
+newmoneyball = subset(moneyball, select = -c(INDEX, TEAM_BASERUN_CS, TEAM_BATTING_HBP))
+c = colMeans(newmoneyball, na.rm = T)
+i = which(is.na(newmoneyball), arr.ind = T)
+newmoneyball[i] = c[i[,2]]
+boxplot(newmoneyball[,c(1,2,11,ncol(newmoneyball))])
+```
+
+According to the boxplot shown above, there are lots of outliers in the number of walks allowed, indicating a strong skew to the right. 
+
+```{r, echo=FALSE}
+skewness(newmoneyball)[c(1,2,11,ncol(newmoneyball))]
+```
+
+The skewness of each variable was obtained. The two variables with a significant amount of skew were the number of base hits by batters and the number of walks allowed. Correspondingly, these two variables had a skew of 1.57 and 6.74. 
+
+```{r, echo=FALSE}
+layout(matrix(c(1,2,3,4), 2, 2))
+hist(newmoneyball$TARGET_WINS, main = ("Histogram of Number of Wins"), xlab = ("Number of Wins"))
+hist(newmoneyball$TEAM_BATTING_H, main = ("Histogram of Base Hits"), xlab = ("Base Hits"))
+hist(newmoneyball$TEAM_PITCHING_BB, main = ("Histogram of Number of Walks Allowed"), xlab = ("Number of Walks Allowed"))
+hist(newmoneyball$TEAM_FIELDING_DP, main = ("Histogram of Double Plays"), xlab = ("Double Plays"))
+```
+
+Histograms of all of the variables were plotted so that the distribution of the data could be visualized. In the distribution for the number of walks allowed, only two bars exist due to the excessive number of outliers.
+
+```{r, echo=FALSE}
+library(matrixStats)
+colSds(as.matrix(newmoneyball[,c(1,2,11,ncol(newmoneyball))]))
+```
+
+The standard deviations for the base hits and the number of walks allowed are both very high (144.6 and 166.4). This implies that both variables are spread out over a wider range of values.  
+
+2. DATA PREPARATION (25 Points)
+
+```{r, echo=FALSE}
+library(moments)
+moneyball = read.csv("moneyball-training-data.csv", header = T)
+newmoneyball = subset(moneyball, select = -c(INDEX, TEAM_BASERUN_CS, TEAM_BATTING_HBP))
+c = colMeans(newmoneyball, na.rm = T)
+i = which(is.na(newmoneyball), arr.ind = T)
+newmoneyball[i] = c[i[,2]]
+newmoneyball
+```
+
+Next, the missing values in the remaining columns were replaced by the column means. 
+
+```{r, echo=FALSE}
+newmoneyball$tf = is.element(newmoneyball$TEAM_PITCHING_BB, boxplot.stats(newmoneyball$TEAM_PITCHING_BB)$out)
+newmoneyballnooutliers = subset(newmoneyball, tf == FALSE) #get rid of outliers
+skewness(newmoneyballnooutliers)[c(1,2,11,14)]
+```
+
+The rows containing all of the outliers were removed from the original dataset to reduce the skewness. After all of these rows were removed, the skew in the number of walks allowed was significantly reduced to below 1. 
+
+```{r, echo=FALSE}
 library(forecast)
 l1 = BoxCox.lambda(newmoneyballnooutliers$TEAM_BATTING_H)
 
 newmoneyballnooutliers$TEAM_BATTING_H_T = BoxCox(newmoneyballnooutliers$TEAM_BATTING_H, l1)
 
+layout(matrix(c(1,2,3,4), 2, 2))
+hist(newmoneyballnooutliers$TARGET_WINS, main = ("Histogram of Number of Wins"), xlab = ("Number of Wins"))
+hist(newmoneyballnooutliers$TEAM_BATTING_H_T, main = ("Histogram of Base Hits"), xlab = ("Base Hits"))
+hist(newmoneyballnooutliers$TEAM_PITCHING_BB, main = ("Histogram of Walks by Batters"), xlab = ("Walks by Batters"))
+hist(newmoneyballnooutliers$TEAM_FIELDING_DP, main = ("Histogram of Double Plays"), xlab = ("Double Plays"))
+
+newmoneyballnooutliers$TEAM_BATTING_H_T
+```
+
+The Box-Cox transformation was done on the number of base hits by batters. As a result of this transformation, the skew in the number of base hits by batters was significantly reduced to below 1. Additionally all of the distributions shown above are approximately normal.  
+
+3. BUILD MODELS (25 Points)
+
+```{r, echo=FALSE}
 fit2 = lm(TARGET_WINS ~ TEAM_BATTING_H_T + TEAM_FIELDING_DP + TEAM_PITCHING_BB, data = newmoneyballnooutliers)
 summary(fit2)
 layout(matrix(c(1,2,3,4), 2, 2))
 plot(fit2)
 ```
 
-base hits, double plays, walks allowed
+```{r, echo=FALSE}
+apply(moneyball, 2, function(x) sum(is.na(x))) #to check number of NA's
+```
 
-1. DATA EXPLORATION (25 Points)
+First, two variables that had a really large number of missing data points were eliminated. These variables were the number of times a batter was hit by a pitch and the number of times the runner was caught stealing a base. The other variables had no data points missing or less than 300 data points missing.  
+
 The variables were correlated to the target variable which is the targeted number of wins. The variables were correlated three at a time. In each of those batches, at least one variable was anticipated to have a positive effect and at least one was anticipated to have a negative effect. 
 
-The skewness of each variable was obtained. The two variables with a significant amount of skew were the number of base hits by batters and the number of walks allowed. Correspondingly, these two variables had a skew of 1.57 and 6.74. 
-
-Histograms of all of the variables were plotted so that the distribution of the data could be visualized. The reason for the strong skew in the number of walks allowed was because of the excessive number of outliers.
-
-The standard deviations for the base hits and the number of walks allowed are both very high (144.6 and 166.4). This implies that both variables are spread out over a wider range of values.  
-
-Describe the size and the variables in the moneyball training data set. Consider that too much detail will cause a
-manager to lose interest while too little detail will make the manager consider that you aren't doing your job. Some
-suggestions are given below. Please do NOT treat this as a check list of things to do to complete the assignment.
-You should have your own thoughts on what to tell the boss. These are just ideas.
-a. Mean / Standard Deviation / Median
-b. Bar Chart or Box Plot of the data
-c. Is the data correlated to the target variable (or to other variables?)
-d. Are any of the variables missing and need to be imputed "fixed"?
-
-2. DATA PREPARATION (25 Points)
-
-First, two variables that had a really large number of missing data points were eliminated. These variables were the number of times a batter was hit by a pitch and the number of times the runner was caught stealing a base. 
-
-Next, the missing values in the remaining columns were replaced by the column means. 
-
-The rows containing all of the outliers were removed from the original dataset to reduce the skewness. After all of these rows were removed, the skew in the number of walks allowed was significantly reduced to below 1. 
-
-The Box-Cox transformation was done on the number of base hits by batters. As a result of this transformation, the skew in the number of base hits by batters was significantly reduced to below 1.
-
-3. BUILD MODELS (25 Points)
-Using the training data set, build at least three different multiple linear regression models, using different variables
-(or the same variables with different transformations). Since we have not yet covered automated variable
-selection methods, you should select the variables manually (unless you previously learned Forward or Stepwise
-selection, etc.). Since you manually selected a variable for inclusion into the model or exclusion into the model,
-indicate why this was done.
-Discuss the coefficients in the models, do they make sense? For example, if a team hits a lot of Home Runs, it
-would be reasonably expected that such a team would win more games. However, if the coefficient is negative
-(suggesting that the team would lose more games), then that needs to be discussed. Are you keeping the model
-even though it is counter intuitive? Why? The boss needs to know.
+The first coefficients in this model both before and after transformation make sense. As the number of base runs increases, the number of wins also increases. However, the second and third coefficients do not make sense. As the number of double plays increases and as the number of walks allowed decreases, the number of wins is supposed to increase. In the untransformed and transformed models, the number of wins has a negative correlation with the number of double plays and a positive correlation with the number of walks allowed. 
 
 4. SELECT MODELS (25 Points)
 Decide on the criteria for selecting the best multiple linear regression model. Will you select a model with slightly
