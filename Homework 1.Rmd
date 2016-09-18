@@ -37,18 +37,10 @@ Christophe Hunt\\
 \end{center}
 
 ```{r, include = FALSE}
-library(Hmisc)
-library(xlsx)
-library(knitr)
-library(magrittr)
-library(tidyr)
-library(plyr)
-library(dplyr)
-library(stringr)
-library(e1071)
-library(corrplot)
-library(knitcitations)
-library(bibtex)
+library(pacman)
+p_load(Hmisc, xlsx, knitr, scales, magrittr, tidyr, plyr, dplyr, 
+       stringr, e1071, corrplot, knitcitations, bibtex, missForest,
+       foreach, doParallel)
 ```
 
 ```{r, include=FALSE, cache=TRUE}
@@ -110,23 +102,25 @@ latex(descriptive, file = '')
 
 In order to address the missing values in our variables we used a nonparametric imputation method (Random Forest) to impute missing values. We chose a nonparametric method due to several variables having significant skew and greater than expected kurtosis values.  
 
-```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE}
-library(missForest)
-library(foreach)
-library(doParallel)
-cl <- makeCluster(2)
-registerDoParallel(cl)
+```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+registerDoParallel(cl = makeCluster(2), cores = 3)
 
 set.seed(1234)
 
 imputed_data <- df %>% 
               select(-`Identification Variable (do not use)`) %>%
               missForest(maxiter = 10, ntree = 100, parallelize = 'forests')
+
+```
+
+```{r, include=FALSE}
+## to ensure similar results we load the imputed data from github 
+imputed_data <- read.csv("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/imputed-moneyball-training-data.csv")
 ```
 
 ## Correlation Matrix 
 
-After competing the imputation, we can implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is our results and interestingly, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR). 
+After competing the imputation, we can implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and interestingly, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR). 
 
 ```{r, fig.cap= "Correlation Plot of Training Data Set with imputed values", echo = FALSE}
 imputed_df_m <- as.matrix(imputed_data$ximp)
@@ -138,13 +132,22 @@ corrplot(cor_matrix, order="hclust", addrect=2, method="square", tl.col = "black
 
 # Data Preparation  
 
+First, we chose to eliminate two variables that had a significant number of missing data points. These variables were Batters hit by pitch (get a free base) and Caught stealing, which were missing `r percent(2085/2276)` and `r percent(772/2276)` respectively. 
 
+```{r, include = FALSE}
+imputed_df <- imputed_df %>% select(-`Batters hit by pitch (get a free base)`, -`Caught stealing`)
+```
 
+Missing values in the remaining columns had been imputed using the random forest method as previous discussed in section 3.1. 
+
+`The rows containing all of the outliers were removed from the original dataset to reduce the skewness. After all of these rows were removed, the skew in the number of walks allowed was significantly reduced to below 1. `
+
+The Box-Cox transformation was done on the number of base hits by batters. As a result of this transformation, the skew in the number of base hits by batters was significantly reduced to below 1.
 
 Describe how you have transformed the data by changing the original variables or creating new variables. If you
 did transform the data or create new variables, discuss why you did this. Here are some possible transformations.
-a. Fix missing values (maybe with a Mean or Median value)
-b. Create flags to suggest if a variable was missing
+
+
 c. Transform data by putting it into buckets
 d. Mathematical transforms such as log or square root (or use Box-Cox)
 e. Combine variables (such as ratios or adding or multiplying) to create new variables
