@@ -40,7 +40,7 @@ Christophe Hunt\\
 library(pacman)
 p_load(Hmisc, xlsx, knitr, scales, magrittr, tidyr, plyr, dplyr, 
        stringr, e1071, corrplot, knitcitations, bibtex, missForest,
-       foreach, doParallel)
+       foreach, doParallel, stargazer)
 ```
 
 ```{r, include=FALSE, cache=TRUE}
@@ -177,7 +177,9 @@ relevant model output. Using the training data set, evaluate the multiple linear
 mean squared error, (b) R2
 , (c) F-statistic, and (d) residual plots. Make predictions using the evaluation data set.
 
-
+```{r, echo=FALSE, results='asis'}
+stargazer::stargazer(lmfit)
+```
 
 # Appendix A
 
