@@ -111,11 +111,12 @@ imputed_data <- df %>%
               select(-`Identification Variable (do not use)`) %>%
               missForest(maxiter = 10, ntree = 100, parallelize = 'forests')
 
+write.csv(imputed_data$ximp,"imputed-moneyball-training-data.csv", row.names = FALSE)
 ```
 
 ```{r, include=FALSE}
 ## to ensure similar results we load the imputed data from github 
-imputed_data <- read.csv("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/imputed-moneyball-training-data.csv")
+imputed_data <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/imputed-moneyball-training-data.csv", header = TRUE, check.names = FALSE)
 ```
 
 ## Correlation Matrix 
@@ -123,9 +124,9 @@ imputed_data <- read.csv("https://github.com/ChristopheHunt/DATA-621-Group-1/blo
 After competing the imputation, we can implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and interestingly, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR). 
 
 ```{r, fig.cap= "Correlation Plot of Training Data Set with imputed values", echo = FALSE}
-imputed_df_m <- as.matrix(imputed_data$ximp)
-cor_matrix <- cor(imputed_df_m, use="everything",  method = c("pearson"))
-corrplot(cor_matrix, order="hclust", addrect=2, method="square", tl.col = "black", tl.cex=.5, na.label = " ")
+imputed_df_m <- as.matrix(imputed_data)
+cor_matrix <- cor(imputed_df_m, use = "everything",  method = c("pearson"))
+corrplot(cor_matrix, order = "hclust", addrect = 2, method="square", tl.col = "black", tl.cex = .5, na.label = " ")
 ```
 
 \newpage
@@ -135,7 +136,7 @@ corrplot(cor_matrix, order="hclust", addrect=2, method="square", tl.col = "black
 First, we chose to eliminate two variables that had a significant number of missing data points. These variables were Batters hit by pitch (get a free base) and Caught stealing, which were missing `r percent(2085/2276)` and `r percent(772/2276)` respectively. 
 
 ```{r, include = FALSE}
-imputed_df <- imputed_df %>% select(-`Batters hit by pitch (get a free base)`, -`Caught stealing`)
+imputed_df <- imputed_data %>% select(-`Batters hit by pitch (get a free base)`, -`Caught stealing`)
 ```
 
 Missing values in the remaining columns had been imputed using the random forest method as previous discussed in section 3.1. 
@@ -144,23 +145,15 @@ Missing values in the remaining columns had been imputed using the random forest
 
 The Box-Cox transformation was done on the number of base hits by batters. As a result of this transformation, the skew in the number of base hits by batters was significantly reduced to below 1.
 
-Describe how you have transformed the data by changing the original variables or creating new variables. If you
-did transform the data or create new variables, discuss why you did this. Here are some possible transformations.
-
-
-c. Transform data by putting it into buckets
-d. Mathematical transforms such as log or square root (or use Box-Cox)
-e. Combine variables (such as ratios or adding or multiplying) to create new variables
-
-
 # Models Built
 
 ```{r}
-imputed_df <- as.data.frame(imputed_data$ximp)
-lmfit = lm( data = imputed_df, `Number of wins` ~ `Homeruns by batters (4B)` + `Caught stealing` + `Strikeouts by batters`)
+lmfit <- lm(data = imputed_df, 
+           `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` + `Homeruns by batters (4B)` +  sqrt(`Strikeouts by batters`))
 summary(lmfit)
+layout(matrix(c(1,2,3,4),2,2))
 plot(lmfit)
-````
+```
 
 Using the training data set, build at least three different multiple linear regression models, using different variables
 (or the same variables with different transformations). Since we have not yet covered automated variable
@@ -184,7 +177,15 @@ relevant model output. Using the training data set, evaluate the multiple linear
 mean squared error, (b) R2
 , (c) F-statistic, and (d) residual plots. Make predictions using the evaluation data set.
 
+
+
 # Appendix A
+
+## Session Info
+
+```{r, results='asis', echo=FALSE}
+toLatex(sessionInfo())
+```
 
 ## Citations
 
