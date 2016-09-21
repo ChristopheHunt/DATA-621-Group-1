@@ -100,7 +100,7 @@ latex(descriptive, file = '')
 
 ## Imputing Missing Values  
 
-In order to address the missing values in our variables we used a nonparametric imputation method (Random Forest) to impute missing values. We chose a nonparametric method due to several variables having significant skew and greater than expected kurtosis values.  
+In order to address the missing values in our variables we used a nonparametric imputation method (Random Forest) to impute missing values. We chose a nonparametric method due to several variables having significant skew and greater than expected kurtosis values. \newpage 
 
 ```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
 registerDoParallel(cl = makeCluster(2), cores = 3)
@@ -121,7 +121,7 @@ imputed_data <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-
 
 ## Correlation Matrix 
 
-After competing the imputation, we can implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and interestingly, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR). 
+After competing the imputation, we can implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and as expected, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR). 
 
 ```{r, fig.cap= "Correlation Plot of Training Data Set with imputed values", echo = FALSE}
 imputed_df_m <- as.matrix(imputed_data)
@@ -141,19 +141,21 @@ imputed_df <- imputed_data %>% select(-`Batters hit by pitch (get a free base)`,
 
 Missing values in the remaining columns had been imputed using the random forest method as previous discussed in section 3.1. 
 
-`The rows containing all of the outliers were removed from the original dataset to reduce the skewness. After all of these rows were removed, the skew in the number of walks allowed was significantly reduced to below 1. `
-
-The Box-Cox transformation was done on the number of base hits by batters. As a result of this transformation, the skew in the number of base hits by batters was significantly reduced to below 1.
-
 # Models Built
 
-```{r}
+## Model 1 
+ 
+We used the variable Base Hits by batters (1B,2B,3B,HR) which is the most correlated variable to Number of Wins as indicated in the correlation matrix. This is expected as Base Hits are necessary to win any game. Additionally, Strikeouts by batters would be negatively correlated Number of Wins because if a batter strikes out they are no able to provide runs which are criticaly to win. 
+
+```{r, results='asis', echo=FALSE}
 lmfit <- lm(data = imputed_df, 
-           `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` + `Homeruns by batters (4B)` +  sqrt(`Strikeouts by batters`))
-summary(lmfit)
-layout(matrix(c(1,2,3,4),2,2))
-plot(lmfit)
+           `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` + sqrt(`Strikeouts by batters`))
+stargazer(lmfit, header=FALSE,  
+          covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", "$\\sqrt{Strikeouts~by~batters}$"),
+          dep.var.caption  = c("Model 1"),
+          dep.var.labels   = c("Number of wins"))
 ```
+
 
 Using the training data set, build at least three different multiple linear regression models, using different variables
 (or the same variables with different transformations). Since we have not yet covered automated variable
