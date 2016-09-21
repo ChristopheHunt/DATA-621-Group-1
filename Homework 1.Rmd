@@ -71,7 +71,7 @@ Note that each record has the performance of the team for the given year, with a
 We noted that several variables were missing a nontrivial amount of observations and these variables are Strikeouts by batters, Stolen Bases, Caught stealing, Batters hit by pitch (get a free base), Strikeouts by pitcher, and Double plays. So we will need to address the missing values for further analysis. 
 
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=FALSE, results='asis', cache=TRUE}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
 
 colnames(df) <- mapvalues(as.vector(colnames(df)), 
@@ -114,7 +114,7 @@ imputed_data <- df %>%
 write.csv(imputed_data$ximp,"imputed-moneyball-training-data.csv", row.names = FALSE)
 ```
 
-```{r, include=FALSE}
+```{r, include=FALSE, cache=TRUE}
 ## to ensure similar results we load the imputed data from github 
 imputed_data <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/imputed-moneyball-training-data.csv", header = TRUE, check.names = FALSE)
 ```
@@ -123,7 +123,7 @@ imputed_data <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-
 
 After competing the imputation, we can implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and as expected, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR). 
 
-```{r, fig.cap= "Correlation Plot of Training Data Set with imputed values", echo = FALSE}
+```{r, fig.cap= "Correlation Plot of Training Data Set with imputed values", echo = FALSE, cache=TRUE}
 imputed_df_m <- as.matrix(imputed_data)
 cor_matrix <- cor(imputed_df_m, use = "everything",  method = c("pearson"))
 corrplot(cor_matrix, order = "hclust", addrect = 2, method="square", tl.col = "black", tl.cex = .5, na.label = " ")
@@ -135,7 +135,7 @@ corrplot(cor_matrix, order = "hclust", addrect = 2, method="square", tl.col = "b
 
 First, we chose to eliminate two variables that had a significant number of missing data points. These variables were Batters hit by pitch (get a free base) and Caught stealing, which were missing `r percent(2085/2276)` and `r percent(772/2276)` respectively. 
 
-```{r, include = FALSE}
+```{r, include = FALSE, cache=TRUE}
 imputed_df <- imputed_data %>% select(-`Batters hit by pitch (get a free base)`, -`Caught stealing`)
 ```
 
@@ -151,8 +151,8 @@ We used the variable Base Hits by batters (1B,2B,3B,HR) which is the most correl
 lmfit <- lm(data = imputed_df, 
            `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` + sqrt(`Strikeouts by batters`))
 
-stargazer(lmfit, header=FALSE,  
-          covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", "$\\sqrt{Strikeouts~by~batters}$"),
+stargazer(lmfit, header = FALSE,  
+          covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", "$\\sqrt{\\textnormal{Strikeouts~by~batters}}$"),
           dep.var.caption  = c("Model 1"),
           dep.var.labels   = c("Number of wins"))
 ```
