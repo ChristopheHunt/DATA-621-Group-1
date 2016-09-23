@@ -46,28 +46,57 @@ The standard deviations for the base hits and the number of walks allowed are bo
 
 2. DATA PREPARATION (25 Points)
 
-```{r, echo=FALSE}
-library(forecast)
-l1 = BoxCox.lambda(newmoneyball$`Base Hits by Batters`)
-newmoneyball$`Base Hits Transformed` = BoxCox(newmoneyball$`Base Hits by Batters`, l1)
-hist(newmoneyball$`Base Hits Transformed`, main = ("Histogram of Base Hits After Box Cox Transformation"), xlab = ("Box Cox Transformation of Base Hits"))
+```{r, echo = FALSE}
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+  
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+  
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+  
+  return(x)  
+  
+}
 
-newmoneyball$`Walks Allowed Transformed` = (newmoneyball$`Walks Allowed`)^(1/3)
-hist(newmoneyball$`Walks Allowed Transformed`, main = ("Histogram of Cube Root of Walks Allowed"), xlab = ("Cube Root of Walks Allowed"))
-
-skewness(newmoneyball)
+newmoneyball$`Number of Wins Winsorized` = winsorize(newmoneyball$`Number of Wins`, multiple = 2.2)
+newmoneyball$`Base Hits Winsorized` = winsorize(newmoneyball$`Base Hits by Batters`, multiple = 2.2)
+newmoneyball$`Walks Allowed Winsorized` = winsorize(newmoneyball$`Walks Allowed`, multiple = 2.2)
+newmoneyball$`Double Plays Winsorized` = winsorize(newmoneyball$`Double Plays`, multiple = 2.2)
+boxplot(newmoneyball$`Number of Wins Winsorized`, newmoneyball$`Base Hits Winsorized`, newmoneyball$`Walks Allowed Winsorized`, newmoneyball$`Double Plays Winsorized`)
 ```
 
-The variables that were transformed were the number of walks allowed and the number of base hits by batters. The cube root of the number of walks allowed was taken because the skewness in this variable was high. After the cube root was taken, the skewness was reduced to approximately 0.5.
-
-The transformation done on the number of walks was Box Cox transformation. As a result of this transformation the skewness was reduced to 0.112. 
-
-Now the distributions are fairly symmetrical.
-
-3. BUILD MODELS (25 Points)
+First, the variables were all winsorized. As a result, all of the outliers were changed. 
 
 ```{r, echo=FALSE}
-fit2 = lm(`Number of Wins` ~ `Base Hits Transformed` + `Double Plays` + `Walks Allowed Transformed`, data = newmoneyball)
+library(forecast)
+l1 = BoxCox.lambda(newmoneyball$`Number of Wins Winsorized`)
+newmoneyball$`Number of Wins Transformed` = BoxCox(newmoneyball$`Number of Wins Winsorized`, l1)
+```
+
+```{r, echo=FALSE}
+newmoneyball$`Walks Allowed Transformed` = (newmoneyball$`Walks Allowed Winsorized`)^(1/3)
+#hist(newmoneyball$`Walks Allowed Transformed`, main = ("Histogram of Cube Root of Walks Allowed"), xlab = ("Cube Root of Walks Allowed"))
+newmoneyball$`Double Plays Transformed` = (newmoneyball$`Double Plays Winsorized`)^(1/3)
+#skewness(newmoneyball)
+```
+
+The variables that were transformed were the number of walks allowed and the number of double plays. The cube roots of these two variables were taken. 
+
+The transformation done on the number of wins was the Box Cox transformation.
+
+As a result of all of these transformations, the adjusted-R-squared was increased to 0.18. 
+
+```{r, echo=FALSE}
+fit = lm(`Number of Wins Winsorized` ~ `Base Hits Winsorized` + `Double Plays Winsorized` + `Walks Allowed Winsorized`, data = newmoneyball)
+summary(fit)
+fit1 = lm(`Number of Wins` ~ `Base Hits by Batters` + `Double Plays` + `Walks Allowed`, data = newmoneyball)
+summary(fit1)
+fit2 = lm(`Number of Wins Transformed` ~ `Base Hits Winsorized` + `Double Plays Transformed` + `Walks Allowed Transformed`, data = newmoneyball)
 summary(fit2)
 layout(matrix(c(1,2,3,4), 2, 2))
 plot(fit2)
@@ -81,7 +110,9 @@ First, two variables that had a really large number of missing data points were 
 
 The variables were correlated to the target variable which is the targeted number of wins. The variables were correlated three at a time. In each of those batches, at least one variable was anticipated to have a positive effect and at least one was anticipated to have a negative effect. 
 
-The first coefficients in this model both before and after transformation make sense. As the number of base runs increases, the number of wins also increases. However, the second and third coefficients do not make sense. As the number of double plays increases and as the number of walks allowed decreases, the number of wins is supposed to increase. In the untransformed and transformed models, the number of wins has a negative correlation with the number of double plays and a positive correlation with the number of walks allowed. 
+The first coefficients in this model both before and after transformation make sense. As the number of base runs increases, the number of wins also increases. However, the second and third coefficients do not make sense. As the number of double plays increases and as the number of walks allowed decreases, the number of wins is supposed to increase. In the untransformed and transformed models, the number of wins has a negative correlation with the number of double plays and a positive correlation with the number of walks allowed. However, after the transformations were done, the significance of the double plays and the walks allowed increased. 
+
+The one variable that did not need to be transformed was the Base Hits variable. This variable already has a strong correlation with the Target Wins. 
 
 4. SELECT MODELS (25 Points)
 Decide on the criteria for selecting the best multiple linear regression model. Will you select a model with slightly
