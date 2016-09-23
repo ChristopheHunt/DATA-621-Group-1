@@ -47,6 +47,7 @@ The standard deviations for the base hits and the number of walks allowed are bo
 2. DATA PREPARATION (25 Points)
 
 ```{r, echo=FALSE}
+library(forecast)
 l1 = BoxCox.lambda(newmoneyball$`Base Hits by Batters`)
 newmoneyball$`Base Hits Transformed` = BoxCox(newmoneyball$`Base Hits by Batters`, l1)
 hist(newmoneyball$`Base Hits Transformed`, main = ("Histogram of Base Hits After Box Cox Transformation"), xlab = ("Box Cox Transformation of Base Hits"))
