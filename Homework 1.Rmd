@@ -22,7 +22,7 @@ Prepared for:\\
 \medskip
 Dr. Nathan Bastian\\
 \smallskip
-City University of New York - Data 621\\
+City University of New York, School of Professional Studies - Data 621\\
 \bigskip
 Prepared by:\\
 \medskip
