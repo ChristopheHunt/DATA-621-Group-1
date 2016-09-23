@@ -70,6 +70,9 @@ Note that each record has the performance of the team for the given year, with a
 
 We noted that several variables were missing a nontrivial amount of observations and these variables are Strikeouts by batters, Stolen Bases, Caught stealing, Batters hit by pitch (get a free base), Strikeouts by pitcher, and Double plays. So we will need to address the missing values for further analysis. 
 
+Histograms of all of the variables have been plotted below so that the distribution of the data can be visualized. In the distribution for the number of walks allowed, only two bars exist due to the excessive number of outliers.
+
+Additionally, the skewness of each variable has been indicated in Table 1 - Descriptive Statistics. Two variables with a significant amount of skew are the number of base hits by batters and the number of walks allowed. Correspondingly, these two variables had a skew of 1.57 and 6.74 respectively. 
 
 ```{r, echo=FALSE, results='asis', cache=TRUE}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
@@ -81,18 +84,21 @@ digits <- c(1)
 descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), 
                         descript = "Table 1 : Descriptive Statistics", digits = digits) 
 
-for (i in seq(1:length(descriptive))){
+for (i in seq(1:length(descriptive))){ 
                      for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
                                          }
      descriptive[[i]]$counts <- (descriptive[[i]]$counts[-c(4,7,8:10,11)])
      
-     descriptive[[i]]$counts[7] <- round(sapply(df[i+1], function(x) median(x, na.rm=TRUE)), digits = digits)
+     descriptive[[i]]$counts[7] <- round(sapply(df[i + 1], function(x) median(x, na.rm = TRUE)), digits = digits)
      names(descriptive[[i]]$counts)[7] <- "Median"
      
-     descriptive[[i]]$counts[8] <- round(sapply(df[i+1], function(x) sd(x, na.rm=TRUE)), digits = digits)
+     descriptive[[i]]$counts[8] <- round(sapply(df[i + 1], function(x) sd(x, na.rm = TRUE)), digits = digits)
      names(descriptive[[i]]$counts)[8] <- "SD"
      
-     descriptive[[i]]$counts <- (descriptive[[i]]$counts[c(1:4,7:8,5:6)]) #reorder 
+     descriptive[[i]]$counts[9] <- round(sapply(df[i + 1], function(x) skewness(x, na.rm = TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[9] <- "Skew"
+     
+     descriptive[[i]]$counts <- (descriptive[[i]]$counts[c(1:4,7:9,5:6)]) #reorder 
 }
 
 latex(descriptive, file = '')
