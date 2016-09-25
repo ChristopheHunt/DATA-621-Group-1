@@ -38,7 +38,7 @@ Christophe Hunt\\
 
 ```{r, include = FALSE}
 library(pacman)
-p_load(Hmisc, xlsx, knitr, scales, magrittr, tidyr, plyr, dplyr, 
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr, 
        stringr, e1071, corrplot, knitcitations, bibtex, missForest,
        foreach, doParallel, stargazer, forecast)
 ```
@@ -79,6 +79,7 @@ df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-
 
 colnames(df) <- mapvalues(as.vector(colnames(df)), 
                             from = str_trim(data_dictionary$VARIABLE.NAME..), to = as.vector(str_trim(data_dictionary$DEFINITION)))
+
 digits <- c(1) 
 
 descriptive <- describe(df %>% select(-`Identification Variable (do not use)`), 
@@ -145,11 +146,38 @@ First, we chose to eliminate two variables that had a significant number of miss
 imputed_df <- imputed_data %>% select(-`Batters hit by pitch (get a free base)`, -`Caught stealing`)
 ```
 
+Additionally, we reduced the data set to the following variables for modeling simplicity. Base Hits by batters (1B,2B,3B,HR), Strikeouts by batters, Walks by batters
+
 Missing values in the remaining columns had been imputed using the random forest method as previous discussed in section 3.1. 
 
-## Box Cox Transformation
+## Outliers 
 
-We reduced the data set to the following variables for modeling simplicity. 
+Winsorizing - 
+
+```{r, echo=FALSE, include = FALSE}
+winsorize <- function(x, multiple=2.2)
+              {
+                q <- quantile(x)
+                iqr <- IQR(x)
+                iqrAdjusted <- iqr*multiple
+                
+                rangeLow <- q['25%'] - iqrAdjusted
+                rangeHigh <- q['75%'] + iqrAdjusted
+                
+                x[x<rangeLow] <- min(x[x > rangeLow])
+                x[x>rangeHigh] <- max(x[x < rangeHigh])
+                
+                return(x)  
+}
+
+for (i in 1:length(imputed_df)){
+  imputed_df[i] <- sapply(imputed_df[i], function(x) winsorize(x))
+} 
+
+imputed_df <- as.data.frame(do.call(cbind, imputed_df))
+```
+
+## Box Cox Transformation
 
 We choose the Box Cox transformation for the following variables to improve linearity in our model. 
 
@@ -182,26 +210,45 @@ Now the distributions are fairly symmetrical.
 
 ## Model 1 
  
-We used the variable Base Hits by batters (1B,2B,3B,HR) which is the most correlated variable to Number of Wins as indicated in the correlation matrix. This is expected as Base Hits are necessary to win any game. Additionally, Strikeouts by batters would be negatively correlated Number of Wins because if a batter strikes out they are no able to provide runs which are criticaly to win. 
+We used the variable Base Hits by batters (1B,2B,3B,HR) which is the most correlated variable to Number of Wins as indicated in the correlation matrix. This is expected as Base Hits are necessary to win any game. Walks by batters was added as walks indicate that a batter is Additionally, Strikeouts by batters would be negatively correlated Number of Wins because if a batter strikes out they are no able to provide runs which are criticaly to win. 
+
+
 
 ```{r, results='asis', echo=FALSE}
-#boxcox(lmfit)
+lmfit_data <- imputed_df
 
+lmfit_data$`Sqrt of Strikeouts by batters` <- sqrt(imputed_df$`Strikeouts by batters`)
 
-lmfit <- lm(data = imputed_df, 
-           `Number of wins`^(1/3) ~ `Base Hits by batters (1B,2B,3B,HR)` +  `Walks by batters` + sqrt(`Strikeouts by batters`))
+lmfit <- lm(data = lmfit_data, 
+           `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` +  
+                               `Walks by batters` + 
+                               `Sqrt of Strikeouts by batters` )
 
 stargazer(lmfit, header = FALSE,  
-          covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", "Walks by batters", "$\\sqrt{\\textnormal{Strikeouts~by~batters}}$"),
+          covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", 
+                               "Walks by batters", 
+                               "$\\sqrt{\\textnormal{Strikeouts~by~batters}}$"),
           dep.var.caption  = c("Model 1"),
           dep.var.labels   = c("Number of wins"))
-summary(lmfit)
+
 ```
 
+In the previous model, we see an interesting Constant of `r round(lmfit$coefficients[[1]],2)`, since it would be impossible for a team to have negative wins. Additionally, the coefficient for $\sqrt{\textnormal{Strikeouts~by~batters}}$ at `r round(lmfit$coefficients[[4]],4)` is surprisingly as we would expect Strikeouts by batters to actually redce the number of wins. 
 
 \newpage
 
 # Selected Model 
+
+```{r}
+eval_data <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-evaluation-data.csv")
+
+colnames(eval_data) <- mapvalues(as.vector(colnames(eval_data)), 
+                            from = str_trim(data_dictionary$VARIABLE.NAME..), 
+                            to = as.vector(str_trim(data_dictionary$DEFINITION)))
+eval_data <- eval_data %>%
+             mutate(`Sqrt of Strikeouts by batters` =  sqrt(`Strikeouts by batters`))
+```
+
 Decide on the criteria for selecting the best multiple linear regression model. Will you select a model with slightly
 worse performance if it makes more sense or is more parsimonious? Discuss why you selected your model.
 For the multiple linear regression model, will you use a metric such as Adjusted R2
@@ -209,7 +256,20 @@ For the multiple linear regression model, will you use a metric such as Adjusted
 explain how you can make inferences from the model, discuss multi-collinearity issues (if any), and discuss other
 relevant model output. Using the training data set, evaluate the multiple linear regression model based on (a)
 mean squared error, (b) R2
-, (c) F-statistic, and (d) residual plots. Make predictions using the evaluation data set.
+, (c) F-statistic, and (d) residual plots. Make predictions using the evaluation data 
+
+Using our best performing model we used the `predict` function and excluded evaluation data with missing values. The below table is our prediction results for the evaluation data set. 
+
+```{r}
+eval_data$predictions <- predict(lmfit, eval_data)
+
+eval_results <- eval_data %>%
+                filter(!is.na(predictions)) %>%
+                select(`Identification Variable (do not use)`, predictions)
+
+xtable(eval_results)
+```
+
 
 ```{r, echo=FALSE, results='asis'}
 stargazer::stargazer(lmfit)
