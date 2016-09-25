@@ -295,6 +295,8 @@ eval_data <- eval_data %>%
 
 Our residuals in each model indcated Heteroskadistity and showed uneven variation. Therefore, we chose the model with the highest Adjusted R-squared which was Model 1. 
 
+# TODO - update chart and make nice report - Christophe
+
 ```{r}
 model <- c(1,2,3)
 adjRSqrd <- c()
@@ -307,15 +309,13 @@ print(data.frame(model,adjRSqrd,FStat,PValForFStat,ResidualVsFittedConstantVaria
 
 ```
 
-explain how you can make inferences from the model, discuss multi-collinearity issues (if any), and discuss other
-relevant model output. 
-
-Using the training data set, evaluate the multiple linear regression model based on (a)
-mean squared error, (b) R2, (c) F-statistic, and (d) residual plots. 
+# TODO - explain inference - Senthil
 
 # Prediction on Evaluation Data
 
 Using our best performing model we used the `predict` function and excluded evaluation data with missing values. The below table is our prediction results for the evaluation data set. 
+
+# TODO - finish prediction section - Christophe
 
 ```{r, eval = FALSE}
 eval_data <- function(x) as.numeric(as.character(x))
@@ -328,6 +328,8 @@ eval_data <- as.data.frame(do.call(cbind, eval_data))
 
 eval_data$predictions <- predict(lmfit, eval_data)
 
+#TODO - square prediction values
+
 eval_results <- eval_data %>%
                 filter(!is.na(predictions)) %>%
                 select(`Identification Variable (do not use)`, predictions)
@@ -335,10 +337,6 @@ eval_results <- eval_data %>%
 xtable(eval_results)
 ```
 
-
-```{r, echo=FALSE, results='asis', eval = FALSE}
-stargazer::stargazer(lmfit)
-```
 
 \newpage
 
@@ -352,6 +350,12 @@ toLatex(sessionInfo())
 
 ## Citations
 
+# TODO - R Package citations - Yadu 
+
+Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr, 
+stringr, e1071, corrplot, knitcitations, bibtex, missForest,
+foreach, doParallel, stargazer, forecast
+
 ## Data Dictionary
 
 ```{r, results='asis', echo=FALSE, cache=TRUE}
@@ -359,3 +363,10 @@ kable(data_dictionary)
 ```
 
 ## R source code
+
+#TODO updated file name when done, check homework requirements for filename - Christophe 
+Please see attached XXXXX.rmd file
+
+
+
+
