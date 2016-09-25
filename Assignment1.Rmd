@@ -1,0 +1,206 @@
+---
+title: "SenthilDhanapal_IS621_HW1"
+author: "Senthil Dhanapal"
+date: "September 24, 2016"
+output: pdf_document
+---
+```{r, echo=FALSE,warning=FALSE}
+#install.packages("corrplot")
+library(corrplot)
+require(corrplot)
+
+```
+
+
+```{r, echo=FALSE}
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+  
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+  
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+  
+  return(x)  
+  
+}
+
+
+```
+
+```{r, echo=FALSE}
+#setwd("f:/temp")
+setwd("C:/Senthil/MSDataAnalytics/Semester4/621/Week1")
+dfMB <- read.csv("moneyball.csv",stringsAsFactors = FALSE)
+
+
+```
+
+#################################################################################################
+#Variables Considered
+#-------------------------------------------------------------
+#TEAM_BATTING_H = Base Hits by batters (1B,2B,3B,HR)
+#TEAM_BATTING_3B = Triples by batters (3B)
+#TEAM_PITCHING_H = Hits allowed
+#-------------------------------------------------------------
+#################################################################################################
+```{r, echo=FALSE}
+dfMB <- dfMB[,c("Number.of.wins","Base.Hits.by.batters..1B.2B.3B.HR.", 
+                "Triples.by.batters..3B.","Hits.allowed")]
+#dfMB <- na.omit(dfMB)
+colnames(dfMB) <- c('TARGET_WINS','TEAM_BATTING_H','TEAM_BATTING_3B','TEAM_PITCHING_H')
+
+
+```
+
+#################################################################################################
+## Data Exploration using summary and plots
+#-------------------------------------------------------------
+#################################################################################################
+```{r, echo=FALSE}
+summary(dfMB)
+
+###check distribution of data 
+par(mfrow=c(2,2))
+
+hist(dfMB$TARGET_WINS)
+hist(dfMB$TEAM_BATTING_H)
+hist(dfMB$TEAM_BATTING_3B)
+hist(dfMB$TEAM_PITCHING_H)
+
+boxplot(dfMB$TARGET_WINS, main="Number of wins")
+boxplot(dfMB$TEAM_BATTING_H, main="Base Hits by batters (1B,2B,3B,HR)")
+boxplot(dfMB$TEAM_BATTING_3B, main="Triples by batters (3B)")
+boxplot(dfMB$TEAM_PITCHING_H, main="Hits allowed ")
+
+
+```
+
+#################################################################################################
+# Handling Outliers using Winsorizing method
+#-------------------------------------------------------------
+#################################################################################################
+
+```{r, echo=FALSE}
+
+dfMB$TEAM_BATTING_H <- winsorize(dfMB$TEAM_BATTING_H)
+dfMB$TEAM_BATTING_3B <- winsorize(dfMB$TEAM_BATTING_3B)
+dfMB$TEAM_PITCHING_H <- winsorize(dfMB$TEAM_PITCHING_H)
+
+
+```
+
+#################################################################################################
+## Data Exploration after winsorizing using plots
+#-------------------------------------------------------------
+#################################################################################################
+```{r, echo=FALSE}
+
+par(mfrow=c(2,2))
+
+hist(dfMB$TARGET_WINS)
+hist(dfMB$TEAM_BATTING_H)
+hist(dfMB$TEAM_BATTING_3B)
+hist(dfMB$TEAM_PITCHING_H)
+
+boxplot(dfMB$TARGET_WINS, main="Number of wins")
+boxplot(dfMB$TEAM_BATTING_H, main="Base Hits by batters (1B,2B,3B,HR)")
+boxplot(dfMB$TEAM_BATTING_3B, main="Triples by batters (3B)")
+boxplot(dfMB$TEAM_PITCHING_H, main="Hits allowed ")
+
+
+```
+
+
+#################################################################################################
+#Check for relevancy and multicollinearity using Correllation between all variables
+#-------------------------------------------------------------
+#################################################################################################
+
+```{r, echo=FALSE}
+par(mfrow=c(1,1))
+cor(dfMB, use="all.obs", method="pearson") 
+M <- cor(dfMB)
+corrplot(M, method="circle")
+
+
+```
+
+## Correllation betwen TEAM_BATTING_H and TEAM_BATTING_3B may lead to multicollinearity
+## TEAM_BATTING_H has the best correllation with Target wins than any other predictors.
+## TEAM_PITCHING_H has no correllation 
+## However, keeping all 3 variables to build models
+#-------------------------------------------------------------
+
+#################################################################################################
+# Build Models
+#-------------------------------------------------------------
+#################################################################################################
+
+#Model1
+```{r, echo=FALSE}
+model1 <- lm(TARGET_WINS~TEAM_BATTING_H+TEAM_PITCHING_H+TEAM_BATTING_3B,dfMB)
+summary(model1)
+par(mfrow=c(2,2))
+plot(model1)
+
+
+```
+
+
+#Model2
+```{r, echo=FALSE}
+model2 <- lm(TARGET_WINS~TEAM_BATTING_H+TEAM_PITCHING_H,dfMB)
+summary(model2)
+par(mfrow=c(2,2))
+plot(model2)
+
+
+```
+
+
+#Model3
+```{r, echo=FALSE}
+model3 <- lm(TARGET_WINS^2~TEAM_BATTING_H+TEAM_PITCHING_H,dfMB)
+summary(model3)
+par(mfrow=c(2,2))
+plot(model3)
+
+
+```
+
+#Model4
+```{r, echo=FALSE}
+model4 <- lm(TARGET_WINS~TEAM_BATTING_H,dfMB)
+summary(model4)
+par(mfrow=c(2,2))
+plot(model4)
+
+
+```
+
+
+
+#################################################################################################
+# Choosing Models
+#-------------------------------------------------------------
+#################################################################################################
+
+```{r, echo=FALSE}
+
+model <- c(1,2,3,4)
+adjRSqrd <- c(0.1711,0.1689,0.1653,0.1461)
+FStat <- c(157.5,232.2,226.3,390.3)
+PValForFStat <- c('Significant','Significant','Significant','Significant')
+ResidualVsFittedConstantVariation <- c('Not good,', 'Not good', 'Not good', 'Not good')
+ResidualVsFittedCuve <- c('shows curve,', 'shows curve', 'shows curve', 'shows curve')
+ResidualVsFittedCuveHeteroscedasticity  <- c('yes,', 'yes', 'yes', 'yes')
+print(data.frame(model,adjRSqrd,FStat,PValForFStat,ResidualVsFittedConstantVariation,ResidualVsFittedCuve,ResidualVsFittedCuveHeteroscedasticity))
+
+
+```
+
