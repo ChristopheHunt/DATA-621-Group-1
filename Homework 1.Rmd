@@ -217,7 +217,7 @@ All models included Base Hits by batters (1B,2B,3B,HR) which is the most correla
  
 We added Walks by batters because a batter being walked would put a runner on a base and therefore in a better position to score. Additionally, Strikeouts by batters would be negatively correlated to the Number of Wins because if a batter strikes out they are no able to provide runs which are criticaly to winning. 
 
-```{r, results='asis', echo=FALSE, eval=FALSE}
+```{r, results='asis', echo=FALSE, eval=TRUE, cache=TRUE}
 lmfit <- lm(data = imputed_df, 
            sqrt(`Number of wins`) ~ `Base Hits by batters (1B,2B,3B,HR)`+  
                                     `Walks by batters` + 
@@ -228,8 +228,7 @@ stargazer(lmfit, header = FALSE,
                                "Walks by batters", 
                                "Strikeouts by batters"),
           dep.var.caption  = c("Model 1"),
-          dep.var.labels   = c("Number of wins"))
-
+          dep.var.labels   = c("$\\sqrt{\\textnormal{Number~of~wins}}$"))
 ```
 
 The F-statistic is 201.6, and the p-value indicates that this model is significant. Additionally, we see the adjusted R-squared is .2092 but unexpectedly Strikeouts by batters has a positive coefficient and all three predictors are significant.  
@@ -237,7 +236,7 @@ The F-statistic is 201.6, and the p-value indicates that this model is significa
 The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
 
 ```{r}
-plot( lmfit$fitted.values, lmfit$residuals)
+plot(lmfit$fitted.values, lmfit$residuals)
 ```
 
 ## Model 2 
@@ -250,6 +249,12 @@ lmfit2 <- lm(data = imputed_df,
                                     `Walks allowed` + 
                                     `Double Plays`)
 
+stargazer(lmfit2, header = FALSE,  
+          covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", 
+                               "Walks allowed", 
+                               "Double Plays"),
+          dep.var.caption  = c("Model 2"),
+          dep.var.labels   = c("$\\sqrt{\\textnormal{Number~of~wins}}$"))
 ```
 
 The F-statistic is 141.2, and the p-value indicates that this model is significant. We see the adjusted R-squared is 0.1561, however, it was unexpected that double plays has a negative coeffiecient but it was not a significant predictor. 
@@ -257,7 +262,7 @@ The F-statistic is 141.2, and the p-value indicates that this model is significa
 The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
 
 ```{r, echo=FALSE}
-plot( lmfit2$fitted.values, lmfit2$residuals)
+plot(lmfit2$fitted.values, lmfit2$residuals)
 ```
 
 ## Model 3 
@@ -269,13 +274,20 @@ lmfit3 <- lm(data = imputed_df,
             `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` + 
                                `Triples by batters (3B)` + 
                                `Hits allowed`)
+
+stargazer(lmfit3, header = FALSE,  
+          covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", 
+                               "Triples by batters (3B)", 
+                               "Hits allowed"),
+          dep.var.caption  = c("Model 3"),
+          dep.var.labels   = c("$\\sqrt{\\textnormal{Number~of~wins}}$"))
 ```
 
 The F-statistic is 157.5 and based on our p-values this model is significant. The Adjusted R-squared is 0.1711. However, the Triples by batters (3B) is less significant due to the colinearity with Base Hits by batters (1B, 2B,3B, HR). 
 
 The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 plot( lmfit3$fitted.values, lmfit3$residuals)
 ```
 
@@ -297,7 +309,7 @@ Our residuals in each model indcated Heteroskadistity and showed uneven variatio
 
 # TODO - update chart and make nice report - Christophe
 
-```{r}
+```{r, eval=FALSE}
 model <- c(1,2,3)
 adjRSqrd <- c()
 FStat <- c()
