@@ -354,7 +354,7 @@ toLatex(sessionInfo())
 
 Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr, 
 stringr, e1071, corrplot, knitcitations, bibtex, missForest,
-foreach, doParallel, stargazer, forecast
+foreach, doParallel, stargazer, forecast. 
 
 ## Data Dictionary
 
