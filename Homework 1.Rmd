@@ -45,7 +45,7 @@ p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr,
 
 ```{r, include=FALSE, cache=TRUE}
 download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Data%20Dictionary.xlsx?raw=true", 
-              destfile = "Data Dictionary HW1 - Group 1.xlsx", mode='wb')
+              destfile = "Data Dictionary HW1 - Group 1.xlsx", mode = 'wb')
 data_dictionary <- read.xlsx("Data Dictionary HW1 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW1 - Group 1", full.names = TRUE))
 ```
@@ -71,8 +71,6 @@ Note that each record has the performance of the team for the given year, with a
 We noted that several variables were missing a nontrivial amount of observations and these variables are Strikeouts by batters, Stolen Bases, Caught stealing, Batters hit by pitch (get a free base), Strikeouts by pitcher, and Double plays. So we will need to address the missing values for further analysis. 
 
 Histograms of all of the variables have been plotted below so that the distribution of the data can be visualized. In the distribution for the number of walks allowed, only two bars exist due to the excessive number of outliers.
-
-Additionally, the skewness of each variable has been indicated in Table 1 - Descriptive Statistics. Several variables have a significant amount of skew, which include the number of base hits by batters and the number of walks allowed. Correspondingly, these two variables had a skew of 1.57 and 6.74 respectively. 
 
 ```{r, echo=FALSE, results='asis', cache=TRUE}
 df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-training-data.csv")
@@ -107,7 +105,9 @@ latex(descriptive, file = '')
 
 ## Imputing Missing Values  
 
-In order to address the missing values in our variables we used a nonparametric imputation method (Random Forest) to impute missing values. We chose a nonparametric method due to several variables having significant skew and greater than expected kurtosis values. \newpage 
+In order to address the missing values in our variables we used a nonparametric imputation method (Random Forest) to impute missing values. Several variables have a significant amount of skew, which include the number of base hits by batters and the number of walks allowed. Correspondingly, these two variables had a skew of 1.57 and 6.74 respectively. Therefore, we chose a nonparametric method due to several variables having significant skew and having a non-normal distribution. 
+
+\newpage 
 
 ```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
 registerDoParallel(cl = makeCluster(2), cores = 3)
@@ -146,13 +146,13 @@ First, we chose to eliminate two variables that had a significant number of miss
 imputed_df <- imputed_data %>% select(-`Batters hit by pitch (get a free base)`, -`Caught stealing`)
 ```
 
-Additionally, we reduced the data set to the following variables for modeling simplicity. Base Hits by batters (1B,2B,3B,HR), Strikeouts by batters, Walks by batters
+Additionally, we reduced the data set to the following variables for modeling simplicity. Base Hits by batters (1B,2B,3B,HR), Strikeouts by batters, Walks by batters, Double plays, Walks allowed, Triples by batters (3B), and Hits allowed. 
 
 Missing values in the remaining columns had been imputed using the random forest method as previous discussed in section 3.1. 
 
 ## Outliers 
 
-Winsorizing - 
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. The factor used is 2.2 which is based on XXXXXXXX's work published in XXXXX. 
 
 ```{r, echo=FALSE, include = FALSE}
 winsorize <- function(x, multiple=2.2)
@@ -170,76 +170,120 @@ winsorize <- function(x, multiple=2.2)
                 return(x)  
 }
 
-for (i in 1:length(imputed_df)){
+for (i in 2:length(imputed_df)){
   imputed_df[i] <- sapply(imputed_df[i], function(x) winsorize(x))
 } 
 
 imputed_df <- as.data.frame(do.call(cbind, imputed_df))
 ```
 
-## Box Cox Transformation
+```{r}
+descriptive <- describe(imputed_df, 
+                        descript = "Table 2 : Descriptive Statistics after Winsorizing Outliers", digits = digits) 
 
-We choose the Box Cox transformation for the following variables to improve linearity in our model. 
+for (i in seq(1:length(descriptive))){ 
+                     for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
+                                         }
+     descriptive[[i]]$counts <- (descriptive[[i]]$counts[-c(4,7,8:10,11)])
+     
+     descriptive[[i]]$counts[7] <- round(sapply(df[i + 1], function(x) median(x, na.rm = TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[7] <- "Median"
+     
+     descriptive[[i]]$counts[8] <- round(sapply(df[i + 1], function(x) sd(x, na.rm = TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[8] <- "SD"
+     
+     descriptive[[i]]$counts[9] <- round(sapply(df[i + 1], function(x) skewness(x, na.rm = TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[9] <- "Skew"
+     
+     descriptive[[i]]$counts <- (descriptive[[i]]$counts[c(1:4,7:9,5:6)]) #reorder 
+}
 
-```{r, echo=FALSE, cache=TRUE, results = 'asis'}
-
-l1 <- BoxCox.lambda(imputed_df$`Base Hits by batters (1B,2B,3B,HR)`)
-
-imputed_df$`Base Hits Transformed` <-  BoxCox(imputed_df$`Base Hits by batters (1B,2B,3B,HR)`, l1)
-
-hist(imputed_df$`Base Hits Transformed`, 
-     main = ("Histogram of Base Hits After Box Cox Transformation"), 
-     xlab = ("Box Cox Transformation of Base Hits"))
-
-imputed_df$`Walks Allowed Transformed` <- (imputed_df$`Walks allowed` ^ (1/3))
-
-hist(imputed_df$`Walks Allowed Transformed`, 
-     main = ("Histogram of Cube Root of Walks Allowed"), 
-     xlab = ("Cube Root of Walks Allowed"))
-
-skewness(imputed_df)
+latex(descriptive, file = '')
 ```
 
-The variables that were transformed were the number of walks allowed and the number of base hits by batters. The cube root of the number of walks allowed was taken because the skewness in this variable was high. After the cube root was taken, the skewness was reduced to approximately 0.5.
+## Box Cox Transformation
 
-The transformation done on the number of walks was Box Cox transformation. As a result of this transformation the skewness was reduced to 0.112. 
+```{r, echo=FALSE, cache=TRUE, results = 'asis'}
+l1 <- BoxCox.lambda(imputed_df$`Number of wins`)
+```
 
-Now the distributions are fairly symmetrical.
+We choose the Box Cox transformation for the following variables to improve linearity in our model. The lambda for the Box Cox transformation of our response variable is `r l1` which indicates that we should square the response variable to improve linearity. Also, we discovered that it was not necessary to transform Base Hits by Batters because the significance levels of the variable before and after transformation were the same. 
 
 # Models Built
 
+All models included Base Hits by batters (1B,2B,3B,HR) which is the most correlated variable to Number of Wins as indicated in the correlation matrix. This is expected as Base Hits are necessary to win any game.
+
 ## Model 1 
  
-We used the variable Base Hits by batters (1B,2B,3B,HR) which is the most correlated variable to Number of Wins as indicated in the correlation matrix. This is expected as Base Hits are necessary to win any game. Walks by batters was added as walks indicate that a batter is Additionally, Strikeouts by batters would be negatively correlated Number of Wins because if a batter strikes out they are no able to provide runs which are criticaly to win. 
+We added Walks by batters because a batter being walked would put a runner on a base and therefore in a better position to score. Additionally, Strikeouts by batters would be negatively correlated to the Number of Wins because if a batter strikes out they are no able to provide runs which are criticaly to winning. 
 
-
-
-```{r, results='asis', echo=FALSE}
-lmfit_data <- imputed_df
-
-lmfit_data$`Sqrt of Strikeouts by batters` <- sqrt(imputed_df$`Strikeouts by batters`)
-
-lmfit <- lm(data = lmfit_data, 
-           `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` +  
-                               `Walks by batters` + 
-                               `Sqrt of Strikeouts by batters` )
+```{r, results='asis', echo=FALSE, eval=FALSE}
+lmfit <- lm(data = imputed_df, 
+           sqrt(`Number of wins`) ~ `Base Hits by batters (1B,2B,3B,HR)`+  
+                                    `Walks by batters` + 
+                                    `Strikeouts by batters`)
 
 stargazer(lmfit, header = FALSE,  
           covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", 
                                "Walks by batters", 
-                               "$\\sqrt{\\textnormal{Strikeouts~by~batters}}$"),
+                               "Strikeouts by batters"),
           dep.var.caption  = c("Model 1"),
           dep.var.labels   = c("Number of wins"))
 
 ```
 
-In the previous model, we see an interesting Constant of `r round(lmfit$coefficients[[1]],2)`, since it would be impossible for a team to have negative wins. Additionally, the coefficient for $\sqrt{\textnormal{Strikeouts~by~batters}}$ at `r round(lmfit$coefficients[[4]],4)` is surprisingly as we would expect Strikeouts by batters to actually redce the number of wins. 
+The F-statistic is 201.6, and the p-value indicates that this model is significant. Additionally, we see the adjusted R-squared is .2092 but unexpectedly Strikeouts by batters has a positive coefficient and all three predictors are significant.  
+
+The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
+
+```{r}
+plot( lmfit$fitted.values, lmfit$residuals)
+```
+
+## Model 2 
+
+We added Walks allowed and Double Plays. The reason being that Walks allowed is possibly an indicator of poor pitching and Double Plays is an indicator of a competent infield team that prevents other teams from scoring. 
+
+```{r, echo= FALSE, results = 'asis'}
+lmfit2 <- lm(data = imputed_df, 
+           sqrt(`Number of wins`) ~ `Base Hits by batters (1B,2B,3B,HR)` +  
+                                    `Walks allowed` + 
+                                    `Double Plays`)
+
+```
+
+The F-statistic is 141.2, and the p-value indicates that this model is significant. We see the adjusted R-squared is 0.1561, however, it was unexpected that double plays has a negative coeffiecient but it was not a significant predictor. 
+
+The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
+
+```{r, echo=FALSE}
+plot( lmfit2$fitted.values, lmfit2$residuals)
+```
+
+## Model 3 
+
+We included Triples by batters and Hits allowed. Additonally, as expected, the Hits allowed has a negative relationship to wins because hits allowed indicates the other team getting a hit and possibly scoring a point. 
+
+```{r}
+lmfit3 <- lm(data = imputed_df,
+            `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` + 
+                               `Triples by batters (3B)` + 
+                               `Hits allowed`)
+```
+
+The F-statistic is 157.5 and based on our p-values this model is significant. The Adjusted R-squared is 0.1711. However, the Triples by batters (3B) is less significant due to the colinearity with Base Hits by batters (1B, 2B,3B, HR). 
+
+The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
+
+```{r, echo=FALSE}
+plot( lmfit3$fitted.values, lmfit3$residuals)
+```
 
 \newpage
 
 # Selected Model 
 
-```{r}
+```{r, eval=FALSE}
 eval_data <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-evaluation-data.csv")
 
 colnames(eval_data) <- mapvalues(as.vector(colnames(eval_data)), 
@@ -249,18 +293,39 @@ eval_data <- eval_data %>%
              mutate(`Sqrt of Strikeouts by batters` =  sqrt(`Strikeouts by batters`))
 ```
 
-Decide on the criteria for selecting the best multiple linear regression model. Will you select a model with slightly
-worse performance if it makes more sense or is more parsimonious? Discuss why you selected your model.
-For the multiple linear regression model, will you use a metric such as Adjusted R2
-, RMSE, etc.? Be sure to
+Our residuals in each model indcated Heteroskadistity and showed uneven variation. Therefore, we chose the model with the highest Adjusted R-squared which was Model 1. 
+
+```{r}
+model <- c(1,2,3)
+adjRSqrd <- c()
+FStat <- c()
+PValForFStat <- c('Significant', 'Significant', 'Significant')
+ResidualVsFittedConstantVariation <- c('Not good,', 'Not good', 'Not good')
+ResidualVsFittedCuve <- c('shows curve,', 'shows curve', 'shows curve')
+ResidualVsFittedCuveHeteroscedasticity  <- c('yes,', 'yes', 'yes')
+print(data.frame(model,adjRSqrd,FStat,PValForFStat,ResidualVsFittedConstantVariation,ResidualVsFittedCuve,ResidualVsFittedCuveHeteroscedasticity))
+
+```
+
 explain how you can make inferences from the model, discuss multi-collinearity issues (if any), and discuss other
-relevant model output. Using the training data set, evaluate the multiple linear regression model based on (a)
-mean squared error, (b) R2
-, (c) F-statistic, and (d) residual plots. Make predictions using the evaluation data 
+relevant model output. 
+
+Using the training data set, evaluate the multiple linear regression model based on (a)
+mean squared error, (b) R2, (c) F-statistic, and (d) residual plots. 
+
+# Prediction on Evaluation Data
 
 Using our best performing model we used the `predict` function and excluded evaluation data with missing values. The below table is our prediction results for the evaluation data set. 
 
-```{r}
+```{r, eval = FALSE}
+eval_data <- function(x) as.numeric(as.character(x))
+
+for (i in 2:length(eval_data)){ 
+  eval_data[i] <- sapply(eval_data[i], function(x) as.numeric(x))
+} 
+
+eval_data <- as.data.frame(do.call(cbind, eval_data))
+
 eval_data$predictions <- predict(lmfit, eval_data)
 
 eval_results <- eval_data %>%
@@ -271,7 +336,7 @@ xtable(eval_results)
 ```
 
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=FALSE, results='asis', eval = FALSE}
 stargazer::stargazer(lmfit)
 ```
 
@@ -281,7 +346,7 @@ stargazer::stargazer(lmfit)
 
 ## Session Info
 
-```{r, results='asis', echo=FALSE}
+```{r, results='asis', echo=FALSE, eval = FALSE}
 toLatex(sessionInfo())
 ```
 
