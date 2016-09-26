@@ -152,7 +152,11 @@ Missing values in the remaining columns had been imputed using the random forest
 
 ## Outliers 
 
-We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. The factor used is 2.2 which is based on XXXXXXXX's work published in XXXXX. 
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^2].  
+
+[^2]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+
+The below table is the results of the winsorizing of the data. 
 
 ```{r, echo=FALSE, include = FALSE}
 winsorize <- function(x, multiple=2.2)
@@ -177,7 +181,7 @@ for (i in 2:length(imputed_df)){
 imputed_df <- as.data.frame(do.call(cbind, imputed_df))
 ```
 
-```{r}
+```{r, results='asis', echo=FALSE}
 descriptive <- describe(imputed_df, 
                         descript = "Table 2 : Descriptive Statistics after Winsorizing Outliers", digits = digits) 
 
@@ -207,7 +211,7 @@ latex(descriptive, file = '')
 l1 <- BoxCox.lambda(imputed_df$`Number of wins`)
 ```
 
-We choose the Box Cox transformation for the following variables to improve linearity in our model. The lambda for the Box Cox transformation of our response variable is `r l1` which indicates that we should square the response variable to improve linearity. Also, we discovered that it was not necessary to transform Base Hits by Batters because the significance levels of the variable before and after transformation were the same. 
+We choose the Box Cox transformation for the following variables to improve linearity in our model. The lambda for the Box Cox transformation of our response variable is `r round(l1,4)` which indicates that we should square the response variable to improve linearity. Also, we discovered that it was not necessary to transform Base Hits by Batters because the significance levels of the variable before and after transformation were the same. 
 
 # Models Built
 
@@ -215,15 +219,15 @@ All models included Base Hits by batters (1B,2B,3B,HR) which is the most correla
 
 ## Model 1 
  
-We added Walks by batters because a batter being walked would put a runner on a base and therefore in a better position to score. Additionally, Strikeouts by batters would be negatively correlated to the Number of Wins because if a batter strikes out they are no able to provide runs which are criticaly to winning. 
+We added `Walks by batters` because a batter being walked would put a runner on a base and therefore in a better position to score. Additionally, Strikeouts by batters would be negatively correlated to the Number of Wins because if a batter strikes out they are not able to provide runs which are criticaly to winning. 
 
 ```{r, results='asis', echo=FALSE, eval=TRUE, cache=TRUE}
-lmfit <- lm(data = imputed_df, 
-           sqrt(`Number of wins`) ~ `Base Hits by batters (1B,2B,3B,HR)`+  
+lmfit1 <- lm(data = imputed_df, 
+           sqrt(`Number of wins`) ~ `Base Hits by batters (1B,2B,3B,HR)` +  
                                     `Walks by batters` + 
                                     `Strikeouts by batters`)
 
-stargazer(lmfit, header = FALSE,  
+stargazer(lmfit1, header = FALSE,  
           covariate.labels = c("Base Hits by batters (1B,2B,3B,HR)", 
                                "Walks by batters", 
                                "Strikeouts by batters"),
@@ -235,8 +239,8 @@ The F-statistic is 201.6, and the p-value indicates that this model is significa
 
 The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
 
-```{r}
-plot(lmfit$fitted.values, lmfit$residuals)
+```{r, echo=FALSE}
+plot(lmfit1$fitted.values, lmfit1$residuals)
 ```
 
 ## Model 2 
@@ -269,7 +273,7 @@ plot(lmfit2$fitted.values, lmfit2$residuals)
 
 We included Triples by batters and Hits allowed. Additonally, as expected, the Hits allowed has a negative relationship to wins because hits allowed indicates the other team getting a hit and possibly scoring a point. 
 
-```{r}
+```{r, results = 'asis', echo = FALSE}
 lmfit3 <- lm(data = imputed_df,
             `Number of wins` ~ `Base Hits by batters (1B,2B,3B,HR)` + 
                                `Triples by batters (3B)` + 
@@ -287,7 +291,7 @@ The F-statistic is 157.5 and based on our p-values this model is significant. Th
 
 The below plot of our fitted values against our residuals indicate that there is Heteroskadistity and showing uneven variation. 
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 plot( lmfit3$fitted.values, lmfit3$residuals)
 ```
 
@@ -295,7 +299,7 @@ plot( lmfit3$fitted.values, lmfit3$residuals)
 
 # Selected Model 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE, echo=FALSE, message=FALSE}
 eval_data <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/moneyball-evaluation-data.csv")
 
 colnames(eval_data) <- mapvalues(as.vector(colnames(eval_data)), 
@@ -305,50 +309,69 @@ eval_data <- eval_data %>%
              mutate(`Sqrt of Strikeouts by batters` =  sqrt(`Strikeouts by batters`))
 ```
 
-Our residuals in each model indcated Heteroskadistity and showed uneven variation. Therefore, we chose the model with the highest Adjusted R-squared which was Model 1. 
+Our residuals in each model indcated Heteroskadistity and showed uneven variation. Therefore, we chose the model with the highest Adjusted R-squared which was Model 1. The Adjusted R-squared of each model is provided in the below table. 
 
-# TODO - update chart and make nice report - Christophe
+```{r, eval = TRUE, echo=FALSE, results = 'asis'}
+options(xtable.comment = FALSE)
 
-```{r, eval=FALSE}
-model <- c(1,2,3)
-adjRSqrd <- c()
-FStat <- c()
-PValForFStat <- c('Significant', 'Significant', 'Significant')
-ResidualVsFittedConstantVariation <- c('Not good,', 'Not good', 'Not good')
-ResidualVsFittedCuve <- c('shows curve,', 'shows curve', 'shows curve')
-ResidualVsFittedCuveHeteroscedasticity  <- c('yes,', 'yes', 'yes')
-print(data.frame(model,adjRSqrd,FStat,PValForFStat,ResidualVsFittedConstantVariation,ResidualVsFittedCuve,ResidualVsFittedCuveHeteroscedasticity))
+model1 <- c(1, 0.209, 201.646, 'Significant', 'Not good', 'shows curve', 'yes')
+model2 <- c(2, 0.156, 141.228, 'Significant', 'Not good', 'shows curve', 'yes')
+model3 <- c(3, 0.171, 157.533, 'Significant', 'Not good', 'shows curve', 'yes')
+models <- t(rbind(model1, model2) %>% rbind(model3)) %>% data.frame()
+rownames(models) <- c("Model", "Adjusted R Squared", "F-statistic", "P Value for F-Statistic", "Residual vs Fitted Constant Variation" , "Residual vs Fitted Curve","Residual vs Fitted Curve Heteroscedasticity")
+colnames(models) <- NULL
+
+xtable(models, align = c("l", "c", "c", "c"))
 
 ```
 
-# TODO - explain inference - Senthil
+```{r, echo=FALSE}
+options(scipen=999)
+fmodel <- c(lmfit1$coefficients[[1]], 
+            lmfit1$coefficients[[2]], 
+            lmfit1$coefficients[[3]], 
+            lmfit1$coefficients[[4]])
+```
+
+Therefore, our final model with the greatest Adjusted R-squared is: 
+
+$$
+\begin{aligned}
+  \sqrt{\textnormal{Number~of~wins}}~=~&\textnormal{`r round(fmodel[2],6)` * Base Hits by batters (1B,2B,3B,HR)} \\ 
+                                       &\textnormal{+ `r round(fmodel[3],6)` * Walks by batters} \\
+                                       &\textnormal{+ `r round(fmodel[4],8)` * Strikeouts by batters} \\
+                                       &\textnormal{+ `r round(fmodel[1],6)`}
+\end{aligned}
+$$
+
+Additionally, we are 95% confident that our regression values lie between the two values from the output in the below table.
+
+```{r, echo=FALSE, results='asis'}
+options(scipen=0)
+xtable(confint(lmfit1,conf.level=0.95))
+```
 
 # Prediction on Evaluation Data
 
 Using our best performing model we used the `predict` function and excluded evaluation data with missing values. The below table is our prediction results for the evaluation data set. 
 
-# TODO - finish prediction section - Christophe
-
-```{r, eval = FALSE}
-eval_data <- function(x) as.numeric(as.character(x))
-
-for (i in 2:length(eval_data)){ 
+```{r, eval = TRUE, echo = FALSE, results = 'asis'}
+for (i in 2:length(eval_data)){  
   eval_data[i] <- sapply(eval_data[i], function(x) as.numeric(x))
 } 
 
 eval_data <- as.data.frame(do.call(cbind, eval_data))
+eval_data$predictions <- predict(lmfit1, eval_data)
 
-eval_data$predictions <- predict(lmfit, eval_data)
-
-#TODO - square prediction values
+eval_data <- eval_data %>%
+             mutate(predictions = as.integer(predictions^2))
 
 eval_results <- eval_data %>%
                 filter(!is.na(predictions)) %>%
                 select(`Identification Variable (do not use)`, predictions)
 
-xtable(eval_results)
+kable(eval_results)
 ```
-
 
 \newpage
 
@@ -356,17 +379,20 @@ xtable(eval_results)
 
 ## Session Info
 
-```{r, results='asis', echo=FALSE, eval = FALSE}
+```{r, results='asis', echo=FALSE, eval = TRUE}
 toLatex(sessionInfo())
 ```
 
 ## Citations
 
-# TODO - R Package citations - Yadu 
+```{r, results='asis', echo=FALSE, eval = TRUE}
+x <- citation("Hmisc")
+toBibtex(x)
 
-Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr, 
-stringr, e1071, corrplot, knitcitations, bibtex, missForest,
-foreach, doParallel, stargazer, forecast. 
+#Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr, 
+#stringr, e1071, corrplot, knitcitations, bibtex, missForest,
+#foreach, doParallel, stargazer, forecast
+```
 
 ## Data Dictionary
 
