@@ -213,6 +213,8 @@ l1 <- BoxCox.lambda(imputed_df$`Number of wins`)
 
 We choose the Box Cox transformation for the following variables to improve linearity in our model. The lambda for the Box Cox transformation of our response variable is `r round(l1,4)` which indicates that we should square the response variable to improve linearity. Also, we discovered that it was not necessary to transform Base Hits by Batters because the significance levels of the variable before and after transformation were the same. 
 
+\newpage
+
 # Models Built
 
 All models included Base Hits by batters (1B,2B,3B,HR) which is the most correlated variable to Number of Wins as indicated in the correlation matrix. This is expected as Base Hits are necessary to win any game.
