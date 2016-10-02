@@ -1,7 +1,44 @@
 ---
 title: "Homework 2"
-output: pdf_document
+author: "Group 1"
+date: ''
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: '2'
 ---
+
+\begin{center}
+\bigskip
+\bigskip
+\bigskip
+Prepared for:\\
+\medskip
+Dr. Nathan Bastian\\
+\smallskip
+City University of New York, School of Professional Studies - Data 621\\
+\bigskip
+Prepared by:\\
+\medskip
+Group 1\\ 
+\medskip
+Senthil Dhanapal\\ 
+\smallskip
+Yadu Chittampalli\\
+\smallskip
+Christophe Hunt\\  
+
+\end{center}
+
+#1. Data Source 
+
+We download the data from our public GitHub repository which was originally provided through Blackboard. 
 
 1. Download the classification output data set (attached in Blackboard to the assignment). - Yadu
 
