@@ -36,21 +36,56 @@ Christophe Hunt\\
 
 \end{center}
 
-#1. Data Source 
+```{r, include = FALSE}
+library(pacman)
+p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR)
+```
+
+
+# Data Source 
 
 We download the data from our public GitHub repository which was originally provided through Blackboard. 
 
-1. Download the classification output data set (attached in Blackboard to the assignment). - Yadu
+```{r, echo=FALSE}
+classification <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%202/classification-output-data.csv")
+```
 
-2. The data set has three key columns we will use:
-??? class: the actual class for the observation
-??? scored.class: the predicted class for the observation (based on a threshold of 0.5)
-??? scored.probability: the predicted probability of success for the observation
-Use the table() function to get the raw confusion matrix for this scored dataset. Make sure you understand
-the output. In particular, do the rows represent the actual or predicted class? The columns? - Yadu
+# Data Explained
 
-3. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+We will be using the following columns from the data source: 
+
+* class: the actual class for the observation
+* scored.class: the predicted class for the observation (based on a threshold of 0.5)
+* scored.probability: the predicted probability of success for the observation
+
+Below is the raw confusion matrix for our scored dataset
+
+```{r, echo=FALSE, results = 'asis', cache=TRUE}
+scores <- subset(classification, select = c("class", "scored.class", "scored.probability"))
+m <- table("Predicted" = scores$class, "Actual" = scores$scored.class)
+colnames(m) <- c('Predicted Failure', "Predicted Success")
+rownames(m) <- c('Actual Failure', 'Actual Success')
+kable(m)
+```
+
+In particular, do the rows represent the actual or predicted class? The columns? - Yadu
+
+# Accuracy of Predictions 
+
+We developed the below function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the accuracy of the predictions. - Yadu 
+
+```{r, results='asis'}
+accuracy <- function(df, actual, prediction){
+  require(scales)
+  truefalse <- as.data.frame(table(df[actual] == df[prediction])) %>% 
+               spread('Var1', 'Freq')
+  accuracy <- unlist(truefalse[2]/nrow(classification))
+  paste0("The prediction accuracy is ", percent(accuracy))
+}
+
+accuracy(df = scores, actual = 'class', prediction = 'scored.class')
+```
 
 4. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the classification error rate of the predictions.Verify that you get an accuracy and an error rate that sums to one. - Yadu 
