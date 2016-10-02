@@ -1,0 +1,35 @@
+---
+title: "Yadu HW 2"
+author: "Yadu"
+date: "October 1, 2016"
+output: html_document
+---
+
+```{r}
+classification = read.csv("classification-output-data.csv", header = T)
+scores = subset(classification, select = c("class", "scored.class", "scored.probability"))
+table("Predicted" = scores$class, "Actual" = scores$scored.class)
+```
+
+```{r}
+library(tidyr)
+accuracy = function(df){
+  truefalse = data.frame(table(df[1] == df[2]))
+  truefalsee = data.frame(spread(truefalse, 'Var1', 'Freq'))
+  accuracy = truefalsee[2]/nrow(classification)
+  paste0("The prediction accuracy is ", accuracy)
+}
+```
+
+```{r}
+errorrate = function(df){
+  truefalse = data.frame(table(df[1] == df[2]))
+  truefalsee = data.frame(spread(truefalse, 'Var1', 'Freq'))
+  error = truefalsee[1]/nrow(classification)
+  paste0("The classification error rate is ", error)
+}
+```
+
+```{r}
+confusionMatrix(scores[,1], scores[,2])
+```
