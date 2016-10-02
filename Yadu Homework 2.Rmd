@@ -8,16 +8,18 @@ output: html_document
 ```{r}
 classification = read.csv("classification-output-data.csv", header = T)
 scores = subset(classification, select = c("class", "scored.class", "scored.probability"))
-table("Predicted" = scores$class, "Actual" = scores$scored.class)
+table("Actual" = scores$class, "Predicted" = scores$scored.class)
 ```
+
+Here the rows represent the actual classes and the columns represent the predicted classes.
 
 ```{r}
 library(tidyr)
 accuracy = function(df){
   truefalse = data.frame(table(df[1] == df[2]))
   truefalsee = data.frame(spread(truefalse, 'Var1', 'Freq'))
-  accuracy = truefalsee[2]/nrow(classification)
-  paste0("The prediction accuracy is ", accuracy)
+  accuracy = truefalsee$TRUE./nrow(classification)
+  return(signif(accuracy, 2))
 }
 ```
 
@@ -25,11 +27,20 @@ accuracy = function(df){
 errorrate = function(df){
   truefalse = data.frame(table(df[1] == df[2]))
   truefalsee = data.frame(spread(truefalse, 'Var1', 'Freq'))
-  error = truefalsee[1]/nrow(classification)
-  paste0("The classification error rate is ", error)
+  error = truefalsee$FALSE./nrow(classification)
+  return(signif(error, 2))
 }
 ```
 
 ```{r}
+errorrate(scores) + accuracy(scores) == 1
+```
+
+Both the accuracy and the error rate do add up to 1.
+
+```{r}
+library(caret)
 confusionMatrix(scores[,1], scores[,2])
 ```
+
+Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. 
