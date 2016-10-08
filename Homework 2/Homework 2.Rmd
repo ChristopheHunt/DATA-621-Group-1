@@ -68,18 +68,25 @@ We will be using the following columns from the data source:
 scores <- subset(classification, select = c("class", "scored.class", "scored.probability"))
 ```
 
-Below is the raw confusion matrix for our scored data set
+The raw confusion matrix for our scored data set is represented the following table. The rows represent the actual classes and the columns represent the predicted classes.
 
 ```{r, echo=FALSE, results = 'asis', cache=TRUE}
-m <- table("Predicted" = scores$class, "Actual" = scores$scored.class)
+m <- table("Actual" = scores$class, "Predicted" = scores$scored.class)
 colnames(m) <- c('Predicted Failure', "Predicted Success")
 rownames(m) <- c('Actual Failure', 'Actual Success')
 kable(m, align = c("c", "c"))
 ```
 
-Here the rows represent the actual classes and the columns represent the predicted classes.
+A visual representation of the confusion matrix is presented in the below figure. 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results = 'asis', cache=TRUE, fig.align='center'}
+colnames(m) <- c('Predicted Failure', "Predicted \nSuccess\n")
+rownames(m) <- c('Actual Failure', 'Actual \nSuccess\n')
+mosaicplot(t(m), main="Confusion Matrix Plot", xlab = "", ylab = "")
+```
+
+
+```{r , echo=FALSE}
 TruePositive <- function(df, prediction, actual, positiveValue, negativeValue){
                 return(length(df[which(df[prediction] == positiveValue & df[actual] == positiveValue),1]))
                 }
@@ -249,10 +256,55 @@ that the F1 score will always be between 0 and 1. (Hint: If 0 < ???? < 1 and 0 <
 
 # Function for ROC curve 
 
-Write a function that generates an ROC curve from a data set with a true classification column (class in our
-example) and a probability column (scored.probability in our example). Your function should return a list
-that includes the plot of the ROC curve and a vector that contains the calculated area under the curve
-(AUC). Note that I recommend using a sequence of thresholds ranging from 0 to 1 at 0.01 intervals. - Senthil
+We developed a function that generates an ROC curve from a data set with a true classification column (`class` from our data set) and a probability column (`scored.probability` from our data set). Our function returns a list that includes the plot of the ROC curve and a vector that contains the calculated area under the curve (AUC). As per Dr. Bastion's recommendation we used a sequence of thresholds ranging from 0 to 1 at 0.01 intervals.
+
+```{r, echo=FALSE}
+ROC.Coordinates <- function(df, classVar, probVar, positiveValue, negativeValue, threshold){
+                    pred <- rep(negativeValue,length(df[,1]))
+                    dfNew <- df
+                    pred[which(df[probVar] >= threshold)]  <- positiveValue
+                    dfNew$pred <- as.factor(pred)
+  
+                    sensitivity <- Sensitivity(df = dfNew, prediction = "pred", 
+                                               actual = classVar, positiveValue, negativeValue)
+                    
+                    specificity <- Specificity(df = dfNew, prediction = "pred", 
+                                               actual = classVar, positiveValue, negativeValue)
+                    tpr  <- sensitivity
+                    fpr  <- (1 - specificity)
+                    auc  <- ((sensitivity + specificity) / 2)
+                    dist <- (sqrt((1 - tpr) ^ 2 + (fpr) ^ 2))
+                  
+                    return(data.frame(threshold,fpr,tpr,auc,dist))
+                    }
+
+ROC <- function(df, classVar, probVar, positiveValue, negativeValue, thresholds){
+                x <- thresholds
+                dfForPlot <- data.frame(threshold = integer(), fpr = double(),tpr = double(), auc = double(), dist = double())
+                for (i in x){
+                  plotCoord <- ROC.Coordinates(df,classVar, probVar, positiveValue, negativeValue, i)
+                  dfForPlot <-  data.frame(rbind(dfForPlot,data.frame(plotCoord)))
+                }
+                plot(x = dfForPlot$fpr,y = dfForPlot$tpr,lwd = 2, type = "l", xlab = "FPR", ylab = "TPR")
+                lines(x = c(0, 1), y = c(0, 1), col = "black", lwd = 1)
+                return(dfForPlot)
+              }
+
+calculateAUC <- function(curveInfo){
+                  tpr1 <- 0
+                  fpr1 <- 0
+                  auc  <- 0
+                  curveInfo <- curveInfo[order(-curveInfo$threshold),]
+                  for (i in 1:nrow(curveInfo)){     
+                    tpr2 <- curveInfo[i,"tpr"]
+                    fpr2 <- curveInfo[i,"fpr"]
+                    auc  <- auc + ((tpr1 + tpr2)/2) * (fpr2 - fpr1)
+                    tpr1 <- tpr2
+                    fpr1 <- fpr2
+                    }
+                  return(auc)
+                }
+```
 
 # R Functions created and classification output
 
