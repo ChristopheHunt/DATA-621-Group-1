@@ -38,7 +38,7 @@ Christophe Hunt\\
 
 ```{r, include = FALSE}
 library(pacman)
-p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret, Hmisc)
+p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret)
 ```
 
 
@@ -177,8 +177,6 @@ f1_score(df = scores, actual = 'class', prediction = 'scored.class')
 ```
 
 
-
-
 # Bounds of F1 Score of Predictions 
 
 Before we move on, let's consider a question that was asked: What are the bounds on the F1 score? Show
@@ -198,16 +196,17 @@ classification metrics discussed above. - Christophe
 accuracy(df = scores, actual = 'class', prediction = 'scored.class')
 ```
 
+# Investigation of `caret` package. 
 
-12. Investigate the caret package. In particular, consider the functions confusionMatrix, sensitivity, and
-specificity. Apply the functions to the data set. How do the results compare with your own functions? 
+In particular, consider the functions confusionMatrix, sensitivity, and specificity. Apply the functions to the data set. How do the results compare with your own functions? 
 
-```{r, results='asis'}
+```{r, echo = FALSE, results='asis'}
 library(caret)
-latex(confusionMatrix(scores[,1], scores[,2]), file = '')
+as.matrix(confusionMatrix(scores[,1], scores[,2]))
 ```
 
 Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. 
 
-13. Investigate the pROC package. Use it to generate an ROC curve for the data set. How do the results
-compare with your own functions? - Senthil 
+# Investigation of the `pROC` package. 
+
+Use it to generate an ROC curve for the data set. How do the results compare with your own functions? - Senthil 
