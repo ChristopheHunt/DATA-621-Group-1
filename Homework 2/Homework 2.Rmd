@@ -43,7 +43,7 @@ Christophe Hunt\\
 
 ```{r, include = FALSE}
 library(pacman)
-p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret)
+p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret, pROC)
 tidy.opts = list(width.cutoff = 60)
 ```
 
@@ -202,6 +202,8 @@ Sensitivity <- function(df, actual, prediction, positiveValue, negativeValue){
 }
 ```
 
+\newpage
+
 # Function for Specificity of Predictions 
 
 We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified,
@@ -258,18 +260,17 @@ that the F1 score will always be between 0 and 1. (Hint: If 0 < ???? < 1 and 0 <
 
 We developed a function that generates an ROC curve from a data set with a true classification column (`class` from our data set) and a probability column (`scored.probability` from our data set). Our function returns a list that includes the plot of the ROC curve and a vector that contains the calculated area under the curve (AUC). As per Dr. Bastion's recommendation we used a sequence of thresholds ranging from 0 to 1 at 0.01 intervals.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 ROC.Coordinates <- function(df, classVar, probVar, positiveValue, negativeValue, threshold){
+
                     pred <- rep(negativeValue,length(df[,1]))
                     dfNew <- df
-                    pred[which(df[probVar] >= threshold)]  <- positiveValue
+                    pred[which(df[probVar]>=threshold)]  <- positiveValue
                     dfNew$pred <- as.factor(pred)
-  
-                    sensitivity <- Sensitivity(df = dfNew, prediction = "pred", 
-                                               actual = classVar, positiveValue, negativeValue)
-                    
-                    specificity <- Specificity(df = dfNew, prediction = "pred", 
-                                               actual = classVar, positiveValue, negativeValue)
+
+                    sensitivity <- Sensitivity(df = dfNew, actual = classVar, prediction = "pred", positiveValue, negativeValue)
+                    specificity <- Specificity(df = dfNew, actual = classVar, prediction = "pred", positiveValue, negativeValue)
+              
                     tpr  <- sensitivity
                     fpr  <- (1 - specificity)
                     auc  <- ((sensitivity + specificity) / 2)
@@ -306,6 +307,8 @@ calculateAUC <- function(curveInfo){
                 }
 ```
 
+\newpage
+
 # R Functions created and classification output
 
 ##Accuracy of Predictions 
@@ -336,11 +339,64 @@ paste0("Sensitivity of Predictions = ", percent(Sensitivity(df = scores, actual 
 paste0("Specificity of Predictions = ", percent(Specificity(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
 ```
 
+\newpage
+
 ##F1 Score of Predictions
 
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
 paste0("The F1 Score = ", f1_score(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0))
 ```
+
+##ROC Function
+
+We calculated best threshold value using two methods.  
+a) by calculating the distance of the point from (0,1).  
+b) by calculating AUC by making a curve for threshold{t} by joining points (0,0), (X{t},Y{t}), (1,1)  
+
+Two thresholds intervals were used:  
+1) .01   
+2) .001   
+    
+1) As the cut-off interval was set threshold (0,1,0.01) the value returned is very close to the value that the R package `pROC` predicts    
+
+```{r, echo=FALSE}
+x <- seq(0,1,0.01)
+dfROC <- ROC(dfData = scores, classVar = 'class', probVar = 'scored.probability', posVal = 1, negVal = 0, thresholds = x)
+auc <- calculateAUC(dfROC)
+bestValueMethod1 <- dfROC[which(dfROC$dist == min(dfROC$dist)),]
+bestValueMethod2 <- dfROC[which(dfROC$auc == max(dfROC$auc)),]
+```
+
+AUC using manual calculation is `r auc`.
+
+Best Threshold value using method 1 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod1[1,1], bestValueMethod1[1,2], bestValueMethod1[1,3],
+            bestValueMethod1[1,4], bestValueMethod1[1,5]))`
+
+Best Threshold value using method 2 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod2[1,1], bestValueMethod2[1,2], bestValueMethod2[1,3],
+            bestValueMethod2[1,4], bestValueMethod2[1,5]))`  
+  
+  
+  + 2) when cut-off interval is threshold(0,1,0.001)  -> value is exact to what pROC predicts  
+
+```{r, echo=FALSE}
+x <- seq(0,1,0.001)
+dfROC <- ROC(df = scores, classVar = 'class', probVar = 'scored.probability', positiveValue = 1 , negativeValue = 0, thresholds = x)
+auc <- calculateAUC(dfROC)
+bestValueMethod1 <- dfROC[which(dfROC$dist == min(dfROC$dist)),]
+bestValueMethod2 <- dfROC[which(dfROC$auc == max(dfROC$auc)),]
+```
+
+AUC using manual calculation is `r auc`.
+
+Best Threshold value using method 1 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod1[1,1], bestValueMethod1[1,2], bestValueMethod1[1,3],
+            bestValueMethod1[1,4], bestValueMethod1[1,5]))`
+
+Best Threshold value using method 2 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod2[1,1], bestValueMethod2[1,2], bestValueMethod2[1,3],
+            bestValueMethod2[1,4], bestValueMethod2[1,5]))`
 
 # Investigation of `caret` package. 
 
@@ -362,9 +418,20 @@ sensitivity(table(scores[,1], scores[,2]))
 specificity(table(scores[,1], scores[,2]))
 ```
 
-# Investigation of the `pROC` package. 
+# Investigation of the `pROC` R package. 
 
-Use it to generate an ROC curve for the data set. How do the results compare with your own functions? - Senthil 
+We used the `pROC` R package to generate an ROC curve for the data set. 
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE, results='asis'}
+roc_curve <- roc(scores$class, scores$scored.probability)
+plot(roc_curve)
+bestPROC <- coords(roc_curve, "best", ret = c("threshold", "1-specificity", "sensitivity"))
+```
+
+Best Threshold value using pROC package is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f}", 
+            bestPROC[1], bestPROC[2], bestPROC[3]))`
+
+Our second method (using `auc`) predicts better than first method (using distance from (0,1))
 
 \newpage
 
