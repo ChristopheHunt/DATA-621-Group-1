@@ -45,4 +45,4 @@ sensitivity(table(scores[,1], scores[,2]))
 specificity(table(scores[,1], scores[,2]))
 ```
 
-Here, the accuracy is rounded up to at least 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. 
+Here, the accuracy is rounded up to at least 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. Sensitivity and specificity functions in the caret package take in only two inputs - predicted and actual. On the other hand, the sensitivity and specificity functions created take in 5 outputs - the entire data frame, preidicted variables, actual variables, the positive values, and negative values.   
