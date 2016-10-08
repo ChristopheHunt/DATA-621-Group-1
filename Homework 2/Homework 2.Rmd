@@ -44,7 +44,7 @@ Christophe Hunt\\
 ```{r, include = FALSE}
 library(pacman)
 p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret)
-tidy.opts=list(width.cutoff = 60)
+tidy.opts = list(width.cutoff = 60)
 ```
 
 
@@ -74,38 +74,52 @@ Below is the raw confusion matrix for our scored data set
 m <- table("Predicted" = scores$class, "Actual" = scores$scored.class)
 colnames(m) <- c('Predicted Failure', "Predicted Success")
 rownames(m) <- c('Actual Failure', 'Actual Success')
-kable(m)
+kable(m, align = c("c", "c"))
 ```
 
 Here the rows represent the actual classes and the columns represent the predicted classes.
+
+```{r, echo=FALSE}
+TruePositive <- function(df, prediction, actual, positiveValue, negativeValue){
+                return(length(df[which(df[prediction] == positiveValue & df[actual] == positiveValue),1]))
+                }
+
+TrueNegative <- function(df, prediction, actual, positiveValue, negativeValue){
+                return(length(df[which(df[prediction] == negativeValue & df[actual] == negativeValue),1]))
+                }
+
+FalsePositive <- function(df, prediction, actual, positiveValue, negativeValue){
+                 return(length(df[which(df[prediction] == positiveValue & df[actual] == negativeValue),1]))
+                 }
+
+FalseNegative <- function(df, prediction, actual, positiveValue, negativeValue){
+                 return(length(df[which(df[prediction] == negativeValue & df[actual] == positiveValue),1]))
+                }
+
+column_check <- function(df,actual, prediction){
+                if (sum(colnames(df) %in% c(actual, prediction)) != 2){
+                return("One or more columns were not found, please verify selections")
+                }
+            }
+```
 
 # Function for Accuracy of Predictions 
 
 We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the accuracy of the predictions. 
 
-Accuracy is determined by the below equation: 
+Accuracy is determined by the below formula: 
 
 $$
 \begin{aligned}
 Accuracy~=~\frac{True~Positives~+~True~Negatives}{True~Positives~+~False~Positives~+~True~Negatives~+~False~Negatives}\end{aligned}
 $$
 
-```{r, echo = FALSE, results='asis'}
-accuracy <- function(df, actual, prediction){
-  
-  library(scales)
-  library(dplyr)
-  library(tidyr)
-  
-  if (sum(colnames(df) %in% c(actual, prediction)) != 2){
-    return("One or more columns were not found, please verify selections")
-  }
-  truefalse <- as.data.frame(table(df[actual] == df[prediction])) %>% 
-               spread('Var1', 'Freq')
-  
-  accuracy <- unlist(truefalse[2]/nrow(df))
-  
-  return(as.numeric(accuracy))
+```{r, echo = FALSE}
+Accuracy <- function(df, actual, prediction, positiveValue, negativeValue){
+  column_check(df, actual, prediction)
+  accuracy <- (TruePositive(df, actual, prediction, positiveValue, negativeValue) + 
+               TrueNegative(df, actual, prediction, positiveValue, negativeValue)) / nrow(df) 
+  return(accuracy)
 }
 
 ```
@@ -116,6 +130,7 @@ We developed a function that takes the data set as a dataframe, with actual and 
 and returns the classification error rate of the predictions. It also verifies that the accuracy and an error rate sums to one. 
 
 Classification of Error Rate is determined by the below formula:
+
 $$
 \begin{aligned}
 Classification~Error~Rate~=~\frac{False~Positives~+~False~Negatives}{True~Positives~+~False~Positives~+~True~Negatives~+~False~Negatives}
@@ -123,16 +138,14 @@ Classification~Error~Rate~=~\frac{False~Positives~+~False~Negatives}{True~Positi
 $$
 
 ```{r, echo=FALSE}
-errorrate <- function(df, actual, prediction){
-  
-  truefalse <- data.frame(table(df[actual] == df[prediction])) %>% 
-                          spread('Var1', 'Freq')
-  
-  error <- unlist(truefalse[1]/nrow(df))
-  
-  if (error + accuracy(df, actual, prediction) != 1){return("Accuracy and Error Rate does not sum to 1")}
-  
-  return(as.numeric(error))
+ClassificationErrorRate <- function(df, actual, prediction, positiveValue, negativeValue){
+  column_check(df, actual, prediction)
+  error <- (FalsePositive(df, actual, prediction, positiveValue, negativeValue) + 
+            FalseNegative(df, actual, prediction, positiveValue, negativeValue)) / nrow(df)
+  if (error + Accuracy(df, actual, prediction, positiveValue, negativeValue) != 1){
+    return("Accuracy and Error Rate does not sum to 1")
+    }
+  return(error)
 }
 
 ```
@@ -140,28 +153,47 @@ errorrate <- function(df, actual, prediction){
 # Function for Precisions of Predictions
 
 Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
-and returns the precision of the predictions. - Senthil
+and returns the precision of the predictions. 
 
 Precision is determined by the below formula:
+
 $$
 \begin{aligned}
 Precision~=~\frac{True~Positives}{True~Positives~+~False~Positives}
 \end{aligned}
 $$
 
+```{r, echo=FALSE}
+Precision <- function(df, actual, prediction, positiveValue, negativeValue){
+  column_check(df, actual, prediction)
+  tp <- TruePositive(df, actual, prediction, positiveValue, negativeValue)
+  fp <- FalsePositive(df, actual, prediction, positiveValue, negativeValue)
+  return(tp/(tp + fp))
+ }
+```
+
 
 # Function for Sensitivity of Predictions
 
-Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
-and returns the sensitivity of the predictions. Sensitivity is also known as recall. - Senthil
+We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+and returns the sensitivity of the predictions. Sensitivity is also known as recall. 
 
 Sensitivity is determined by the below formula:
+
 $$
 \begin{aligned}
 Sensitivity~=~\frac{True~Positives}{True~Positives~+~False~Negatives}
 \end{aligned}
 $$
 
+```{r, echo = FALSE}
+Sensitivity <- function(df, actual, prediction, positiveValue, negativeValue){
+  column_check(df, actual, prediction)
+  tp <- TruePositive(df, actual, prediction, positiveValue, negativeValue)
+  fn <- FalseNegative(df, actual, prediction, positiveValue, negativeValue)
+  return(tp/(tp + fn))
+}
+```
 
 # Function for Specificity of Predictions 
 
@@ -169,6 +201,7 @@ We developed a function that takes the data set as a dataframe, with actual and 
 and returns the specificity of the predictions. 
 
 Specificity is determined by the below formula:
+
 $$
 \begin{aligned}
 Specificity~=~\frac{True~Negative}{True~Negatives~+~False~Positives}
@@ -176,16 +209,12 @@ Specificity~=~\frac{True~Negative}{True~Negatives~+~False~Positives}
 $$
 
 ```{r, echo=FALSE}
-Specificity <- function(df, actual, prediction){
-  
-  if(sum(colnames(df) %in% c(actual, prediction)) != 2){ 
-    return("One or more columns were not found, please verify selections")
-  }
-  m <- as.data.frame(table(df[[actual]], df[[prediction]]))
-  true_negative  <- m$Freq[m$Var1 == 0 & m$Var2 == 0]
-  false_positive <- m$Freq[m$Var1 == 0 & m$Var2 == 1]
-  return(true_negative/(true_negative + false_positive))
-  }
+Specificity <- function(df, actual, prediction, positiveValue, negativeValue){
+  column_check(df, actual, prediction)
+  tn <- TrueNegative(df, actual, prediction, positiveValue, negativeValue)
+  fp <- FalsePositive(df, actual, prediction, positiveValue, negativeValue)
+  return(tn/(tn + fp))
+}
 ```
 
 
@@ -194,22 +223,20 @@ Specificity <- function(df, actual, prediction){
 We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the F1 score of the predictions. 
 
-```{r}
-f1_score <- function(df, actual, prediction){
-  require(scales)
-  if (sum(colnames(df) %in% c(actual, prediction)) != 2) {
-    return("One or more columns were not found, please verify selections")
-  }
-  
-  m <- as.data.frame(table(df[[actual]], df[[prediction]])) 
-  
-  true_positive  <- as.numeric(m$Freq[m$Var1 == 1 & m$Var2 == 1])
-  false_positive <- as.numeric(m$Freq[m$Var1 == 0 & m$Var2 == 1])
-  false_negative <- as.numeric(m$Freq[m$Var1 == 1 & m$Var2 == 0])
-  
-  precision <- true_positive/(true_positive + false_positive)
-  sensitivity <- true_positive/(true_positive + false_negative)
-  f1_score <- ((2 * precision * sensitivity) / (precision + sensitivity))
+The F1 score is determined by the below formula: 
+
+$$
+\begin{aligned}
+F1~Score~=~\frac{2~*Precision~*~Sensitivity}{Precision~+~Sensitivity}
+\end{aligned}
+$$
+
+```{r, echo = FALSE}
+f1_score <- function(df, actual, prediction, positiveValue, negativeValue){
+  column_check(df, actual, prediction)
+  p <- Precision(df, actual, prediction, positiveValue, negativeValue)
+  s <- Sensitivity(df, actual, prediction, positiveValue, negativeValue)
+  f1_score <- ((2 * p * s) / (p + s))
   return(f1_score)
   }
 ```
@@ -230,36 +257,37 @@ that includes the plot of the ROC curve and a vector that contains the calculate
 # R Functions created and classification output
 
 ##Accuracy of Predictions 
+
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Accuracy of Predictions = ", percent(accuracy(df = scores, actual = 'class', prediction = 'scored.class')))
+paste0("Accuracy of Predictions = ", percent(Accuracy(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
 ```
 
 ##Classification Error Rate of Predictions 
+
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Error Rate of Predictions = ", percent(errorrate(scores, "class", "scored.class")))
+paste0("Error Rate of Predictions = ", percent(ClassificationErrorRate(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
 ```
 
 ##Precisions of Predictions
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-
+paste0("Precision of Predictions = ", percent(Precision(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
 ```
 
 ##Sensitivity of Predictions
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-
+paste0("Sensitivity of Predictions = ", percent(Sensitivity(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
 ```
 
 ##Specificity of Predictions
 
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Specificity of Predictions = ", percent(Specificity(df = scores, actual = 'class', prediction = 'scored.class')))
+paste0("Specificity of Predictions = ", percent(Specificity(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
 ```
-
 
 ##F1 Score of Predictions
 
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("The F1 Score = ", f1_score(df = scores, actual = 'class', prediction = 'scored.class'))
+paste0("The F1 Score = ", f1_score(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0))
 ```
 
 # Investigation of `caret` package. 
