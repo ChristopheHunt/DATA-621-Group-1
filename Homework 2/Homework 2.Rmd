@@ -38,15 +38,15 @@ Christophe Hunt\\
 
 ```{r, include = FALSE}
 library(pacman)
-p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR)
+p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret, Hmisc)
 ```
 
 
 # Data Source 
 
-We download the data from our public GitHub repository which was originally provided through Blackboard. 
+The data is a set of actual classes and predicted classes as provided by Dr. Nathan Bastian through Blackboard. We uploaded the data to our public GitHub repository. 
 
-```{r, echo=FALSE}
+```{r load in data, echo=FALSE}
 classification <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%202/classification-output-data.csv")
 ```
 
@@ -58,62 +58,82 @@ We will be using the following columns from the data source:
 * scored.class: the predicted class for the observation (based on a threshold of 0.5)
 * scored.probability: the predicted probability of success for the observation
 
+```{r subset data, echo=FALSE, results = 'asis', cache=TRUE}
+scores <- subset(classification, select = c("class", "scored.class", "scored.probability"))
+```
+
 Below is the raw confusion matrix for our scored data set
 
 ```{r, echo=FALSE, results = 'asis', cache=TRUE}
-scores <- subset(classification, select = c("class", "scored.class", "scored.probability"))
 m <- table("Predicted" = scores$class, "Actual" = scores$scored.class)
 colnames(m) <- c('Predicted Failure', "Predicted Success")
 rownames(m) <- c('Actual Failure', 'Actual Success')
 kable(m)
 ```
 
-In particular, do the rows represent the actual or predicted class? The columns? - Yadu
+Here the rows represent the actual classes and the columns represent the predicted classes.
 
 # Function for Accuracy of Predictions 
 
-We developed the below function that takes the data set as a dataframe, with actual and predicted classifications identified,
-and returns the accuracy of the predictions. - Yadu 
+We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the accuracy of the predictions. - Yadu 
 
-```{r, results='asis'}
+```{r, results='asis', size='normalsize'}
 accuracy <- function(df, actual, prediction){
-  require(scales)
   
-  if (sum(colnames(df) %in% c(actual, prediction)) != 2){ 
+  library(scales)
+  library(dplyr)
+  library(tidyr)
+  
+  if (sum(colnames(df) %in% c(actual, prediction)) != 2){
     return("One or more columns were not found, please verify selections")
   }
-  
   truefalse <- as.data.frame(table(df[actual] == df[prediction])) %>% 
                spread('Var1', 'Freq')
+  
   accuracy <- unlist(truefalse[2]/nrow(df))
-  paste0("The prediction accuracy is ", percent(accuracy))
+  
+  return(as.numeric(accuracy))
 }
 
-accuracy(df = scores, actual = 'class', prediction = 'scored.class')
+accuracy(scores,"class", "scored.class" )
 ```
 
 # Function Classification Error Rate of Predictions 
 
-Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
-and returns the classification error rate of the predictions.Verify that you get an accuracy and an error rate that sums to one. - Yadu 
+We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+and returns the classification error rate of the predictions. It verifies that the accuracy and an error rate sums to one. 
 
+```{r}
+errorrate <- function(df, actual, prediction){
+  
+  truefalse <- data.frame(table(df[actual] == df[prediction])) %>% 
+                          spread('Var1', 'Freq')
+  
+  error <- unlist(truefalse[1]/nrow(df))
+  
+  if (error + accuracy(df, actual, prediction) != 1){return("Accuracy and Error Rate does not sum to 1")}
+  
+  return(as.numeric(error))
+}
+
+errorrate(scores, "class", "scored.class")
+```
 
 # Function for Precisions of Predictions
 
 Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the precision of the predictions. - Senthil
 
-
 # Function for Sensitivity of Predictions
 
 Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the sensitivity of the predictions. Sensitivity is also known as recall. - Senthil
 
-
 # Function for Specificity of Predictions 
 
 ```{r}
 Specificity <- function(df, actual, prediction){
+  
   if(sum(colnames(df) %in% c(actual, prediction)) != 2){ 
     return("One or more columns were not found, please verify selections")
   }
@@ -129,6 +149,9 @@ paste0("The specificity is ", percent(Specificity(df = scores, actual = 'class',
 
 
 # F1 Score of Predictions 
+
+We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+and returns the F1 score of the predictions. 
 
 ```{r}
 f1_score <- function(df, actual, prediction){
@@ -154,8 +177,7 @@ f1_score(df = scores, actual = 'class', prediction = 'scored.class')
 ```
 
 
-Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
-and returns the F1 score of the predictions. - Christophe
+
 
 # Bounds of F1 Score of Predictions 
 
@@ -172,8 +194,20 @@ that includes the plot of the ROC curve and a vector that contains the calculate
 11. Use your created R functions and the provided classification output data set to produce all of the
 classification metrics discussed above. - Christophe
 
+```{r}
+accuracy(df = scores, actual = 'class', prediction = 'scored.class')
+```
+
+
 12. Investigate the caret package. In particular, consider the functions confusionMatrix, sensitivity, and
-specificity. Apply the functions to the data set. How do the results compare with your own functions? - Yadu
+specificity. Apply the functions to the data set. How do the results compare with your own functions? 
+
+```{r, results='asis'}
+library(caret)
+latex(confusionMatrix(scores[,1], scores[,2]), file = '')
+```
+
+Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. 
 
 13. Investigate the pROC package. Use it to generate an ROC curve for the data set. How do the results
 compare with your own functions? - Senthil 
