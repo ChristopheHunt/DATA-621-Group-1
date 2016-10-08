@@ -58,7 +58,7 @@ We will be using the following columns from the data source:
 * scored.class: the predicted class for the observation (based on a threshold of 0.5)
 * scored.probability: the predicted probability of success for the observation
 
-Below is the raw confusion matrix for our scored dataset
+Below is the raw confusion matrix for our scored data set
 
 ```{r, echo=FALSE, results = 'asis', cache=TRUE}
 scores <- subset(classification, select = c("class", "scored.class", "scored.probability"))
@@ -70,7 +70,7 @@ kable(m)
 
 In particular, do the rows represent the actual or predicted class? The columns? - Yadu
 
-# Accuracy of Predictions 
+# Function for Accuracy of Predictions 
 
 We developed the below function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the accuracy of the predictions. - Yadu 
@@ -78,34 +78,93 @@ and returns the accuracy of the predictions. - Yadu
 ```{r, results='asis'}
 accuracy <- function(df, actual, prediction){
   require(scales)
+  
+  if (sum(colnames(df) %in% c(actual, prediction)) != 2){ 
+    return("One or more columns were not found, please verify selections")
+  }
+  
   truefalse <- as.data.frame(table(df[actual] == df[prediction])) %>% 
                spread('Var1', 'Freq')
-  accuracy <- unlist(truefalse[2]/nrow(classification))
+  accuracy <- unlist(truefalse[2]/nrow(df))
   paste0("The prediction accuracy is ", percent(accuracy))
 }
 
 accuracy(df = scores, actual = 'class', prediction = 'scored.class')
 ```
 
-4. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+# Function Classification Error Rate of Predictions 
+
+Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the classification error rate of the predictions.Verify that you get an accuracy and an error rate that sums to one. - Yadu 
 
-5. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+
+# Function for Precisions of Predictions
+
+Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the precision of the predictions. - Senthil
 
-6. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+
+# Function for Sensitivity of Predictions
+
+Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the sensitivity of the predictions. Sensitivity is also known as recall. - Senthil
 
-7. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
-and returns the specificity of the predictions. - Christophe
 
-8. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+# Function for Specificity of Predictions 
+
+```{r}
+Specificity <- function(df, actual, prediction){
+  if(sum(colnames(df) %in% c(actual, prediction)) != 2){ 
+    return("One or more columns were not found, please verify selections")
+  }
+  m <- as.data.frame(table(df[[actual]], df[[prediction]]))
+  true_negative  <- m$Freq[m$Var1 == 0 & m$Var2 == 0]
+  false_positive <- m$Freq[m$Var1 == 0 & m$Var2 == 1]
+  return(true_negative/(true_negative + false_positive))
+  }
+
+paste0("The specificity is ", percent(Specificity(df = scores, actual = 'class', prediction = 'scored.class')))
+
+```
+
+
+# F1 Score of Predictions 
+
+```{r}
+f1_score <- function(df, actual, prediction){
+  require(scales)
+  if (sum(colnames(df) %in% c(actual, prediction)) != 2) {
+    return("One or more columns were not found, please verify selections")
+  }
+  
+  m <- as.data.frame(table(df[[actual]], df[[prediction]])) 
+  
+  true_positive  <- as.numeric(m$Freq[m$Var1 == 1 & m$Var2 == 1])
+  false_positive <- as.numeric(m$Freq[m$Var1 == 0 & m$Var2 == 1])
+  false_negative <- as.numeric(m$Freq[m$Var1 == 1 & m$Var2 == 0])
+  
+  precision <- true_positive/(true_positive + false_positive)
+  sensitivity <- true_positive/(true_positive + false_negative)
+  f1_score <- ((2 * precision * sensitivity) / (precision + sensitivity))
+  return(f1_score)
+  }
+
+f1_score(df = scores, actual = 'class', prediction = 'scored.class')
+
+```
+
+
+Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the F1 score of the predictions. - Christophe
 
-9. Before we move on, let's consider a question that was asked: What are the bounds on the F1 score? Show
+# Bounds of F1 Score of Predictions 
+
+Before we move on, let's consider a question that was asked: What are the bounds on the F1 score? Show
 that the F1 score will always be between 0 and 1. (Hint: If 0 < ???? < 1 and 0 < ???? < 1 then ????????- Christophe
 
-10. Write a function that generates an ROC curve from a data set with a true classification column (class in our
+# Function for ROC curve 
+
+Write a function that generates an ROC curve from a data set with a true classification column (class in our
 example) and a probability column (scored.probability in our example). Your function should return a list
 that includes the plot of the ROC curve and a vector that contains the calculated area under the curve
 (AUC). Note that I recommend using a sequence of thresholds ranging from 0 to 1 at 0.01 intervals. - Senthil
