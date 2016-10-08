@@ -16,3 +16,5 @@ purrr
 dplyr
 pander
 formatR
+caret
+stargazer

@@ -39,18 +39,19 @@ Christophe Hunt\\
 ```{r, include = FALSE}
 library(pacman)
 p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret)
+tidy.opts=list(width.cutoff=60)
 ```
 
 
 # Data Source 
 
-The data is a set of actual classes and predicted classes as provided by Dr. Nathan Bastian through Blackboard. We uploaded the data to our public GitHub repository. 
+The data is a set of actual classes and predicted classes as provided by Dr. Nathan Bastian for this exercise. We uploaded the data to our public GitHub repository for ease of access. 
 
 ```{r load in data, echo=FALSE}
 classification <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%202/classification-output-data.csv")
 ```
 
-# Data Explained
+# Data Explained and Confusion Matrix
 
 We will be using the following columns from the data source: 
 
@@ -75,9 +76,16 @@ Here the rows represent the actual classes and the columns represent the predict
 
 # Function for Accuracy of Predictions 
 
-We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the accuracy of the predictions. - Yadu 
+We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the accuracy of the predictions. 
 
-```{r, results='asis', size='normalsize'}
+Accuracy is determined by the below equation: 
+
+$$
+\begin{aligned}
+Accuracy~=~\frac{True~Positives~+~True~Negatives}{True~Positives~+~False~Positives~+~True~Negatives~+~False~Negatives}\end{aligned}
+$$
+
+```{r, echo = FALSE, results='asis'}
 accuracy <- function(df, actual, prediction){
   
   library(scales)
@@ -98,12 +106,19 @@ accuracy <- function(df, actual, prediction){
 accuracy(scores,"class", "scored.class" )
 ```
 
-# Function Classification Error Rate of Predictions 
+# Function for Classification Error Rate of Predictions 
 
 We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified,
-and returns the classification error rate of the predictions. It verifies that the accuracy and an error rate sums to one. 
+and returns the classification error rate of the predictions. It also verifies that the accuracy and an error rate sums to one. 
 
-```{r}
+Classification of Error Rate is determined by the below formula:
+$$
+\begin{aligned}
+Classification~Error~Rate~=~\frac{False~Positives~+~False~Negatives}{True~Positives~+~False~Positives~+~True~Negatives~+~False~Negatives}
+\end{aligned}
+$$
+
+```{r, echo=FALSE}
 errorrate <- function(df, actual, prediction){
   
   truefalse <- data.frame(table(df[actual] == df[prediction])) %>% 
@@ -116,7 +131,6 @@ errorrate <- function(df, actual, prediction){
   return(as.numeric(error))
 }
 
-errorrate(scores, "class", "scored.class")
 ```
 
 # Function for Precisions of Predictions
@@ -124,14 +138,30 @@ errorrate(scores, "class", "scored.class")
 Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the precision of the predictions. - Senthil
 
+Precision is determined by the below formula:
+$$
+\begin{aligned}
+Precision~=~\frac{True~Positives}{True~Positives~+~False~Positives}
+\end{aligned}
+$$
+
+
 # Function for Sensitivity of Predictions
 
 Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,
 and returns the sensitivity of the predictions. Sensitivity is also known as recall. - Senthil
 
+Sensitivity is determined by the below formula:
+$$
+\begin{aligned}
+Sensitivity~=~\frac{True~Positives}{True~Positives~+~False~Negatives}
+\end{aligned}
+$$
+
+
 # Function for Specificity of Predictions 
 
-```{r}
+```{r, echo=FALSE}
 Specificity <- function(df, actual, prediction){
   
   if(sum(colnames(df) %in% c(actual, prediction)) != 2){ 
@@ -142,8 +172,6 @@ Specificity <- function(df, actual, prediction){
   false_positive <- m$Freq[m$Var1 == 0 & m$Var2 == 1]
   return(true_negative/(true_negative + false_positive))
   }
-
-paste0("The specificity is ", percent(Specificity(df = scores, actual = 'class', prediction = 'scored.class')))
 
 ```
 
@@ -172,7 +200,7 @@ f1_score <- function(df, actual, prediction){
   return(f1_score)
   }
 
-f1_score(df = scores, actual = 'class', prediction = 'scored.class')
+
 
 ```
 
@@ -189,11 +217,39 @@ example) and a probability column (scored.probability in our example). Your func
 that includes the plot of the ROC curve and a vector that contains the calculated area under the curve
 (AUC). Note that I recommend using a sequence of thresholds ranging from 0 to 1 at 0.01 intervals. - Senthil
 
-11. Use your created R functions and the provided classification output data set to produce all of the
-classification metrics discussed above. - Christophe
+# R Functions created and classification output
 
-```{r}
-accuracy(df = scores, actual = 'class', prediction = 'scored.class')
+##Accuracy of Predictions 
+```{r, tidy=TRUE, cache=TRUE, results='asis'}
+paste0("Accuracy of Predictions = ", percent(accuracy(df = scores, actual = 'class', prediction = 'scored.class')))
+```
+
+##Classification Error Rate of Predictions 
+```{r, tidy=TRUE, cache=TRUE, results='asis'}
+paste0("Error Rate of Predictions = ", percent(errorrate(scores, "class", "scored.class")))
+```
+
+##Precisions of Predictions
+```{r, tidy=TRUE, cache=TRUE, results='asis'}
+
+```
+
+##Sensitivity of Predictions
+```{r, tidy=TRUE, cache=TRUE, results='asis'}
+
+```
+
+##Specificity of Predictions
+
+```{r, tidy=TRUE, cache=TRUE, results='asis'}
+paste0("Specificity of Predictions = ", percent(Specificity(df = scores, actual = 'class', prediction = 'scored.class')))
+```
+
+
+##F1 Score of Predictions
+
+```{r, tidy=TRUE, cache=TRUE, results='asis'}
+paste0("The F1 Score = ", f1_score(df = scores, actual = 'class', prediction = 'scored.class'))
 ```
 
 # Investigation of `caret` package. 
@@ -207,6 +263,38 @@ as.matrix(confusionMatrix(scores[,1], scores[,2]))
 
 Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. 
 
+```{r, echo = FALSE, results='asis'}
+sensitivity(table(scores[,1], scores[,2]))
+```
+
+
+```{r, echo = FALSE, results='asis'}
+specificity(table(scores[,1], scores[,2]))
+```
+
 # Investigation of the `pROC` package. 
 
 Use it to generate an ROC curve for the data set. How do the results compare with your own functions? - Senthil 
+
+# Appendix A
+
+## Session Info
+
+```{r, results='asis', echo=FALSE, eval = TRUE}
+
+toLatex(sessionInfo())
+```
+
+## Data Summary
+
+```{r, results='asis', echo=FALSE, cache=TRUE}
+library(stargazer)
+stargazer(scores, nobs = FALSE, mean.sd = TRUE, median = TRUE,
+          iqr = TRUE, header = FALSE)
+```
+
+## R source code
+
+Please see [Homework 1.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%201.Rmd) on GitHub for source code.   
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%201.Rmd. 
