@@ -1,0 +1,299 @@
+---
+title: "IS621_Assignment2"
+author: "Senthil Dhanapal"
+date: "October 6, 2016"
+output: pdf_document
+---
+
+
+```{r, echo=FALSE}
+#install.packages("evaluate")
+filePath <- "C:/Senthil/MSDataAnalytics/Semester4/621/HW2/"
+setwd(filePath)
+dfClass <- read.csv(paste(filePath,"classification-output-data.csv",sep = ""))
+dfConfusion <- dfClass
+
+dfConfusion <- dfConfusion[,c("class","scored.class")]
+dfConfusion$scored.class[which(dfConfusion$scored.class==1)] <- "Pred-One"
+dfConfusion$scored.class[which(dfConfusion$scored.class==0)] <- "Pred-Zero"
+dfConfusion$class[which(dfConfusion$class==1)] <- "Obs-One"
+dfConfusion$class[which(dfConfusion$class==0)] <- "Obs-Zero"
+
+tblConfusion <- table(dfConfusion$scored.class, dfConfusion$class) 
+
+
+
+```
+
+Confusion Matrix
+
+```{r, echo=FALSE}
+
+print(tblConfusion)
+
+
+```
+
+
+
+
+
+```{r, echo=FALSE}
+mosaicplot(tblConfusion,dir=c("h","v"),main="Confusion Matrix Plot")
+
+
+```
+
+
+```{r, echo=FALSE}
+#Supporting Functions
+
+TP <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  return(length(dfData[which(dfData[predVar]==posVal & dfData[actualVar]==posVal),1]))
+}
+
+TN <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  return(length(dfData[which(dfData[predVar]==negVal & dfData[actualVar]==negVal),1]))
+}
+
+FP <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  return(length(dfData[which(dfData[predVar]==posVal & dfData[actualVar]==negVal),1]))
+}
+
+FN <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  return(length(dfData[which(dfData[predVar]==negVal & dfData[actualVar]==posVal),1]))
+}
+
+
+Accuracy <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  tn <- TN(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  fn <- FN(dfData,predVar,actualVar,posVal,negVal)
+  
+  return ((tp + tn)/(tp + fp + tn + fn))
+  
+}
+
+ClassificationErrorRate <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  tn <- TN(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  fn <- FN(dfData,predVar,actualVar,posVal,negVal)
+  
+  return ((fp + fn)/(tp + fp + tn + fn))
+  
+}
+
+Precision <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  
+  return (tp/(tp + fp))
+  
+}
+
+Sensitivity <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  fn <- FN(dfData,predVar,actualVar,posVal,negVal)
+  
+  return (tp/(tp + fn))
+  
+}
+
+Specificity <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  tn <- TN(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  
+  return (tn/(tn + fp))
+  
+}
+
+F1Score <- function(dfData, predVar, actualVar, posVal, negVal)
+{
+  precision <- Precision(dfData,predVar,actualVar,posVal,negVal)
+  sensitivity <- Sensitivity(dfData,predVar,actualVar,posVal,negVal)
+  
+  return ((2 * precision * sensitivity)/(precision + sensitivity))
+  
+}
+
+
+ROC <- function(dfData, classVar, probVar, posVal, negVal, thresholds)
+{
+  x <- thresholds
+  dfForPlot <- data.frame(threshold=integer(), fpr=double(),tpr=double(), auc=double(), dist=double())
+  for(i in x)
+  {
+    plotCoord <- ROC.Coordinates(dfData,classVar, probVar, posVal, negVal, i)
+    #print(plotCoord)
+    dfForPlot <-  data.frame(rbind(dfForPlot,data.frame(plotCoord)))
+  }
+  plot(x=dfForPlot$fpr,y=dfForPlot$tpr,lwd=2, type="l", xlab="FPR", ylab="TPR")
+  lines(x=c(0, 1), y=c(0, 1), col="black", lwd=1)
+  return (dfForPlot)
+  
+}
+
+
+ROC.Coordinates <- function(dfData, classVar, probVar, posVal, negVal, threshold)
+{
+  pred <- rep(negVal,length(dfData[,1]))
+  dfNew <- dfData
+  pred[which(dfData[probVar]>=threshold)]  <- posVal
+  dfNew$pred <- as.factor(pred)
+  
+  sensitivity <- Sensitivity(dfData = dfNew, predVar = "pred",actualVar = classVar,posVal = posVal,negVal = negVal)
+  specificity <- Specificity(dfData = dfNew, predVar = "pred",actualVar = classVar,posVal = posVal,negVal = negVal)
+  
+  tpr <- sensitivity
+  fpr <- 1 - specificity
+  auc <- (sensitivity + specificity)/2
+  dist <- sqrt((1-tpr)^2 + (fpr)^2)
+  
+  return (data.frame(threshold,fpr,tpr,auc,dist))
+  
+}
+
+calculateAUC <- function(curveInfo)
+{
+  tpr1 <- 0
+  fpr1 <- 0
+  auc <- 0
+  curveInfo <- curveInfo[order(-curveInfo$threshold),]
+  for(i in 1:nrow(curveInfo))
+  {
+    tpr2 <- curveInfo[i,"tpr"]
+    fpr2 <- curveInfo[i,"fpr"]
+    
+    auc <- auc + ((tpr1 + tpr2)/2)*(fpr2-fpr1)
+    
+    
+    tpr1 <- tpr2
+    fpr1 <- fpr2
+  }
+  return(auc)
+}
+
+
+```
+
+
+
+5. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the precision of the predictions.
+
+
+```{r, echo=FALSE}
+predVar <- "scored.class"
+actualVar <- "class"
+posVal <- 1
+negVal <- 0
+dfData <- dfClass
+
+
+```
+
+Precision = `r Precision(dfData,predVar,actualVar,posVal,negVal)`
+
+
+6. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the sensitivity of the predictions. Sensitivity is also known as recall.
+
+Sensitivity = `r Sensitivity(dfData,predVar,actualVar,posVal,negVal)`
+
+```{r, echo=FALSE}
+
+#Sensitivity(dfData,predVar,actualVar,posVal,negVal)
+
+```
+
+10. Write a function that generates an ROC curve from a data set with a true classification column (class in our example) and a probability column (scored.probability in our example). Your function should return a list that includes the plot of the ROC curve and a vector that contains the calculated area under the curve (AUC). Note that I recommend using a sequence of thresholds ranging from 0 to 1 at 0.01 intervals.
+
+I calculated best threshold value using two methods.  
+  a) by calculating the distance of the point from (0,1).  
+  b) by calculating AUC by making a curve for threshold{t} by joining points (0,0), (X{t},Y{t}), (1,1)  
+  
+  
+  
+  
+I used two thresholds intervals - 1) .01, 2) .001  
+    
+  + 1) when cut-off interval is threshold(0,1,0.01) -> value is very close to what pROC predicts  
+
+```{r, echo=FALSE}
+classVar <- actualVar
+probVar <- "scored.probability"
+x <- seq(0,1,0.01)
+dfROC <- ROC(dfData,classVar, probVar, posVal, negVal, x)
+auc <- calculateAUC(dfROC)
+bestValueMethod1 <- dfROC[which(dfROC$dist == min(dfROC$dist)),]
+bestValueMethod2 <- dfROC[which(dfROC$auc == max(dfROC$auc)),]
+
+
+```
+
+AUC using manual calculation is `r auc`.
+
+Best Threshold value using method 1 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod1[1,1], bestValueMethod1[1,2], bestValueMethod1[1,3],
+            bestValueMethod1[1,4], bestValueMethod1[1,5]))`
+
+Best Threshold value using method 2 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod2[1,1], bestValueMethod2[1,2], bestValueMethod2[1,3],
+            bestValueMethod2[1,4], bestValueMethod2[1,5]))`  
+  
+  
+  + 2) when cut-off interval is threshold(0,1,0.001)  -> value is exact to what pROC predicts  
+
+```{r, echo=FALSE}
+classVar <- actualVar
+probVar <- "scored.probability"
+x <- seq(0,1,0.001)
+dfROC <- ROC(dfData,classVar, probVar, posVal, negVal, x)
+auc <- calculateAUC(dfROC)
+bestValueMethod1 <- dfROC[which(dfROC$dist == min(dfROC$dist)),]
+bestValueMethod2 <- dfROC[which(dfROC$auc == max(dfROC$auc)),]
+
+
+```
+
+AUC using manual calculation is `r auc`.
+
+Best Threshold value using method 1 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod1[1,1], bestValueMethod1[1,2], bestValueMethod1[1,3],
+            bestValueMethod1[1,4], bestValueMethod1[1,5]))`
+
+Best Threshold value using method 2 is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f,auc = %f,
+            dist = %f}", bestValueMethod2[1,1], bestValueMethod2[1,2], bestValueMethod2[1,3],
+            bestValueMethod2[1,4], bestValueMethod2[1,5]))`  
+  
+  
+13. Investigate the pROC package. Use it to generate an ROC curve for the data set. How do the results compare with your own functions?
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE}
+#install.packages("pROC")
+library(pROC)
+#roc(dfData$class, dfData$scored.probability,plot = TRUE)
+#plot(roc(dfData$class, dfData$scored.probability))
+roc_curve <- roc(dfData$class, dfData$scored.probability)
+plot(roc_curve)
+
+bestPROC <- coords(roc_curve, "best", ret=c("threshold", "1-specificity", "sensitivity"))
+
+
+
+```
+
+
+Best Threshold value using pROC package is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f}", 
+            bestPROC[1], bestPROC[2], bestPROC[3]))`
+
+Note: My second method (using auc) predicts better than first method (using distance from (0,1))
