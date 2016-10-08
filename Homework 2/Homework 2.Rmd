@@ -15,6 +15,8 @@ output:
 ---
 
 \begin{center}
+\topskip0pt
+\vspace*{\fill}
 \bigskip
 \bigskip
 \bigskip
@@ -33,13 +35,16 @@ Senthil Dhanapal\\
 Yadu Chittampalli\\
 \smallskip
 Christophe Hunt\\  
-
+\vspace*{\fill}
 \end{center}
+
+
+\newpage
 
 ```{r, include = FALSE}
 library(pacman)
 p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret)
-tidy.opts=list(width.cutoff=60)
+tidy.opts=list(width.cutoff = 60)
 ```
 
 
@@ -103,7 +108,6 @@ accuracy <- function(df, actual, prediction){
   return(as.numeric(accuracy))
 }
 
-accuracy(scores,"class", "scored.class" )
 ```
 
 # Function for Classification Error Rate of Predictions 
@@ -161,6 +165,16 @@ $$
 
 # Function for Specificity of Predictions 
 
+We developed a function that takes the data set as a dataframe, with actual and predicted classifications identified,
+and returns the specificity of the predictions. 
+
+Specificity is determined by the below formula:
+$$
+\begin{aligned}
+Specificity~=~\frac{True~Negative}{True~Negatives~+~False~Positives}
+\end{aligned}
+$$
+
 ```{r, echo=FALSE}
 Specificity <- function(df, actual, prediction){
   
@@ -172,7 +186,6 @@ Specificity <- function(df, actual, prediction){
   false_positive <- m$Freq[m$Var1 == 0 & m$Var2 == 1]
   return(true_negative/(true_negative + false_positive))
   }
-
 ```
 
 
@@ -199,9 +212,6 @@ f1_score <- function(df, actual, prediction){
   f1_score <- ((2 * precision * sensitivity) / (precision + sensitivity))
   return(f1_score)
   }
-
-
-
 ```
 
 
@@ -276,25 +286,24 @@ specificity(table(scores[,1], scores[,2]))
 
 Use it to generate an ROC curve for the data set. How do the results compare with your own functions? - Senthil 
 
+\newpage
+
 # Appendix A
 
 ## Session Info
 
 ```{r, results='asis', echo=FALSE, eval = TRUE}
-
 toLatex(sessionInfo())
 ```
 
-## Data Summary
+## Data Table
 
 ```{r, results='asis', echo=FALSE, cache=TRUE}
-library(stargazer)
-stargazer(scores, nobs = FALSE, mean.sd = TRUE, median = TRUE,
-          iqr = TRUE, header = FALSE)
+kable(scores, align = c("c","c","c"))
 ```
 
 ## R source code
 
-Please see [Homework 1.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%201.Rmd) on GitHub for source code.   
+Please see [Homework 2.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%202/Homework%202.Rmd) on GitHub for source code.   
 
-https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%201.Rmd. 
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%202/Homework%202.Rmd. 
