@@ -445,17 +445,17 @@ Best Threshold value using method 2 is `r (sprintf("{Threshold = %f,fpr = %f,tpr
             dist = %f}", bestValueMethod2[1,1], bestValueMethod2[1,2], bestValueMethod2[1,3],
             bestValueMethod2[1,4], bestValueMethod2[1,5]))`
 
-\clearpage  
+\pagebreak
 
-# Investigation of `caret` package   
+#Investigation of `caret` package   
 
-## confusionMatrix function   
+##confusionMatrix function   
 
 The results of the caret confusionMatrix function is below. 
 
-Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. 
+Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes.    
 
-```{r, echo = FALSE, results='asis', cache=TRUE}
+```{r, echo = FALSE, results='asis', fig.align='default'}
 library(caret)
 library(Hmisc)
 `Matrix` <- as.matrix(confusionMatrix(scores[,1], scores[,2])) 
@@ -478,17 +478,22 @@ The results of the Specificity function is below:
 paste0("Specificity provided by caret pacakge is ",specificity(table(scores[,1], scores[,2])))
 ```
 
+\pagebreak
+
 # Investigation of the `pROC` R package. 
 
 We used the `pROC` R package to generate an ROC curve for the data set. 
 
-```{r,warning=FALSE,message=FALSE, echo=FALSE, results='asis'}
+```{r, warning=FALSE, message=FALSE, echo=FALSE, results='markup'}
 
 library(pROC)
 
 roc_curve <- roc(dfData$class, dfData$scored.probability)
-plot(roc_curve)
 
+plot(roc_curve)
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, results='asis'}
 bestPROC <- coords(roc_curve, "best", ret=c("threshold", "1-specificity", "sensitivity"))
 ```
 
