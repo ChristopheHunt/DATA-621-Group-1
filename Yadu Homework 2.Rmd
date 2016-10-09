@@ -2,11 +2,11 @@
 title: "Yadu HW 2"
 author: "Yadu"
 date: "October 1, 2016"
-output: html_document
+output: pdf_document
 ---
 
 ```{r}
-classification = read.csv("classification-output-data.csv", header = T)
+classification = read.csv("classification.csv", sep = ",")
 scores = subset(classification, select = c("class", "scored.class", "scored.probability"))
 table("Actual" = scores$class, "Predicted" = scores$scored.class)
 ```
@@ -46,3 +46,19 @@ specificity(table(scores[,1], scores[,2]))
 ```
 
 Here, the accuracy is rounded up to at least 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. Sensitivity and specificity functions in the caret package take in only two inputs - predicted and actual. On the other hand, the sensitivity and specificity functions created take in 5 outputs - the entire data frame, preidicted variables, actual variables, the positive values, and negative values.   
+
+We already know that the bounds on precision and sensitivity are as follows:
+
+\[0 < p < 1 \]
+
+\[0 < s < 1 \]
+
+Both calculated quantities will always be between 0 and 1 because each of them are of the form $\frac{a}{a+b}$.
+
+The formula for the F1 score is as follows:
+
+\[F1 = \frac{2 p s}{p + s} \]
+
+When both calculated quantities are multiplied by each other, we get a value that would be less than those of both calculated quantities. Therefore the product $\ps$ would also be bounded by 0 and 1. 
+
+The denominator in the above equation or the sum of the two calculated quantities would be greater than their product. This implies that $\F1$ would most definitely be less than one and greater than 0. 
