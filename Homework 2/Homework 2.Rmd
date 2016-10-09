@@ -167,7 +167,7 @@ ClassificationErrorRate <- function(dfData, predVar, actualVar, posVal, negVal){
 
 ```
 
-We also check to ensure that the accuracy and the error rate add up to 1. Our results when adding the accuracy and error rate is `r ClassificationErrorRate(scores,'class', 'scored.class', 1, 0) + Accuracy(scores,'class', 'scored.class', 1, 0)` so we are certain our accuracy and error rate is accurate. 
+We also check to ensure that the accuracy and the error rate add up to 1. Our results when adding the accuracy and error rate is `r ClassificationErrorRate(scores,'class', 'scored.class', 1, 0) + Accuracy(scores,'class', 'scored.class', 1, 0)` so we are certain our accuracy and error rate are accurate. 
 
 # Function for Precisions of Predictions
 
