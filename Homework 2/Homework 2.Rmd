@@ -383,9 +383,6 @@ paste0("The F1 Score = ", F1Score(scores,'class', 'scored.class', 1, 0))
 
 ##ROC Function
 
-ROC curve stands for Receiver Operator Characteristic curve used to illustrate the performance of the binary classifier
-as its discrimination threshold is varied. The curve is created by plotting True Positive Rate against Falst Positive Rate at various threshold settings.
-
 We calculated best threshold value using two methods.  
 a) by calculating the distance of the point from (0,1).  
 b) by calculating AUC by making a curve for threshold{t} by joining points (0,0), (X{t},Y{t}), (1,1)  
@@ -467,7 +464,6 @@ paste0("Specificity provided by caret pacakge is ",specificity(table(scores[,1],
 
 We used the `pROC` R package to generate an ROC curve for the data set. 
 
-
 ```{r,warning=FALSE,message=FALSE, echo=FALSE, results='asis'}
 #install.packages("pROC")
 library(pROC)
@@ -482,7 +478,7 @@ bestPROC <- coords(roc_curve, "best", ret=c("threshold", "1-specificity", "sensi
 Best Threshold value using pROC package is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f}", 
             bestPROC[1], bestPROC[2], bestPROC[3]))`
 
-Our second method (using `auc`) predicts better than first method (using distance from (0,1))
+Note: The second method (using auc) predicts better than first method (using distance from (0,1))
 
 \newpage
 
