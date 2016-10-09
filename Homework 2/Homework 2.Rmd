@@ -4,6 +4,8 @@ author: "Group 1"
 date: ''
 output:
   pdf_document:
+    fig_caption: yes
+    keep_tex: yes
     includes:
       in_header: header.tex
     number_sections: yes
@@ -13,6 +15,7 @@ output:
     toc: yes
     toc_depth: '2'
 ---
+
 
 \begin{center}
 \topskip0pt
@@ -43,8 +46,9 @@ Christophe Hunt\\
 
 ```{r, include = FALSE}
 library(pacman)
-p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret, pROC, Hmisc)
+p_load(xtable, knitr, pander, xtable, scales, tidyverse, formatR, caret, pROC)
 tidy.opts = list(width.cutoff = 60)
+knitr::opts_chunk$set(fig.pos = 'H')
 ```
 
 
@@ -162,6 +166,8 @@ ClassificationErrorRate <- function(dfData, predVar, actualVar, posVal, negVal){
 
 
 ```
+
+We also check to ensure that the accuracy and the error rate add up to 1. Our results when adding the accuracy and error rate is `r ClassificationErrorRate(scores,'class', 'scored.class', 1, 0) + Accuracy(scores,'class', 'scored.class', 1, 0)` so we are certain our accuracy and error rate is accurate. 
 
 # Function for Precisions of Predictions
 
@@ -445,7 +451,7 @@ Best Threshold value using method 2 is `r (sprintf("{Threshold = %f,fpr = %f,tpr
             dist = %f}", bestValueMethod2[1,1], bestValueMethod2[1,2], bestValueMethod2[1,3],
             bestValueMethod2[1,4], bestValueMethod2[1,5]))`
 
-\pagebreak
+\clearpage
 
 #Investigation of `caret` package   
 
@@ -455,11 +461,11 @@ The results of the caret confusionMatrix function is below.
 
 Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes.    
 
-```{r, echo = FALSE, results='asis', fig.align='default'}
+```{r, echo = FALSE, results='asis'}
 library(caret)
-library(Hmisc)
+options(xtable.comment = FALSE)
 `Matrix` <- as.matrix(confusionMatrix(scores[,1], scores[,2])) 
-cat(capture.output(latex(`Matrix`, file=''))[-1], sep='\n')  
+xtable(`Matrix`)
 ```
 
 ## Sensitivity and Specificity functions
@@ -485,11 +491,8 @@ paste0("Specificity provided by caret pacakge is ",specificity(table(scores[,1],
 We used the `pROC` R package to generate an ROC curve for the data set. 
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE, results='markup'}
-
 library(pROC)
-
 roc_curve <- roc(dfData$class, dfData$scored.probability)
-
 plot(roc_curve)
 ```
 
