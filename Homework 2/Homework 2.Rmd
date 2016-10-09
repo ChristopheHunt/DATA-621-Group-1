@@ -349,6 +349,9 @@ paste0("The F1 Score = ", f1_score(df = scores, actual = 'class', prediction = '
 
 ##ROC Function
 
+ROC curve stands for Receiver Operator Characteristic curve used to illustrate the performance of the binary classifier
+as its discrimination threshold is varied. The curve is created by plotting True Positive Rate against Falst Positive Rate at various threshold settings.
+
 We calculated best threshold value using two methods.  
 a) by calculating the distance of the point from (0,1).  
 b) by calculating AUC by making a curve for threshold{t} by joining points (0,0), (X{t},Y{t}), (1,1)  
