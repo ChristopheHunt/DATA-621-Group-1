@@ -87,21 +87,22 @@ mosaicplot(t(m), main="Confusion Matrix Plot", xlab = "", ylab = "")
 
 
 ```{r , echo=FALSE}
-TruePositive <- function(df, prediction, actual, positiveValue, negativeValue){
-                return(length(df[which(df[prediction] == positiveValue & df[actual] == positiveValue),1]))
-                }
+TP <- function(dfData, predVar, actualVar, posVal, negVal){
+  return(length(dfData[which(dfData[predVar]==posVal & dfData[actualVar]==posVal),1]))
+}
 
-TrueNegative <- function(df, prediction, actual, positiveValue, negativeValue){
-                return(length(df[which(df[prediction] == negativeValue & df[actual] == negativeValue),1]))
-                }
+TN <- function(dfData, predVar, actualVar, posVal, negVal){
+  return(length(dfData[which(dfData[predVar]==negVal & dfData[actualVar]==negVal),1]))
+}
 
-FalsePositive <- function(df, prediction, actual, positiveValue, negativeValue){
-                 return(length(df[which(df[prediction] == positiveValue & df[actual] == negativeValue),1]))
-                 }
+FP <- function(dfData, predVar, actualVar, posVal, negVal){
+  return(length(dfData[which(dfData[predVar]==posVal & dfData[actualVar]==negVal),1]))
+}
 
-FalseNegative <- function(df, prediction, actual, positiveValue, negativeValue){
-                 return(length(df[which(df[prediction] == negativeValue & df[actual] == positiveValue),1]))
-                }
+FN <- function(dfData, predVar, actualVar, posVal, negVal){
+  return(length(dfData[which(dfData[predVar]==negVal & dfData[actualVar]==posVal),1]))
+}
+
 
 column_check <- function(df,actual, prediction){
                 if (sum(colnames(df) %in% c(actual, prediction)) != 2){
@@ -122,11 +123,15 @@ Accuracy~=~\frac{True~Positives~+~True~Negatives}{True~Positives~+~False~Positiv
 $$
 
 ```{r, echo = FALSE}
-Accuracy <- function(df, actual, prediction, positiveValue, negativeValue){
-  column_check(df, actual, prediction)
-  accuracy <- (TruePositive(df, actual, prediction, positiveValue, negativeValue) + 
-               TrueNegative(df, actual, prediction, positiveValue, negativeValue)) / nrow(df) 
-  return(accuracy)
+Accuracy <- function(dfData, predVar, actualVar, posVal, negVal){
+  column_check(dfData, predVar, actualVar)
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  tn <- TN(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  fn <- FN(dfData,predVar,actualVar,posVal,negVal)
+  
+  return ((tp + tn)/(tp + fp + tn + fn))
+  
 }
 
 ```
@@ -145,15 +150,16 @@ Classification~Error~Rate~=~\frac{False~Positives~+~False~Negatives}{True~Positi
 $$
 
 ```{r, echo=FALSE}
-ClassificationErrorRate <- function(df, actual, prediction, positiveValue, negativeValue){
-  column_check(df, actual, prediction)
-  error <- (FalsePositive(df, actual, prediction, positiveValue, negativeValue) + 
-            FalseNegative(df, actual, prediction, positiveValue, negativeValue)) / nrow(df)
-  if (error + Accuracy(df, actual, prediction, positiveValue, negativeValue) != 1){
-    return("Accuracy and Error Rate does not sum to 1")
-    }
-  return(error)
-}
+ClassificationErrorRate <- function(dfData, predVar, actualVar, posVal, negVal){
+  column_check(dfData, predVar, actualVar)
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  tn <- TN(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  fn <- FN(dfData,predVar,actualVar,posVal,negVal)
+  
+  return((fp + fn)/(tp + fp + tn + fn))
+  }
+
 
 ```
 
@@ -171,12 +177,14 @@ Precision~=~\frac{True~Positives}{True~Positives~+~False~Positives}
 $$
 
 ```{r, echo=FALSE}
-Precision <- function(df, actual, prediction, positiveValue, negativeValue){
-  column_check(df, actual, prediction)
-  tp <- TruePositive(df, actual, prediction, positiveValue, negativeValue)
-  fp <- FalsePositive(df, actual, prediction, positiveValue, negativeValue)
+Precision <- function(dfData, predVar, actualVar, posVal, negVal){
+  column_check(dfData, predVar, actualVar)
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  
   return(tp/(tp + fp))
- }
+  }
+
 ```
 
 
@@ -194,12 +202,13 @@ Sensitivity~=~\frac{True~Positives}{True~Positives~+~False~Negatives}
 $$
 
 ```{r, echo = FALSE}
-Sensitivity <- function(df, actual, prediction, positiveValue, negativeValue){
-  column_check(df, actual, prediction)
-  tp <- TruePositive(df, actual, prediction, positiveValue, negativeValue)
-  fn <- FalseNegative(df, actual, prediction, positiveValue, negativeValue)
+Sensitivity <- function(dfData, predVar, actualVar, posVal, negVal){
+  column_check(dfData, predVar, actualVar)
+  tp <- TP(dfData,predVar,actualVar,posVal,negVal)
+  fn <- FN(dfData,predVar,actualVar,posVal,negVal)
+  
   return(tp/(tp + fn))
-}
+  }
 ```
 
 \newpage
@@ -218,11 +227,13 @@ Specificity~=~\frac{True~Negative}{True~Negatives~+~False~Positives}
 $$
 
 ```{r, echo=FALSE}
-Specificity <- function(df, actual, prediction, positiveValue, negativeValue){
-  column_check(df, actual, prediction)
-  tn <- TrueNegative(df, actual, prediction, positiveValue, negativeValue)
-  fp <- FalsePositive(df, actual, prediction, positiveValue, negativeValue)
+Specificity <- function(dfData, predVar, actualVar, posVal, negVal){
+  column_check(dfData, predVar, actualVar)
+  tn <- TN(dfData,predVar,actualVar,posVal,negVal)
+  fp <- FP(dfData,predVar,actualVar,posVal,negVal)
+  
   return(tn/(tn + fp))
+  
 }
 ```
 
@@ -241,70 +252,93 @@ F1~Score~=~\frac{2~*Precision~*~Sensitivity}{Precision~+~Sensitivity}
 $$
 
 ```{r, echo = FALSE}
-f1_score <- function(df, actual, prediction, positiveValue, negativeValue){
-  column_check(df, actual, prediction)
-  p <- Precision(df, actual, prediction, positiveValue, negativeValue)
-  s <- Sensitivity(df, actual, prediction, positiveValue, negativeValue)
-  f1_score <- ((2 * p * s) / (p + s))
-  return(f1_score)
-  }
+F1Score <- function(dfData, predVar, actualVar, posVal, negVal){
+  precision <- Precision(dfData,predVar,actualVar,posVal,negVal)
+  sensitivity <- Sensitivity(dfData,predVar,actualVar,posVal,negVal)
+  
+  return ((2 * precision * sensitivity)/(precision + sensitivity))
+  
+}
 ```
 
 
 # Bounds of F1 Score of Predictions 
 
-Before we move on, let's consider a question that was asked: What are the bounds on the F1 score? Show
-that the F1 score will always be between 0 and 1. (Hint: If 0 < ???? < 1 and 0 < ???? < 1 then ????????- Christophe
+The bounds on precision and sensitivity are as follows:
+
+$\textnormal{[0~<~p~<~1]}$
+
+$\textnormal{[0~<~s~<~1~]}$
+
+Both calculated quantities will always be between 0 and 1 because each of them are of the form $\frac{a}{a+b}$.
+
+The formula for the F1 score is as follows:
+
+$F1~=~\frac{2~*~p~*~s}{p~+~s}$
+
+When both calculated quantities are multiplied by each other, we get a value that would be less than those of both calculated quantities. Therefore the product $p*s$ would also be bounded by 0 and 1. 
+
+The denominator in the above equation or the sum of the two calculated quantities would be greater than their product. This implies that $F1$ would most definitely be less than one and greater than 0. 
 
 # Function for ROC curve 
 
 We developed a function that generates an ROC curve from a data set with a true classification column (`class` from our data set) and a probability column (`scored.probability` from our data set). Our function returns a list that includes the plot of the ROC curve and a vector that contains the calculated area under the curve (AUC). As per Dr. Bastion's recommendation we used a sequence of thresholds ranging from 0 to 1 at 0.01 intervals.
 
-```{r, echo=FALSE, eval=FALSE}
-ROC.Coordinates <- function(df, classVar, probVar, positiveValue, negativeValue, threshold){
+```{r, echo=FALSE, eval=TRUE}
 
-                    pred <- rep(negativeValue,length(df[,1]))
-                    dfNew <- df
-                    pred[which(df[probVar]>=threshold)]  <- positiveValue
+ROC <- function(dfData, classVar, probVar, posVal, negVal, thresholds){
+        x <- thresholds
+        dfForPlot <- data.frame(threshold=integer(), fpr=double(),tpr=double(), auc=double(), dist=double())
+        for(i in x)
+        {
+          plotCoord <- ROC.Coordinates(dfData,classVar, probVar, posVal, negVal, i)
+          #print(plotCoord)
+          dfForPlot <-  data.frame(rbind(dfForPlot,data.frame(plotCoord)))
+        }
+        plot(x=dfForPlot$fpr,y=dfForPlot$tpr,lwd=2, type="l", xlab="FPR", ylab="TPR")
+        lines(x=c(0, 1), y=c(0, 1), col="black", lwd=1)
+        return (dfForPlot)
+        
+      }
+
+
+ROC.Coordinates <- function(dfData, classVar, probVar, posVal, negVal, threshold){
+                    pred <- rep(negVal,length(dfData[,1]))
+                    dfNew <- dfData
+                    pred[which(dfData[probVar]>=threshold)]  <- posVal
                     dfNew$pred <- as.factor(pred)
-
-                    sensitivity <- Sensitivity(df = dfNew, actual = classVar, prediction = "pred", positiveValue, negativeValue)
-                    specificity <- Specificity(df = dfNew, actual = classVar, prediction = "pred", positiveValue, negativeValue)
-              
-                    tpr  <- sensitivity
-                    fpr  <- (1 - specificity)
-                    auc  <- ((sensitivity + specificity) / 2)
-                    dist <- (sqrt((1 - tpr) ^ 2 + (fpr) ^ 2))
-                  
+                    
+                    sensitivity <- Sensitivity(dfData = dfNew, predVar = "pred",actualVar = classVar,posVal = posVal,negVal = negVal)
+                    specificity <- Specificity(dfData = dfNew, predVar = "pred",actualVar = classVar,posVal = posVal,negVal = negVal)
+                    
+                    tpr <- sensitivity
+                    fpr <- 1 - specificity
+                    auc <- (sensitivity + specificity)/2
+                    dist <- sqrt((1-tpr)^2 + (fpr)^2)
+                    
                     return(data.frame(threshold,fpr,tpr,auc,dist))
-                    }
-
-ROC <- function(df, classVar, probVar, positiveValue, negativeValue, thresholds){
-                x <- thresholds
-                dfForPlot <- data.frame(threshold = integer(), fpr = double(),tpr = double(), auc = double(), dist = double())
-                for (i in x){
-                  plotCoord <- ROC.Coordinates(df,classVar, probVar, positiveValue, negativeValue, i)
-                  dfForPlot <-  data.frame(rbind(dfForPlot,data.frame(plotCoord)))
-                }
-                plot(x = dfForPlot$fpr,y = dfForPlot$tpr,lwd = 2, type = "l", xlab = "FPR", ylab = "TPR")
-                lines(x = c(0, 1), y = c(0, 1), col = "black", lwd = 1)
-                return(dfForPlot)
-              }
+                    
+                  }
 
 calculateAUC <- function(curveInfo){
-                  tpr1 <- 0
-                  fpr1 <- 0
-                  auc  <- 0
-                  curveInfo <- curveInfo[order(-curveInfo$threshold),]
-                  for (i in 1:nrow(curveInfo)){     
-                    tpr2 <- curveInfo[i,"tpr"]
-                    fpr2 <- curveInfo[i,"fpr"]
-                    auc  <- auc + ((tpr1 + tpr2)/2) * (fpr2 - fpr1)
-                    tpr1 <- tpr2
-                    fpr1 <- fpr2
-                    }
-                  return(auc)
+                tpr1 <- 0
+                fpr1 <- 0
+                auc <- 0
+                curveInfo <- curveInfo[order(-curveInfo$threshold),]
+                for(i in 1:nrow(curveInfo))
+                {
+                  tpr2 <- curveInfo[i,"tpr"]
+                  fpr2 <- curveInfo[i,"fpr"]
+                  
+                  auc <- auc + ((tpr1 + tpr2)/2)*(fpr2-fpr1)
+                  
+                  
+                  tpr1 <- tpr2
+                  fpr1 <- fpr2
                 }
+                return(auc)
+              }
+
 ```
 
 \newpage
@@ -314,29 +348,29 @@ calculateAUC <- function(curveInfo){
 ##Accuracy of Predictions 
 
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Accuracy of Predictions = ", percent(Accuracy(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
+paste0("Accuracy of Predictions = ", percent(Accuracy(scores,'class', 'scored.class', 1, 0)))
 ```
 
 ##Classification Error Rate of Predictions 
 
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Error Rate of Predictions = ", percent(ClassificationErrorRate(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
+paste0("Error Rate of Predictions = ", percent(ClassificationErrorRate(scores,'class', 'scored.class', 1, 0)))
 ```
 
 ##Precisions of Predictions
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Precision of Predictions = ", percent(Precision(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
+paste0("Precision of Predictions = ", percent(Precision(scores,'class', 'scored.class', 1, 0)))
 ```
 
 ##Sensitivity of Predictions
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Sensitivity of Predictions = ", percent(Sensitivity(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
+paste0("Sensitivity of Predictions = ", percent(Sensitivity(scores,'class', 'scored.class', 1, 0)))
 ```
 
 ##Specificity of Predictions
 
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("Specificity of Predictions = ", percent(Specificity(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0)))
+paste0("Specificity of Predictions = ", percent(Specificity(scores,'class', 'scored.class', 1, 0)))
 ```
 
 \newpage
@@ -344,7 +378,7 @@ paste0("Specificity of Predictions = ", percent(Specificity(df = scores, actual 
 ##F1 Score of Predictions
 
 ```{r, tidy=TRUE, cache=TRUE, results='asis'}
-paste0("The F1 Score = ", f1_score(df = scores, actual = 'class', prediction = 'scored.class', positiveValue = 1, negativeValue = 0))
+paste0("The F1 Score = ", F1Score(scores,'class', 'scored.class', 1, 0))
 ```
 
 ##ROC Function
@@ -364,7 +398,13 @@ Two thresholds intervals were used:
 
 ```{r, echo=FALSE}
 x <- seq(0,1,0.01)
-dfROC <- ROC(dfData = scores, classVar = 'class', probVar = 'scored.probability', posVal = 1, negVal = 0, thresholds = x)
+predVar <- "scored.class"
+actualVar <- "class"
+posVal <- 1
+negVal <- 0
+dfData <- scores
+
+dfROC <- ROC(scores,'class', 'scored.class', 1, 0, x)
 auc <- calculateAUC(dfROC)
 bestValueMethod1 <- dfROC[which(dfROC$dist == min(dfROC$dist)),]
 bestValueMethod2 <- dfROC[which(dfROC$auc == max(dfROC$auc)),]
@@ -385,10 +425,11 @@ Best Threshold value using method 2 is `r (sprintf("{Threshold = %f,fpr = %f,tpr
 
 ```{r, echo=FALSE}
 x <- seq(0,1,0.001)
-dfROC <- ROC(df = scores, classVar = 'class', probVar = 'scored.probability', positiveValue = 1 , negativeValue = 0, thresholds = x)
+dfROC <- ROC(scores, 'class', 'scored.probability', 1 ,  0,  x)
 auc <- calculateAUC(dfROC)
 bestValueMethod1 <- dfROC[which(dfROC$dist == min(dfROC$dist)),]
 bestValueMethod2 <- dfROC[which(dfROC$auc == max(dfROC$auc)),]
+
 ```
 
 AUC using manual calculation is `r auc`.
@@ -412,23 +453,30 @@ as.matrix(confusionMatrix(scores[,1], scores[,2]))
 
 Here, the accuracy is rounded up to 4 decimal places. The confusion matrix has rows that represent the predicted classes and columns that represent the actual classes. 
 
+Sensitivity and specificity functions in the caret package take in only two inputs - predicted and actual. On the other hand, the sensitivity and specificity functions we created take in 5 outputs - the entire data frame, preidicted variables, actual variables, the positive values, and negative values. 
+
 ```{r, echo = FALSE, results='asis'}
-sensitivity(table(scores[,1], scores[,2]))
+paste0("Sensitivity provided by caret pacakge is ",sensitivity(table(scores[,1], scores[,2])))
 ```
 
-
 ```{r, echo = FALSE, results='asis'}
-specificity(table(scores[,1], scores[,2]))
+paste0("Specificity provided by caret pacakge is ",specificity(table(scores[,1], scores[,2])))
 ```
 
 # Investigation of the `pROC` R package. 
 
 We used the `pROC` R package to generate an ROC curve for the data set. 
 
+
 ```{r,warning=FALSE,message=FALSE, echo=FALSE, results='asis'}
-roc_curve <- roc(scores$class, scores$scored.probability)
+#install.packages("pROC")
+library(pROC)
+#roc(dfData$class, dfData$scored.probability,plot = TRUE)
+#plot(roc(dfData$class, dfData$scored.probability))
+roc_curve <- roc(dfData$class, dfData$scored.probability)
 plot(roc_curve)
-bestPROC <- coords(roc_curve, "best", ret = c("threshold", "1-specificity", "sensitivity"))
+
+bestPROC <- coords(roc_curve, "best", ret=c("threshold", "1-specificity", "sensitivity"))
 ```
 
 Best Threshold value using pROC package is `r (sprintf("{Threshold = %f,fpr = %f,tpr = %f}", 
