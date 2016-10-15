@@ -44,11 +44,9 @@ p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr,
 ```
 
 ```{r, include=FALSE, cache=TRUE}
-#TODO - Get working when I have internet access 
-#download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW1 - Group 1.xlsx", mode = 'wb')
-setwd(file.path("C:","Users", "Christophe","Documents", "Github", "Data 621 - Group 1", "Homework 3"))
-data_dictionary <- read.xlsx("Data Dictionary.xlsx", sheetIndex = 1)
-#TODO - update when I get internet access file.remove(dir(getwd(), pattern = "Data Dictionary", full.names = TRUE))
+download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%203/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW3 - Group 1.xlsx", mode = 'wb')
+data_dictionary <- read.xlsx("Data Dictionary HW3 - Group 1.xlsx", sheetIndex = 1)
+file.remove(dir(getwd(), pattern = "Data Dictionary HW3 - Group 1", full.names = TRUE))
 ```
 \newpage
 
@@ -59,16 +57,12 @@ data_dictionary <- read.xlsx("Data Dictionary.xlsx", sheetIndex = 1)
 # Data Exploration  
 
 ```{r, echo=FALSE, results='asis', cache=TRUE}
-
-#TODO - Get this working when I have internet access 
-#df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/Homework 3/crime-evaluation-data.csv")
-
-df <- read.csv(file.path("C:","Users", "Christophe","Documents", "Github", "Data 621 - Group 1", "Homework 3","crime-training-data.csv"))
+df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
   
 #colnames(df) <- mapvalues(as.vector(colnames(df)), from = str_trim(data_dictionary$VARIABLE.NAME), to = as.vector(str_trim(data_dictionary$DEFINITION)))
 
 digits <- c(1) 
-#test <- df %>% mutate_each(funs(as.character))
+
 descriptive <- describe( df %>% select(-target) # TODO figure out why rad has a wierd frequency table
                         , descript = "Table 1 : Descriptive Statistics", digits = digits)
 latex(descriptive, file = '')
