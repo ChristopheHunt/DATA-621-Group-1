@@ -1,0 +1,101 @@
+---
+title: "Homework 3"
+author: "Group 1"
+date: ''
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+\begin{center}
+\bigskip
+\bigskip
+\bigskip
+Prepared for:\\
+\medskip
+Dr. Nathan Bastian\\
+\smallskip
+City University of New York, School of Professional Studies - Data 621\\
+\bigskip
+Prepared by:\\
+\medskip
+Group 1\\ 
+\medskip
+Senthil Dhanapal\\ 
+\smallskip
+Yadu Chittampalli\\
+\smallskip
+Christophe Hunt\\  
+
+\end{center}
+
+```{r, include = FALSE}
+library(pacman)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr, 
+       stringr, e1071, corrplot, knitcitations, bibtex, missForest,
+       foreach, doParallel, stargazer, forecast)
+```
+
+```{r, include=FALSE, cache=TRUE}
+#TODO - Get working when I have internet access 
+#download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW1 - Group 1.xlsx", mode = 'wb')
+setwd(file.path("C:","Users", "Christophe","Documents", "Github", "Data 621 - Group 1", "Homework 3"))
+data_dictionary <- read.xlsx("Data Dictionary.xlsx", sheetIndex = 1)
+#TODO - update when I get internet access file.remove(dir(getwd(), pattern = "Data Dictionary", full.names = TRUE))
+```
+\newpage
+
+# Introduction
+
+# Statement of the Problem
+
+# Data Exploration  
+
+```{r, echo=FALSE, results='asis', cache=TRUE}
+
+#TODO - Get this working when I have internet access 
+#df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/Homework 3/crime-evaluation-data.csv")
+
+df <- read.csv(file.path("C:","Users", "Christophe","Documents", "Github", "Data 621 - Group 1", "Homework 3","crime-training-data.csv"))
+  
+#colnames(df) <- mapvalues(as.vector(colnames(df)), from = str_trim(data_dictionary$VARIABLE.NAME), to = as.vector(str_trim(data_dictionary$DEFINITION)))
+
+digits <- c(1) 
+#test <- df %>% mutate_each(funs(as.character))
+descriptive <- describe( df %>% select(-target) # TODO figure out why rad has a wierd frequency table
+                        , descript = "Table 1 : Descriptive Statistics", digits = digits)
+latex(descriptive, file = '')
+```
+
+```{r, eval=FALSE, echo = FALSE}
+#TODO figure out why this is not working anymore 
+for (i in seq(1:length(descriptive))){ 
+                     for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
+                                         }
+     descriptive[[i]]$counts <- (descriptive[[i]]$counts[-c(4,7,8:10,11)])
+     
+     descriptive[[i]]$counts[7] <- round(sapply(df[i + 1], function(x) median(x, na.rm = TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[7] <- "Median"
+     
+     descriptive[[i]]$counts[8] <- round(sapply(df[i + 1], function(x) sd(x, na.rm = TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[8] <- "SD"
+     
+     descriptive[[i]]$counts[9] <- round(sapply(df[i + 1], function(x) skewness(x, na.rm = TRUE)), digits = digits)
+     names(descriptive[[i]]$counts)[9] <- "Skew"
+     
+     descriptive[[i]]$counts <- (descriptive[[i]]$counts[c(1:4,7:9,5:6)]) #reorder 
+}
+```
+
+```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, cache=TRUE}
+df_m <- as.matrix(df)
+cor_matrix <- cor(df_m, use = "everything",  method = c("pearson"))
+corrplot(cor_matrix, order = "hclust", addrect = 2, method="square", tl.col = "black", tl.cex = .5, na.label = " ")
+```
