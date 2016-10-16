@@ -45,7 +45,7 @@ p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr,
 
 ```{r, include=FALSE, cache=TRUE}
 download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%203/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW3 - Group 1.xlsx", mode = 'wb')
-data_dictionary <- read.xlsx("Data Dictionary HW3 - Group 1.xlsx", sheetIndex = 1)
+daDict <- read.xlsx("Data Dictionary HW3 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW3 - Group 1", full.names = TRUE))
 ```
 \newpage
@@ -56,14 +56,23 @@ file.remove(dir(getwd(), pattern = "Data Dictionary HW3 - Group 1", full.names =
 
 # Data Exploration  
 
+```{r programming style guide, echo=FALSE, eval=FALSE}
+##Style guide
+##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
+##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
+##lower case for scalar/single value, ex. x <- 1
+##data frame start with df followed by description, ex. dfEval <- evaluation data frame
+##assignments use "<-" not "="
+```
+
 ```{r, echo=FALSE, results='asis', cache=TRUE}
-df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
   
-#colnames(df) <- mapvalues(as.vector(colnames(df)), from = str_trim(data_dictionary$VARIABLE.NAME), to = as.vector(str_trim(data_dictionary$DEFINITION)))
+#colnames(dfTr) <- mapvalues(as.vector(colnames(dfTr)), from = str_trim(data_dictionary$VARIABLE.NAME), to = as.vector(str_trim(data_dictionary$DEFINITION)))
 
 digits <- c(1) 
 
-descriptive <- describe( df %>% select(-target) # TODO figure out why rad has a wierd frequency table
+descriptive <- describe( dfTr %>% select(-target) # TODO figure out why rad has a wierd frequency table
                         , descript = "Table 1 : Descriptive Statistics", digits = digits)
 latex(descriptive, file = '')
 ```
@@ -75,13 +84,13 @@ for (i in seq(1:length(descriptive))){
                                          }
      descriptive[[i]]$counts <- (descriptive[[i]]$counts[-c(4,7,8:10,11)])
      
-     descriptive[[i]]$counts[7] <- round(sapply(df[i + 1], function(x) median(x, na.rm = TRUE)), digits = digits)
+     descriptive[[i]]$counts[7] <- round(sapply(dfTr[i + 1], function(x) median(x, na.rm = TRUE)), digits = digits)
      names(descriptive[[i]]$counts)[7] <- "Median"
      
-     descriptive[[i]]$counts[8] <- round(sapply(df[i + 1], function(x) sd(x, na.rm = TRUE)), digits = digits)
+     descriptive[[i]]$counts[8] <- round(sapply(dfTr[i + 1], function(x) sd(x, na.rm = TRUE)), digits = digits)
      names(descriptive[[i]]$counts)[8] <- "SD"
      
-     descriptive[[i]]$counts[9] <- round(sapply(df[i + 1], function(x) skewness(x, na.rm = TRUE)), digits = digits)
+     descriptive[[i]]$counts[9] <- round(sapply(dfTr[i + 1], function(x) skewness(x, na.rm = TRUE)), digits = digits)
      names(descriptive[[i]]$counts)[9] <- "Skew"
      
      descriptive[[i]]$counts <- (descriptive[[i]]$counts[c(1:4,7:9,5:6)]) #reorder 
@@ -89,7 +98,7 @@ for (i in seq(1:length(descriptive))){
 ```
 
 ```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, cache=TRUE}
-df_m <- as.matrix(df)
-cor_matrix <- cor(df_m, use = "everything",  method = c("pearson"))
-corrplot(cor_matrix, order = "hclust", addrect = 2, method="square", tl.col = "black", tl.cex = .5, na.label = " ")
+dfTrMx <- as.matrix(dfTr)
+corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
+corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .5, na.label = " ")
 ```
