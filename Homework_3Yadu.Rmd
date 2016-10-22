@@ -1,0 +1,69 @@
+---
+title: "Untitled"
+author: "Yadu"
+date: "October 16, 2016"
+output: html_document
+---
+
+```{r}
+crimes = read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+
+  return(x)  
+
+}
+```
+
+```{r}
+library(forecast)
+winsorizedandtransformed = function(dataset){
+  dataset = dataset[,1:ncol(dataset)]
+  wdataset = tdataset = matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  l1 = numeric(ncol(dataset))
+  for (i in 1:length(l1)){
+    if(i == 3 || i == length(l1)){
+      wdataset[,i] = dataset[,i]
+      tdataset[,i] = wdataset[,i]
+    }
+    else {
+    wdataset[,i] = winsorize(dataset[,i], multiple = 2.2)
+    l1[i] = BoxCox.lambda(wdataset[,i])
+    tdataset[,i] = BoxCox(wdataset[,i],l1[i])
+    }
+    colnames(tdataset) = colnames(dataset)
+  }
+  return(data.frame(tdataset))
+}
+wtcrimes = winsorizedandtransformed(crimes)
+```
+
+```{r}
+fullModel = lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtcrimes))
+fit = glm(step(fullModel, direction = "backward", trace = F))
+summary(fit)
+```
+
+DATA EXPLORATION
+
+The skewness of each input variable is shown below. The two variables with the strongest skew are the proportion of residential land zoned for large lots and the proportion of blacks by town. Respectively the magnitudes of the skewness of these two variables are 2.18 and 2.92. This indicates that the distributions for these two variables are far from symmetrical. The skewness of the dummy variable (whether the suburb borders the river or not) can be neglected because it is a binary variable. All of the other variables skewnesses that are approximately of magnitude 1 or less. This indicates that the distributions for those variables can be considered symmetric even though for three of the variables (concentration of nitrogen oxides, index of accessibility to radial highways, and median value of owner-occupied homes) are multimodal.
+
+According to the standard deviations of each variable, the variable that has the highest difference from the mean is tax. 
+
+Histograms of all of the variables have been plotted below so that distribution can be visualized. 
+
+```{r}
+library(matrixStats)
+abs(skewness(crimes))
+data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crimes))))
+```
+
