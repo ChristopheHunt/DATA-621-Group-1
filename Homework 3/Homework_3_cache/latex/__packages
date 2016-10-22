@@ -30,3 +30,9 @@ stargazer
 zoo
 timeDate
 forecast
+glmulti
+tidyverse
+tibble
+readr
+purrr
+matrixStats

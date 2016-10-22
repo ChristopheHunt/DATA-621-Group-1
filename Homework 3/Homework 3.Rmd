@@ -14,6 +14,22 @@ output:
     toc_depth: '2'
 ---
 
+```{r programming style guide, echo=FALSE, eval=FALSE}
+##Style guide
+##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
+##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
+##lower case for scalar/single value, ex. x <- 1
+##data frame start with df followed by description, ex. dfEval <- evaluation data frame
+##assignments use "<-" not "="
+```
+
+```{r, include = FALSE}
+library(pacman)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
+       stringr, e1071, corrplot, knitcitations, bibtex, missForest,
+       foreach, doParallel, stargazer, forecast)
+```
+
 \begin{center}
 \bigskip
 \bigskip
@@ -36,38 +52,58 @@ Christophe Hunt\\
 
 \end{center}
 
-```{r, include = FALSE}
-library(pacman)
-p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyr, plyr, dplyr, 
-       stringr, e1071, corrplot, knitcitations, bibtex, missForest,
-       foreach, doParallel, stargazer, forecast)
-```
-
 ```{r, include=FALSE, cache=TRUE}
 download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%203/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW3 - Group 1.xlsx", mode = 'wb')
 daDict <- read.xlsx("Data Dictionary HW3 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW3 - Group 1", full.names = TRUE))
 ```
+
 \newpage
 
 # Introduction
 
+Crime has a high cost to all parts of society and it can have severe long term impact on neighborhoods. If crime rises in the neighborhood or it is invaded by criminals, then families and those with the economic means to leave for more stable areas will do so[^1]. Additionally, crime can even have a health cost to the community in that the perception of a dangerous neighborhood was associated with significantly lower odds of having high physical activity among both men and women[^2]. It is important to understand the propensity for crime levels of a neighborhood before investing in that neighborhood. 
+
+[^1]: Effect of Crime on Real Estate Values. (1952). The Journal of Criminal Law, Criminology, and Police Science, 43(3), 357-357. Retrieved from http://www.jstor.org.remote.baruch.cuny.edu/stable/1139159
+
+[^2]: Bennett GG, McNeill LH, Wolin KY, Duncan DT, Puleo E, Emmons KM (2007) [Safe To Walk? Neighborhood Safety and Physical Activity Among Public Housing Residents.](http://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0040306) PLoS Med 4(10): e306. doi:10.1371/journal.pmed.0040306
+
 # Statement of the Problem
+
+The purpose of this report is to develop a statisical model to determine the variables that are independently associated with neighborhoods with crime rates above or below the median. Note that neighborhoods with crime rates above or below the median have been provided in our evaluation data set.
 
 # Data Exploration  
 
-```{r programming style guide, echo=FALSE, eval=FALSE}
-##Style guide
-##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
-##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
-##lower case for scalar/single value, ex. x <- 1
-##data frame start with df followed by description, ex. dfEval <- evaluation data frame
-##assignments use "<-" not "="
+## Variables Explained
+
+The variables provided in our evaluation data set our explained below:
+
+```{r, eval=TRUE, results='asis', echo=FALSE}
+kable(daDict %>% 
+      filter(VARIABLE.TYPE == "Predictor Variable") %>%
+      mutate(`Variable Abbreviation` = VARIABLE.NAME, `Variable Definition` = DEFINITION)  %>%
+      select(`Variable Abbreviation`, `Variable Definition` ),
+      align = c("c","l"))
 ```
+
+## Exploration of Variables
+
+The skewness of each input variable is shown below. The two variables with the strongest skew are the proportion of residential land zoned for large lots and the proportion of blacks by town. Respectively the magnitudes of the skewness of these two variables are 2.18 and 2.92. This indicates that the distributions for these two variables are far from symmetrical. The skewness of the dummy variable (whether the suburb borders the river or not) can be neglected because it is a binary variable. All of the other variables skewnesses that are approximately of magnitude 1 or less. This indicates that the distributions for those variables can be considered symmetric even though for three of the variables (concentration of nitrogen oxides, index of accessibility to radial highways, and median value of owner-occupied homes) are multimodal.
+
+According to the standard deviations of each variable, the variable that has the highest difference from the mean is tax. 
+
+```{r, echo=FALSE}
+library(matrixStats)
+crimes <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+abs(skewness(crimes))
+data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crimes))))
+```
+
+Histograms of all of the variables have been plotted below so that distribution can be visualized. 
 
 ```{r, echo=FALSE, results='asis', cache=TRUE}
 dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
-  
+
 #colnames(dfTr) <- mapvalues(as.vector(colnames(dfTr)), from = str_trim(data_dictionary$VARIABLE.NAME), to = as.vector(str_trim(data_dictionary$DEFINITION)))
 
 digits <- c(1) 
@@ -77,28 +113,90 @@ descriptive <- describe( dfTr %>% select(-target) # TODO figure out why rad has 
 latex(descriptive, file = '')
 ```
 
-```{r, eval=FALSE, echo = FALSE}
-#TODO figure out why this is not working anymore 
-for (i in seq(1:length(descriptive))){ 
-                     for (j in c(6,9,12)){names(descriptive[[i]]$counts)[j] <- paste0(names(descriptive[[i]]$counts)[j]," freq")
-                                         }
-     descriptive[[i]]$counts <- (descriptive[[i]]$counts[-c(4,7,8:10,11)])
-     
-     descriptive[[i]]$counts[7] <- round(sapply(dfTr[i + 1], function(x) median(x, na.rm = TRUE)), digits = digits)
-     names(descriptive[[i]]$counts)[7] <- "Median"
-     
-     descriptive[[i]]$counts[8] <- round(sapply(dfTr[i + 1], function(x) sd(x, na.rm = TRUE)), digits = digits)
-     names(descriptive[[i]]$counts)[8] <- "SD"
-     
-     descriptive[[i]]$counts[9] <- round(sapply(dfTr[i + 1], function(x) skewness(x, na.rm = TRUE)), digits = digits)
-     names(descriptive[[i]]$counts)[9] <- "Skew"
-     
-     descriptive[[i]]$counts <- (descriptive[[i]]$counts[c(1:4,7:9,5:6)]) #reorder 
-}
-```
+## Correlation Matrix 
+
+We implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and as expected, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR).  
 
 ```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, cache=TRUE}
 dfTrMx <- as.matrix(dfTr)
 corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
 corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .5, na.label = " ")
+```
+
+## Outliers Treatment
+
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^3].  
+
+[^3]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+
+The below table is the summary results of the winsorizing of the data. 
+
+```{r, winsorize function, echo=FALSE}
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+
+  return(x)  
+
+}
+```
+
+```{r, echo=FALSE, results='asis'}
+library(forecast)
+winsorizedandtransformed <- function(dataset){
+  dataset <- dataset[,1:ncol(dataset)]
+  wdataset <- tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  l1 <- numeric(ncol(dataset))
+  for (i in 1:length(l1)){
+    if(i == 3 || i == length(l1)){
+      wdataset[,i] <- dataset[,i]
+      tdataset[,i] <- wdataset[,i]
+    }
+    else {
+    wdataset[,i] <- winsorize(dataset[,i], multiple = 2.2)
+    l1[i] <- BoxCox.lambda(wdataset[,i])
+    tdataset[,i] <- BoxCox(wdataset[,i],l1[i])
+    }
+    colnames(tdataset) <- colnames(dataset)
+  }
+  return(data.frame(tdataset))
+}
+
+wtCrimes <- winsorizedandtransformed(crimes)
+stargazer(wtCrimes, header = FALSE)
+```
+
+# Models Built
+
+## Model 1 - Backwards Selection Method
+
+```{r}
+fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtCrimes))
+fit <- glm(step(fullModel, direction = "backward", trace = F))
+summary(fit)
+```
+
+## Model 2 - Forwards Selection Method
+
+## Model 3 - Subset Selection Method
+
+```{r, stepwise variable selection, eval=TRUE,  cache=TRUE}
+library(glmulti)
+library(stargazer)
+glmultiLogisticOut <-
+    glmulti(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv ,                data = dfTr, level = 1, method = "h", crit = "aicc", confsetsize = 200,  plotty = T, report = T, maxit=50, fitfunction = "glm", family = binomial)     
+
+glmultiLogisticOut@formulas
+x <- summary(glmultiLogisticOut@objects[[1]])
+x
+
+
 ```
