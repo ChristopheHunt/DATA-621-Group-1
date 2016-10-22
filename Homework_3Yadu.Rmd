@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r}
-crimes = read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+crimes <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
 winsorize <- function(x, multiple=2.2)
 {
   q <- quantile(x)
@@ -26,30 +26,30 @@ winsorize <- function(x, multiple=2.2)
 
 ```{r}
 library(forecast)
-winsorizedandtransformed = function(dataset){
-  dataset = dataset[,1:ncol(dataset)]
-  wdataset = tdataset = matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
-  l1 = numeric(ncol(dataset))
+winsorizedandtransformed <- function(dataset){
+  dataset <- dataset[,1:ncol(dataset)]
+  wdataset <- tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  l1 <- numeric(ncol(dataset))
   for (i in 1:length(l1)){
     if(i == 3 || i == length(l1)){
-      wdataset[,i] = dataset[,i]
-      tdataset[,i] = wdataset[,i]
+      wdataset[,i] <- dataset[,i]
+      tdataset[,i] <- wdataset[,i]
     }
     else {
-    wdataset[,i] = winsorize(dataset[,i], multiple = 2.2)
-    l1[i] = BoxCox.lambda(wdataset[,i])
-    tdataset[,i] = BoxCox(wdataset[,i],l1[i])
+    wdataset[,i] <- winsorize(dataset[,i], multiple = 2.2)
+    l1[i] <- BoxCox.lambda(wdataset[,i])
+    tdataset[,i] <- BoxCox(wdataset[,i],l1[i])
     }
-    colnames(tdataset) = colnames(dataset)
+    colnames(tdataset) <- colnames(dataset)
   }
   return(data.frame(tdataset))
 }
-wtcrimes = winsorizedandtransformed(crimes)
+wtcrimes <- winsorizedandtransformed(crimes)
 ```
 
 ```{r}
-fullModel = lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtcrimes))
-fit = glm(step(fullModel, direction = "backward", trace = F))
+fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtcrimes))
+fit <- glm(step(fullModel, direction = "backward", trace = F))
 summary(fit)
 ```
 
