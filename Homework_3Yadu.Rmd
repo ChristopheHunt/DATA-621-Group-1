@@ -42,28 +42,33 @@ winsorizedandtransformed <- function(dataset){
     }
     colnames(tdataset) <- colnames(dataset)
   }
-  return(data.frame(tdataset))
+  return(list(data.frame(tdataset), data.frame(l1, variables = colnames(tdataset))))
 }
-wtcrimes <- winsorizedandtransformed(crimes)
+lambdas <- winsorizedandtransformed(crimes)[[2]]
+wtcrimes <- winsorizedandtransformed(crimes)[[1]]
 ```
 
 ```{r}
-fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtcrimes))
+fullModel <- lm(target ~ zn + indus + nox + rm + age + dis + tax + ptratio + black + lstat + medv, data = na.omit(wtcrimes))
 fit <- glm(step(fullModel, direction = "backward", trace = F))
 summary(fit)
+#210.53
 ```
+
+In the backward selection method, the AIC turns out to be 230.43. All of the variables are eliminated except the concentration of nitrogen oxides, age of the owner-occupied units, weighted mean of distances to five boston employment centers, full-value property tax rate per $10,000, pupil-teacher ratio by town, proportion of blacks by town, and median value of owner-occupied homes.
 
 DATA EXPLORATION
 
 The skewness of each input variable is shown below. The two variables with the strongest skew are the proportion of residential land zoned for large lots and the proportion of blacks by town. Respectively the magnitudes of the skewness of these two variables are 2.18 and 2.92. This indicates that the distributions for these two variables are far from symmetrical. The skewness of the dummy variable (whether the suburb borders the river or not) can be neglected because it is a binary variable. All of the other variables skewnesses that are approximately of magnitude 1 or less. This indicates that the distributions for those variables can be considered symmetric even though for three of the variables (concentration of nitrogen oxides, index of accessibility to radial highways, and median value of owner-occupied homes) are multimodal.
 
-According to the standard deviations of each variable, the variable that has the highest difference from the mean is tax. 
+According to the standard deviations of each variable, the variable that has the highest spread from the mean is tax. 
 
 Histograms of all of the variables have been plotted below so that distribution can be visualized. 
 
 ```{r}
 library(matrixStats)
-abs(skewness(crimes))
+skew = data.frame(abs(skewness(crimes)))
+colnames(skew) = c("variable", "skewness")
 data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crimes))))
 ```
 
