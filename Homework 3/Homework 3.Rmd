@@ -27,11 +27,7 @@ output:
 library(pacman)
 p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
        stringr, e1071, corrplot, knitcitations, bibtex, missForest,
-<<<<<<< HEAD
-       foreach, doParallel, stargazer, forecast)
-=======
        foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps)
->>>>>>> update
 ```
 
 \begin{center}
@@ -207,6 +203,4 @@ glmultiLogisticOut <-
 glmultiLogisticOut@formulas
 x <- summary(glmultiLogisticOut@objects[[1]])
 x
-
-
 ```
