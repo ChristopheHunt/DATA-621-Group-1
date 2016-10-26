@@ -26,7 +26,7 @@ output:
 ```{r, include = FALSE}
 library(pacman)
 p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
-       stringr, e1071, corrplot, knitcitations, bibtex, missForest,
+       stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc,
        foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps)
 ```
 
