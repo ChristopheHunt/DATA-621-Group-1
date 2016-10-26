@@ -81,8 +81,8 @@ The variables provided in our evaluation data set our explained below:
 ```{r, eval=TRUE, results='asis', echo=FALSE}
 kable(daDict %>% 
       filter(VARIABLE.TYPE == "Predictor Variable") %>%
-      mutate(`Variable Abbreviation` = VARIABLE.NAME, `Variable Definition` = DEFINITION)  %>%
-      select(`Variable Abbreviation`, `Variable Definition` ),
+      mutate(Abbreviation = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(Abbreviation, Definition),
       align = c("c","l"))
 ```
 
@@ -108,7 +108,7 @@ dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Grou
 
 digits <- c(1) 
 
-descriptive <- describe( dfTr %>% select(-target) # TODO figure out why rad has a wierd frequency table
+descriptive <- describe( dfTr %>% dplyr::select(-target) # TODO figure out why rad has a wierd frequency table
                         , descript = "Table 1 : Descriptive Statistics", digits = digits)
 latex(descriptive, file = '')
 ```
@@ -189,8 +189,10 @@ summary(fit)
 ## Model 3 - Subset Selection Method
 
 ```{r, subset, eval=TRUE, cache=TRUE, results = 'asis'}
-x <- regsubsets(target ~ ., data = dfTr, nbest = 2)
-summary(x)
+subsetModel <- regsubsets(target ~ ., data = dfTr, nbest = 1)
+summary(subsetModel, matrix.logical = TRUE)
+plot(subsetModel)
+glm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv,family = binomial, data = dfTr)
 ```
 
 
