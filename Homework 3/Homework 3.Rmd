@@ -27,7 +27,11 @@ output:
 library(pacman)
 p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
        stringr, e1071, corrplot, knitcitations, bibtex, missForest,
+<<<<<<< HEAD
        foreach, doParallel, stargazer, forecast)
+=======
+       foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps)
+>>>>>>> update
 ```
 
 \begin{center}
@@ -187,6 +191,12 @@ summary(fit)
 ## Model 2 - Forwards Selection Method
 
 ## Model 3 - Subset Selection Method
+
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis'}
+x <- regsubsets(target ~ ., data = dfTr, nbest = 2)
+summary(x)
+```
+
 
 ```{r, stepwise variable selection, eval=TRUE,  cache=TRUE}
 library(glmulti)

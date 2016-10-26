@@ -31,8 +31,12 @@ zoo
 timeDate
 forecast
 glmulti
+<<<<<<< HEAD
 tidyverse
 tibble
 readr
 purrr
 matrixStats
+=======
+leaps
+>>>>>>> update
