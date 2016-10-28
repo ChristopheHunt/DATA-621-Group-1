@@ -178,21 +178,27 @@ stargazer(wtCrimes, header = FALSE)
 
 ## Model 1 - Backwards Selection Method
 
-```{r}
+```{r, echo=FALSE, results='asis'}
 fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtCrimes))
 fit <- glm(step(fullModel, direction = "backward", trace = F))
-summary(fit)
+stargazer(fit, header = FALSE)
 ```
 
 ## Model 2 - Forwards Selection Method
 
 ## Model 3 - Subset Selection Method
 
-```{r, subset, eval=TRUE, cache=TRUE, results = 'asis'}
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. Our final model using this method is `8` which we will further implement into our model. 
+
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
 subsetModel <- regsubsets(target ~ ., data = dfTr, nbest = 1)
-summary(subsetModel, matrix.logical = TRUE)
-plot(subsetModel)
-glm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv,family = binomial, data = dfTr)
+summary <- summary(subsetModel)
+kable(summary$outmat)
+```
+
+```{r, model from subset, eval=TRUE, cache=TRUE, results = 'asis'}
+subsetModel <- glm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv, family = binomial, data = dfTr)
+stargazer(subsetModel, header = FALSE)
 ```
 
 
