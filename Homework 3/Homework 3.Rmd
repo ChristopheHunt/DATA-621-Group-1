@@ -27,7 +27,7 @@ output:
 library(pacman)
 p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
        stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc,
-       foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table)
+       foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight)
 ```
 
 \begin{center}
@@ -196,35 +196,44 @@ wtCrimes <- winsorizedandtransformed(crimes)
 stargazer(wtCrimes, header = FALSE)
 ```
 
+\newpage
+
 # Models Built
 
 ## Model 1 - Backwards Selection Method
 
-```{r, echo=FALSE, results='asis'}
+
+```{r, echo=FALSE, results='asis', size="small"}
 fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtCrimes))
 fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
 ```
 
+
+\newpage
+
 ## Model 2 - Forwards Selection Method
+
+\newpage
 
 ## Model 3 - Subset Selection Method
 
-Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. Our final model using this method is `8` which we will further implement into our model. 
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. Our final model using this method is line `8` which we will further implement into our subset selection model. 
 
-```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE,  size="small"}
 subsetModel <- regsubsets(target ~ ., data = dfTr, nbest = 1)
 summary <- summary(subsetModel)
 kable(summary$outmat)
 ```
 
-```{r, model from subset, eval=TRUE, cache=TRUE, results = 'asis'}
+
+```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE,size='small', results = 'asis'}
 subsetModel <- glm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv, family = binomial, data = dfTr)
 stargazer(subsetModel, header = FALSE)
 ```
 
 
-```{r, stepwise variable selection, eval=TRUE,  cache=TRUE}
+```{r, stepwise variable selection, eval=FALSE,  cache=TRUE, echo=FALSE}
 library(glmulti)
 library(stargazer)
 glmultiLogisticOut <-
