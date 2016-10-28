@@ -26,33 +26,43 @@ winsorize <- function(x, multiple=2.2)
 
 ```{r}
 library(forecast)
-winsorizedandtransformed <- function(dataset){
+winsorizedDataset <- function(dataset){
   dataset <- dataset[,1:ncol(dataset)]
-  wdataset <- tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
-  l1 <- numeric(ncol(dataset))
-  for (i in 1:length(l1)){
-    if(i == 3 || i == length(l1)){
+  wdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  #l1 <- numeric(ncol(dataset))
+  for (i in 1:ncol(dataset)){
+    if(i == 3 || i == ncol(dataset)){
       wdataset[,i] <- dataset[,i]
-      tdataset[,i] <- wdataset[,i]
     }
     else {
     wdataset[,i] <- winsorize(dataset[,i], multiple = 2.2)
-    l1[i] <- BoxCox.lambda(wdataset[,i])
-    tdataset[,i] <- BoxCox(wdataset[,i],l1[i])
+    #l1[i] <- BoxCox.lambda(wdataset[,i])
     }
-    colnames(tdataset) <- colnames(dataset)
+    colnames(wdataset) <- colnames(dataset)
   }
-  return(list(data.frame(tdataset), data.frame(l1, variables = colnames(tdataset))))
+  return(data.frame(wdataset))
 }
-lambdas <- winsorizedandtransformed(crimes)[[2]]
-wtcrimes <- winsorizedandtransformed(crimes)[[1]]
+#lambdas <- winsorizedandtransformed(crimes)[[2]]
+#wtcrimes <- winsorizedandtransformed(crimes)[[1]]
+wcrimes = winsorizedDataset(crimes)
 ```
 
 ```{r}
-fullModel <- lm(target ~ zn + indus + nox + rm + age + dis + tax + ptratio + black + lstat + medv, data = na.omit(wtcrimes))
-fit <- glm(step(fullModel, direction = "backward", trace = F))
+boxcoxLambdas <- function(dataset){
+  dataset <- dataset[,1:ncol(dataset)]
+  #tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  l1 <- numeric(ncol(dataset))
+  for (i in 1:ncol(dataset)){
+    l1[i] <- BoxCox.lambda(dataset[,i])
+  }
+  return(data.frame(l1, colnames(dataset)))
+}
+```
+
+```{r}
+fullModel <- lm(target ~ zn + indus + rad + nox + rm + age + dis + tax + ptratio + black + lstat + medv, data = na.omit(wcrimes))
+fit <- glm(step(fullModel, direction = "backward", trace = F, family = binomial))
 summary(fit)
-#210.53
 ```
 
 In the backward selection method, the AIC turns out to be 230.43. All of the variables are eliminated except the concentration of nitrogen oxides, age of the owner-occupied units, weighted mean of distances to five boston employment centers, full-value property tax rate per $10,000, pupil-teacher ratio by town, proportion of blacks by town, and median value of owner-occupied homes.
