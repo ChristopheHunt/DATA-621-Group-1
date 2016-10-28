@@ -27,7 +27,7 @@ output:
 library(pacman)
 p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
        stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc,
-       foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight)
+       foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car)
 ```
 
 \begin{center}
@@ -70,7 +70,7 @@ Crime has a high cost to all parts of society and it can have severe long term i
 
 # Statement of the Problem
 
-The purpose of this report is to develop a statistical model to determine the variables that are independently associated with neighborhoods with crime rates above or below the median. Note that neighborhoods with crime rates above or below the median have been provided in our evaluation data set.
+The purpose of this report is to develop a statistical model to determine the variables that are independently associated with neighborhoods with crime rates above or below the median. Note that neighborhoods with crime rates above or below the median have already been provided in our evaluation data set.
 
 # Data Exploration  
 
@@ -147,9 +147,9 @@ corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "blac
 
 ## Outliers Treatment
 
-We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^3].  
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^6].  
 
-[^3]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+[^6]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
 
 The below table is the summary results of the winsorizing of the data. 
 
@@ -202,13 +202,21 @@ stargazer(wtCrimes, header = FALSE)
 
 ## Model 1 - Backwards Selection Method
 
-
-```{r, echo=FALSE, results='asis', size="small"}
+```{r, echo=FALSE, results='asis'}
 fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wtCrimes))
 fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
 ```
 
+We will use a value of 5 as our threshold for multicollinearity of our variables[^7]. Here in our backwards selection model we find that `nox` exceeds our pre-established threshold.
+
+```{r, echo=FALSE, results='asis'}
+dfVifFit <- setDT(as.data.frame(vif(fit)), keep.rownames = TRUE)[]
+colnames(dfVifFit) <- c("variables", "VIF")
+kable(dfVifFit, align = c("l", "c"))
+```
+
+[^7]: ["Variance Inflation Factor (VIF)."](http://www.how2stats.net/2011/09/variance-inflation-factor-vif.html)  How2stats:. N.p., n.d. Web. 27 Oct. 2016.
 
 \newpage
 
@@ -218,28 +226,52 @@ stargazer(fit, header = FALSE)
 
 ## Model 3 - Subset Selection Method
 
-Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. Our final model using this method is line `8` which we will further implement into our subset selection model. 
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. Our final model will use variables as indicated in line `8` of the below table which we will further implement into our subset selection model. 
 
-```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE,  size="small"}
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
 subsetModel <- regsubsets(target ~ ., data = dfTr, nbest = 1)
 summary <- summary(subsetModel)
 kable(summary$outmat)
 ```
 
-
-```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE,size='small', results = 'asis'}
+```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModel <- glm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv, family = binomial, data = dfTr)
 stargazer(subsetModel, header = FALSE)
 ```
 
+Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
-```{r, stepwise variable selection, eval=FALSE,  cache=TRUE, echo=FALSE}
-library(glmulti)
-library(stargazer)
-glmultiLogisticOut <-
-    glmulti(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv ,                data = dfTr, level = 1, method = "h", crit = "aicc", confsetsize = 200,  plotty = T, report = T, maxit=50, fitfunction = "glm", family = binomial)     
-
-glmultiLogisticOut@formulas
-x <- summary(glmultiLogisticOut@objects[[1]])
-x
+```{r, echo=FALSE, results='asis'}
+dfVifSubset <- setDT(as.data.frame(vif(subsetModel)), keep.rownames = TRUE)[]
+colnames(dfVifSubset) <- c("variables", "VIF")
+kable(dfVifSubset, align = c("l", "c"))
 ```
+
+\newpage 
+# Selected Model
+
+
+\newpage
+# Appendix A
+
+## Session Info
+
+```{r, results='asis', echo=FALSE, eval = TRUE}
+toLatex(sessionInfo())
+```
+
+## Data Dictionary
+
+```{r, eval=TRUE, results='asis', echo=FALSE}
+kable(daDict %>% 
+      filter(VARIABLE.TYPE == "Predictor Variable") %>%
+      mutate(Abbreviation = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(Abbreviation, Definition),
+      align = c("c","l"))
+```
+
+## R source code
+
+Please see [Homework 3.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%203/Homework%203.Rmd) on GitHub for source code.   
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%203/Homework%203.Rmd
