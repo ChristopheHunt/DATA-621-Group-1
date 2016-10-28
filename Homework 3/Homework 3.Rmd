@@ -27,7 +27,7 @@ output:
 library(pacman)
 p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
        stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc,
-       foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps)
+       foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table)
 ```
 
 \begin{center}
@@ -70,7 +70,7 @@ Crime has a high cost to all parts of society and it can have severe long term i
 
 # Statement of the Problem
 
-The purpose of this report is to develop a statisical model to determine the variables that are independently associated with neighborhoods with crime rates above or below the median. Note that neighborhoods with crime rates above or below the median have been provided in our evaluation data set.
+The purpose of this report is to develop a statistical model to determine the variables that are independently associated with neighborhoods with crime rates above or below the median. Note that neighborhoods with crime rates above or below the median have been provided in our evaluation data set.
 
 # Data Exploration  
 
@@ -86,42 +86,64 @@ kable(daDict %>%
       align = c("c","l"))
 ```
 
+\newpage
+
 ## Exploration of Variables
 
 The skewness of each input variable is shown below. The two variables with the strongest skew are the proportion of residential land zoned for large lots and the proportion of blacks by town. Respectively the magnitudes of the skewness of these two variables are 2.18 and 2.92. This indicates that the distributions for these two variables are far from symmetrical. The skewness of the dummy variable (whether the suburb borders the river or not) can be neglected because it is a binary variable. All of the other variables skewnesses that are approximately of magnitude 1 or less. This indicates that the distributions for those variables can be considered symmetric even though for three of the variables (concentration of nitrogen oxides, index of accessibility to radial highways, and median value of owner-occupied homes) are multimodal.
 
-According to the standard deviations of each variable, the variable that has the highest difference from the mean is tax. 
-
-```{r, echo=FALSE}
+```{r, skew, echo=FALSE, results='asis'}
 library(matrixStats)
 crimes <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
-abs(skewness(crimes))
-data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crimes))))
+dfSkew <- setDT(as.data.frame(abs(skewness(crimes))), keep.rownames = TRUE)[]
+colnames(dfSkew) <- c("variables", "skew")
+kable(dfSkew, align = c("l", "c"))
 ```
 
-Histograms of all of the variables have been plotted below so that distribution can be visualized. 
+According to the standard deviations of each variable, the variable that has the highest difference from the mean is tax. 
+
+```{r, sd, echo=FALSE, results='asis'}
+kable(data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crimes)))), align = c("l", "c"))
+```
+
+\newpage
+
+Histograms of most of our variables have been plotted below so that distribution can be visualized. We have excluded `target` and `chas` due to being binary and not being well represented in the below visualization. We also excluded `rad` as it is an index variable and also is not best represented in the below visualization. 
 
 ```{r, echo=FALSE, results='asis', cache=TRUE}
 dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
 
-#colnames(dfTr) <- mapvalues(as.vector(colnames(dfTr)), from = str_trim(data_dictionary$VARIABLE.NAME), to = as.vector(str_trim(data_dictionary$DEFINITION)))
+digits <- c(1)
 
-digits <- c(1) 
-
-descriptive <- describe( dfTr %>% dplyr::select(-target) # TODO figure out why rad has a wierd frequency table
+descriptive <- describe( dfTr %>% dplyr::select(-target, -chas, -rad) # TODO figure out why rad has a wierd frequency table
                         , descript = "Table 1 : Descriptive Statistics", digits = digits)
 latex(descriptive, file = '')
 ```
 
 ## Correlation Matrix 
 
-We implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and as expected, Number of Wins appears to be most correlated to Base Hits by batters (1B,2B,3B,HR).  
+We implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and we noticed a few interesting correlations. 
 
-```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, cache=TRUE}
+* High nitrogen oxides concentration (parts per 10 million) ("nox") is positively correlated with higher than median crime rates. As defined by the EPA  - "NOx pollution is emitted by automobiles, trucks and various non-road vehicles (e.g., construction equipment, boats, etc.) as well as industrial sources such as power plants, industrial boilers, cement kilns, and turbines"[^4]. It is clear to see that nox is concentrated in areas of high road traffic and possible high industrial use which would be neighborhoods of low value and may attract crime. 
+
+* The weighted mean of distances to five Boston employment centers is negatively correlated with a city with higher than median crime rate. This is intuitive in that employment centers would be more closely located in cities of high crime due to high unemployment being positively correlated with higher crimes rates[^5]. 
+
+* The tax is positively correlated with higher than median crime rate which is counter intuitive because we would think as tax increases then crime would decrease (more valuable property = higher tax = less crime). 
+
+* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. Further resources on why this type of transformation is being used were not available. It should be noted that this transformation causes a counter intuitive correlation. 
+
+[^4]: ["Nitrogen Oxides Control Regulations | Ground-level Ozone | New England | US EPA."](https://www3.epa.gov/region1/airquality/nox.html) EPA. Environmental Protection Agency, n.d. Web. 22 Oct. 2016.
+
+[^5]: Ajimotokin, S., Haskins, A., & Wade, Z. (2015). [The Effects of Unemployment on Crime Rates in the US.](https://smartech.gatech.edu/bitstream/handle/1853/53294/theeffectsofunemploymentoncimerates.pdf?sequence=1&isAllowed=y)
+
+
+```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 4, fig.width= 6, cache=TRUE}
 dfTrMx <- as.matrix(dfTr)
 corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
 corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .5, na.label = " ")
 ```
+
+\newpage 
 
 ## Outliers Treatment
 

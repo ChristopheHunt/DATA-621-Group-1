@@ -43,3 +43,4 @@ forecast
 matrixStats
 glmulti
 leaps
+data.table
