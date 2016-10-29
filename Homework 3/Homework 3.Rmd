@@ -58,6 +58,11 @@ daDict <- read.xlsx("Data Dictionary HW3 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW3 - Group 1", full.names = TRUE))
 ```
 
+```{r, offline, include=FALSE, cache=TRUE}
+setwd(file.path("C:","Users", "Christophe", "Documents", "GitHub", "DATA 621 - Group 1", "DATA-621-Group-1", "Homework 3"))
+daDict <- read.xlsx("Data Dictionary.xlsx", sheetIndex = 1)
+```
+
 \newpage
 
 # Introduction
@@ -110,6 +115,7 @@ kable(data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crime
 
 Histograms of most of our variables have been plotted below so that distribution can be visualized. We have excluded `target` and `chas` due to being binary and not being well represented in the below visualization. We also excluded `rad` as it is an index variable and also is not best represented in the below visualization. 
 
+
 ```{r, echo=FALSE, results='asis', cache=TRUE}
 dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
 
@@ -118,6 +124,10 @@ digits <- c(1)
 descriptive <- describe( dfTr %>% dplyr::select(-target, -chas, -rad) # TODO figure out why rad has a wierd frequency table
                         , descript = "Table 1 : Descriptive Statistics", digits = digits)
 latex(descriptive, file = '')
+```
+
+```{r, offline data, results='asis', cache=TRUE}
+crimes <- dfTr
 ```
 
 ## Correlation Matrix 
@@ -173,29 +183,44 @@ winsorize <- function(x, multiple=2.2)
 
 ```{r, echo=FALSE, results='asis'}
 library(forecast)
-winsorizedandtransformed <- function(dataset){
+
+winsorizedDataset <- function(dataset){
   dataset <- dataset[,1:ncol(dataset)]
-  wdataset <- tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
-  l1 <- numeric(ncol(dataset))
-  for (i in 1:length(l1)){
-    if(i == 3 || i == length(l1)){
+  wdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  #l1 <- numeric(ncol(dataset))
+  for (i in 1:ncol(dataset)){
+    if(i == 3 || i == ncol(dataset)){
       wdataset[,i] <- dataset[,i]
-      tdataset[,i] <- wdataset[,i]
     }
     else {
     wdataset[,i] <- winsorize(dataset[,i], multiple = 2.2)
-    l1[i] <- BoxCox.lambda(wdataset[,i])
-    tdataset[,i] <- BoxCox(wdataset[,i],l1[i])
+    #l1[i] <- BoxCox.lambda(wdataset[,i])
     }
-    colnames(tdataset) <- colnames(dataset)
+    colnames(wdataset) <- colnames(dataset)
   }
-  return(data.frame(tdataset))
+  return(data.frame(wdataset))
 }
+#lambdas <- winsorizedandtransformed(crimes)[[2]]
+#wtcrimes <- winsorizedandtransformed(crimes)[[1]]
+wCrimes <- winsorizedDataset(crimes)
 
-wtCrimes <- winsorizedandtransformed(crimes)
-stargazer(wtCrimes, header = FALSE)
+stargazer(wCrimes, header = FALSE)
 ```
 
+## BoxCox Transformations 
+
+```{r, echo=FALSE, cache=TRUE, results='asis'}
+boxcoxLambdas <- function(dataset){
+  dataset <- dataset[,1:ncol(dataset)]
+  #tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  l1 <- numeric(ncol(dataset))
+  for (i in 1:ncol(dataset)){
+    l1[i] <- BoxCox.lambda(dataset[,i])
+  }
+  return(data.frame(l1, colnames(dataset)))
+}
+boxcoxLambdas(wCrimes)
+```
 \newpage
 
 # Models Built
@@ -235,7 +260,8 @@ kable(summary$outmat)
 ```
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
-subsetModel <- glm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv, family = binomial, data = dfTr)
+subsetModel <- lm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv, data = dfTr)
+subsetModel <- glm(subsetModel, family = binomial, data = dfTr)
 stargazer(subsetModel, header = FALSE)
 ```
 
