@@ -23,10 +23,9 @@ output:
 ##assignments use "<-" not "="
 ```
 
-```{r, include = FALSE}
+```{r library load, include = FALSE}
 library(pacman)
-p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, 
-       stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc,
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc,
        foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car)
 ```
 
@@ -52,7 +51,7 @@ Christophe Hunt\\
 
 \end{center}
 
-```{r, include=FALSE, cache=TRUE}
+```{r data dictionary load, include=FALSE, cache=TRUE}
 download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%203/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW3 - Group 1.xlsx", mode = 'wb')
 daDict <- read.xlsx("Data Dictionary HW3 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW3 - Group 1", full.names = TRUE))
@@ -79,7 +78,7 @@ The purpose of this report is to develop a statistical model to determine the va
 
 The variables provided in our evaluation data set our explained below:
 
-```{r, eval=TRUE, results='asis', echo=FALSE}
+```{r data dictionary table, eval=TRUE, results='asis', echo=FALSE}
 kable(daDict %>% 
       filter(VARIABLE.TYPE == "Predictor Variable") %>%
       mutate(Abbreviation = VARIABLE.NAME, Definition = DEFINITION)  %>%
@@ -93,7 +92,7 @@ kable(daDict %>%
 
 The skewness of each input variable is shown below. The two variables with the strongest skew are the proportion of residential land zoned for large lots and the proportion of blacks by town. Respectively the magnitudes of the skewness of these two variables are 2.18 and 2.92. This indicates that the distributions for these two variables are far from symmetrical. The skewness of the dummy variable (whether the suburb borders the river or not) can be neglected because it is a binary variable. All of the other variables skewnesses that are approximately of magnitude 1 or less. This indicates that the distributions for those variables can be considered symmetric even though for three of the variables (concentration of nitrogen oxides, index of accessibility to radial highways, and median value of owner-occupied homes) are multimodal.
 
-```{r, skew, echo=FALSE, results='asis'}
+```{r skew, echo=FALSE, results='asis'}
 library(matrixStats)
 crimes <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
 dfSkew <- setDT(as.data.frame(abs(skewness(crimes))), keep.rownames = TRUE)[]
@@ -103,7 +102,7 @@ kable(dfSkew, align = c("l", "c"))
 
 According to the standard deviations of each variable, the variable that has the highest difference from the mean is tax. 
 
-```{r, sd, echo=FALSE, results='asis'}
+```{r sd, echo=FALSE, results='asis'}
 kable(data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crimes)))), align = c("l", "c"))
 ```
 
@@ -112,7 +111,7 @@ kable(data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crime
 Histograms of most of our variables have been plotted below so that distribution can be visualized. We have excluded `target` and `chas` due to being binary and not being well represented in the below visualization. We also excluded `rad` as it is an index variable and also is not best represented in the below visualization. 
 
 
-```{r, echo=FALSE, results='asis', cache=TRUE}
+```{r descriptive statistics table, echo=FALSE, results='asis', cache=TRUE}
 dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
 
 digits <- c(1)
@@ -139,7 +138,7 @@ We implement a correlation matrix to better understand the correlation between v
 [^5]: Ajimotokin, S., Haskins, A., & Wade, Z. (2015). [The Effects of Unemployment on Crime Rates in the US.](https://smartech.gatech.edu/bitstream/handle/1853/53294/theeffectsofunemploymentoncimerates.pdf?sequence=1&isAllowed=y)
 
 
-```{r, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 4, fig.width= 6, cache=TRUE}
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 4, fig.width= 6, cache=TRUE}
 dfTrMx <- as.matrix(dfTr)
 corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
 corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .5, na.label = " ")
@@ -155,7 +154,7 @@ We chose winsorizing as the method to address outliers. Instead of trimming valu
 
 The below table is the summary results of the winsorizing of the data. 
 
-```{r, winsorize function, echo=FALSE}
+```{r winsorize function, echo=FALSE}
 winsorize <- function(x, multiple=2.2)
 {
   q <- quantile(x)
@@ -173,7 +172,7 @@ winsorize <- function(x, multiple=2.2)
 }
 ```
 
-```{r, echo=FALSE, results='asis'}
+```{r winsorize dataframe,  echo=FALSE, results='asis'}
 library(forecast)
 
 winsorizedDataset <- function(dataset){
@@ -205,7 +204,7 @@ stargazer(wCrimes, header = FALSE)
 
 Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
 
-```{r, echo=FALSE, cache=TRUE, results='asis'}
+```{r boxcox transformation, echo=FALSE, cache=TRUE, results='asis'}
 boxcoxLambdas <- function(dataset){
   dataset <- dataset[,1:ncol(dataset)]
   #tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
@@ -454,22 +453,18 @@ ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
 
 ## Model 1 - Backwards Selection Method
 
-```{r, echo=FALSE, results='asis'}
-fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = na.omit(wCrimes)) ##TODO - Review before submission
-fit <- glm(step(fullModel, direction = "backward", trace = F))
-summary(fit)
-
-stargazer(fit, header = FALSE)
-
-fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wCrimes))
-fit <- glm(step(fullModel, direction = "backward", trace = F))
-summary(fit)
+```{r backwards model selection, echo=FALSE, results='asis'}
+fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + 
+                  I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, 
+                data = wCrimes) ##TODO - Review before submission
+backFit <- glm(step(fullModel, direction = "backward", trace = F))
+stargazer(backFit, header = FALSE)
 ```
 
 We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that `rad` exceeds our pre-established threshold.
 
 ```{r, echo=FALSE, results='asis'}
-dfVifFit <- setDT(as.data.frame(vif(fit)), keep.rownames = TRUE)[]
+dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
 colnames(dfVifFit) <- c("variables", "VIF")
 kable(dfVifFit, align = c("l", "c"))
 ```
@@ -480,13 +475,25 @@ kable(dfVifFit, align = c("l", "c"))
 
 ## Model 2 - Forwards Selection Method
 
+```{r}
+step(lm(target~1, data=wCrimes), direction = "forward", scope = ~zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv) ##TODO - Review before submission
+forwardFit <- glm(formula = target ~ nox + rad + age + medv + ptratio, data = wCrimes, family = binomial)
+stargazer(forwardFit, header = FALSE)
+```
 
+Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r, echo=FALSE, results='asis'}
+dfVifFit <- setDT(as.data.frame(vif(forwardFit)), keep.rownames = TRUE)[]
+colnames(dfVifFit) <- c("variables", "VIF")
+kable(dfVifFit, align = c("l", "c"))
+```
 
 \newpage
 
 ## Model 3 - Subset Selection Method
 
-Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. Our final model will use variables as indicated in line `8` of the below table which we will further implement into our subset selection model. 
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. The variables as indicated in line `8` of the below table will be further implement into our subset selection model. 
 
 ```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
 subsetModel <- regsubsets(target ~ ., data = wCrimes, nbest = 1)
@@ -495,7 +502,7 @@ kable(summary$outmat)
 ```
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
-subsetModel <- lm(target ~ nox + age + rad + tax + ptratio + black + lstat + medv, data = wCrimes)
+subsetModel <- lm(target ~ zn + I(nox^-1) + I(age^2) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + medv, data = wCrimes) ##TODO - Review before submission
 subsetModel <- glm(subsetModel, family = binomial, data = wCrimes)
 stargazer(subsetModel, header = FALSE)
 ```
