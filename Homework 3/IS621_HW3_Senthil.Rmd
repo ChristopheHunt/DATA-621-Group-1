@@ -1,0 +1,265 @@
+---
+title: "IS621 HW3"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo=FALSE}
+#Supporting Functions
+
+TP <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==p & df[resp]==p),1]))
+}
+
+TN <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==n & df[resp]==n),1]))
+}
+
+FP <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==p & df[resp]==n),1]))
+}
+
+FN <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==n & df[resp]==p),1]))
+}
+
+
+Accuracy <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  tn <- TN(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  fn <- FN(df,predResp,resp,p,n)
+  
+  return ((tp + tn)/(tp + fp + tn + fn))
+  
+}
+
+ClassificationErrorRate <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  tn <- TN(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  fn <- FN(df,predResp,resp,p,n)
+  
+  return ((fp + fn)/(tp + fp + tn + fn))
+  
+}
+
+Precision <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  
+  return (tp/(tp + fp))
+  
+}
+
+Sensitivity <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  fn <- FN(df,predResp,resp,p,n)
+  
+  return (tp/(tp + fn))
+  
+}
+
+Specificity <- function(df, predResp, resp, p, n)
+{
+  tn <- TN(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  
+  return (tn/(tn + fp))
+  
+}
+
+F1Score <- function(df, predResp, resp, p, n)
+{
+  precision <- Precision(df,predResp,resp,p,n)
+  sensitivity <- Sensitivity(df,predResp,resp,p,n)
+  
+  return ((2 * precision * sensitivity)/(precision + sensitivity))
+  
+}
+
+
+ROC <- function(df, respProb, resp, p, n, thresholds, plotTitle)
+{
+  x <- thresholds
+  dfForPlot <- data.frame(threshold=integer(), fpr=double(),tpr=double(), auc=double(), dist=double())
+  for(i in x)
+  {
+    plotCoord <- ROC.Coordinates(df,resp, respProb, p, n, i)
+    #print(plotCoord)
+    dfForPlot <-  data.frame(rbind(dfForPlot,data.frame(plotCoord)))
+  }
+  plot(x=dfForPlot$fpr,y=dfForPlot$tpr,lwd=2, type="l", xlab="FPR", ylab="TPR", main=plotTitle)
+  lines(x=c(0, 1), y=c(0, 1), col="black", lwd=1)
+  return (dfForPlot)
+  
+}
+
+
+ROC.Coordinates <- function(df, resp, respProb, p, n, threshold)
+{
+  pred <- rep(n,length(df[,1]))
+  dfNew <- df
+  pred[which(df[respProb]>=threshold)]  <- p
+  dfNew$pred <- as.factor(pred)
+  
+  sensitivity <- Sensitivity(df = dfNew, predResp = "pred",resp = resp,p = p,n = n)
+  specificity <- Specificity(df = dfNew, predResp = "pred",resp = resp,p = p,n = n)
+  
+  tpr <- sensitivity
+  fpr <- 1 - specificity
+  auc <- (sensitivity + specificity)/2
+  dist <- sqrt((1-tpr)^2 + (fpr)^2)
+  
+  return (data.frame(threshold,fpr,tpr,auc,dist))
+  
+}
+
+calculateAUC <- function(curveInfo)
+{
+  tpr1 <- 0
+  fpr1 <- 0
+  auc <- 0
+  curveInfo <- curveInfo[order(-curveInfo$threshold),]
+  for(i in 1:nrow(curveInfo))
+  {
+    tpr2 <- curveInfo[i,"tpr"]
+    fpr2 <- curveInfo[i,"fpr"]
+    
+    auc <- auc + ((tpr1 + tpr2)/2)*(fpr2-fpr1)
+    
+    
+    tpr1 <- tpr2
+    fpr1 <- fpr2
+  }
+  return(auc)
+}
+
+
+ConfusionDataFrame <- function(tp,fp,tn,fn)
+{
+  cm <- data.frame( rbind(tp,fp), rbind(fn, tn))
+  colnames(cm) <- c("Act-Pos","Act-Neg")
+  rownames(cm) <- c("Pred-Pos","Pred-Neg")
+  return(cm)
+}
+
+ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
+{
+  acc <- Accuracy(dfPred,"predResp","target",1,0)
+  cer <- ClassificationErrorRate(dfPred,"predResp","target",1,0)
+  prec <- Precision(dfPred,"predResp","target",1,0)
+  sens <- Sensitivity(dfPred,"predResp","target",1,0)
+  spec <- Specificity(dfPred,"predResp","target",1,0)
+  f1score <- F1Score(dfPred,"predResp","target",1,0)
+  roc <- ROC(dfPred,"predProb","target",1,0, seq(0,1,.01),modelName)
+  
+  auc <- calculateAUC(roc)
+  
+  bestThreshold <- roc[which(roc$auc == max(roc$auc)),][1,][,1]
+
+  
+  tp <- TP(dfPred,"predResp","target",1,0)
+  tn <- TN(dfPred,"predResp","target",1,0)
+  fp <- FP(dfPred,"predResp","target",1,0)
+  fn <- FN(dfPred,"predResp","target",1,0)
+  
+  print(ConfusionDataFrame(tp,fp,tn,fn))
+  
+  M <- format(c(acc,cer,prec,sens,spec,f1score,auc,bestThreshold,aic), digits = 3)
+  df <- data.frame("metric" = M)
+  r.n <- c("accuracy", "classif.error","precision","sensitivity","specificity","f1score","auc","best.threshold", "aic")
+  rownames(df) <- r.n
+  colnames(df) <- modelName
+  
+  return(df)
+}
+
+
+```
+
+
+
+```{r}
+
+wd <- "C:/Senthil/MSDataAnalytics/Semester4/621/HW3"
+#wd <- "F:/Temp/H2"
+file <- paste(wd,"crime-training-data.csv",sep="/")
+df <- read.csv(file)
+
+summary(df)
+
+boxcox <- function(X)
+{
+  lambda <- 1
+  return (lambda)
+}
+
+lambda.nox <- boxcox(df$nox)
+lambda.rad <- boxcox(df$rad)
+
+```
+
+
+```{r}
+
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+
+digits <- c(1)
+
+
+
+```
+
+
+```{r}
+
+step(lm(target~1,data=dfTr),direction = "forward",scope=~zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+black+lstat+medv)
+
+#step(lm(target~zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+black+lstat+medv,data=df),direction = "backward")
+
+fit <- glm(formula = target ~ nox + rad + age + medv + ptratio, data = dfTr,family = binomial)
+
+fit$aic
+#summary(fit)
+#confint(fit)
+#exp(fit$coefficients)
+#exp(confint(fit))
+
+
+dfPred <- df[,c("nox","rad","age","medv","ptratio")]
+predProb <- predict(fit,dfPred,type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.59)] <- 1
+
+dfPred <- data.frame(cbind(df[,c("nox","rad","age","medv","ptratio","target")],predProb,predResp))
+
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic )
+dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"backward", fit$aic )
+
+
+
+```
+
+
+```{r}
+
+
+#dfModel <- rbind(dfModel, data.frame(forward=fit$aic))
+
+```
+
