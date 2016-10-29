@@ -458,25 +458,21 @@ backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
 ```
 
-### Model Metrics
+### Model Metrics for Backwards Selection
 
-```{r backwards model metrics, echo=FALSE, results='asis', eval=FALSE}
+We first use an established threshold of .50 to determine our best possible threshold. In this instances our best threshold is 0.500. 
+
+```{r backwards model metrics, echo=FALSE, results='asis', eval=TRUE}
 dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
-
 predProb <- predict(fit,dfPred,type="response") #Predicted Probability
-
 predResp <- numeric(length(predProb)) #Predicted Class
-predResp[which(predProb>=0.59)] <- 1
-
-dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")],predProb, predResp))
-
-
-dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic)
+predResp[which(predProb>=0.50)] <- 1
+dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb, predResp))
 dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"backward", fit$aic)
-
+kable(dfBwdModel)
 ```
 
-### Multicollinearity 
+### Multicollinearity for Backwards Selection
 
 We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that `rad` exceeds our pre-established threshold.
 
@@ -505,22 +501,42 @@ forwardFit <- fit <- glm(formula = target ~ I(nox^-1) + rad + I(age^2) + medv + 
 stargazer(fit, header = FALSE)
 ```
 
-```{r forward model metrics, echo=FALSE, results='asis', eval=FALSE}
 
+### Model Metrics for Forward Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+```{r forward model metrics, echo=FALSE, results='asis', eval=TRUE}
 dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
 predResp <- numeric(length(predProb)) #Predicted Class
-predResp[which(predProb>=0.59)] <- 1
+predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")],predProb,predResp))
+dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb,predResp))
 
 dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic)
 
-
-dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"backward", fit$aic)
-
+kable(dfFwdModel)
 ```
+
+Our results indicate that .610 would be the best threshold for this model so we re-run our metrics using this threshold. 
+
+```{r second forward model metrics, echo=FALSE, results='asis', eval=TRUE}
+dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.610)] <- 1
+
+dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb,predResp))
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic)
+
+kable(dfFwdModel)
+```
+
+### Multicollinearity for Forwards Selection
 
 Here in our forward selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
@@ -536,17 +552,33 @@ kable(dfVifFit, align = c("l", "c"))
 
 Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. The variables as indicated in line `8` of the below table will be further implement into our subset selection model. 
 
-```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
-subsetModel <- regsubsets(target ~ ., data = wCrimes, nbest = 1)
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=TRUE}
+subsetModel <- regsubsets(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes, nbest = 1)
 summary <- summary(subsetModel)
-kable(summary$outmat)
+kable(t(summary$outmat))
 ```
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModel <- lm(target ~ zn + I(nox^-1) + I(age^2) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + medv, data = wCrimes) ##TODO - Review before submission
-subsetModel <- glm(subsetModel, family = binomial, data = wCrimes)
+subsetModel <- fit <- glm(subsetModel, family = binomial, data = wCrimes)
 stargazer(subsetModel, header = FALSE)
 ```
+
+
+```{r subset model metrics, echo=FALSE, results='asis', eval=TRUE}
+dfPred <- df[,c("zn", "nox","age","rad","tax","ptratio", "black", "medv")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.50)] <- 1
+
+dfPred <- data.frame(cbind(df[,c("zn", "nox","age","rad","tax","ptratio", "black", "medv", "target")],predProb,predResp))
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"subset", fit$aic)
+
+kable(dfFwdModel)
+```
+
 
 Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
