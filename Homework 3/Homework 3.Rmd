@@ -58,10 +58,6 @@ daDict <- read.xlsx("Data Dictionary HW3 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW3 - Group 1", full.names = TRUE))
 ```
 
-```{r, offline, include=FALSE, cache=TRUE}
-setwd(file.path("C:","Users", "Christophe", "Documents", "GitHub", "DATA 621 - Group 1", "DATA-621-Group-1", "Homework 3"))
-daDict <- read.xlsx("Data Dictionary.xlsx", sheetIndex = 1)
-```
 
 \newpage
 
@@ -121,13 +117,9 @@ dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Grou
 
 digits <- c(1)
 
-descriptive <- describe( dfTr %>% dplyr::select(-target, -chas, -rad) # TODO figure out why rad has a wierd frequency table
+descriptive <- describe( dfTr %>% dplyr::select(-target, -chas, -rad) 
                         , descript = "Table 1 : Descriptive Statistics", digits = digits)
 latex(descriptive, file = '')
-```
-
-```{r, offline data, results='asis', echo = FALSE, cache=TRUE}
-crimes <- dfTr
 ```
 
 ## Correlation Matrix 
@@ -207,7 +199,11 @@ wCrimes <- winsorizedDataset(crimes)
 stargazer(wCrimes, header = FALSE)
 ```
 
+\newpage
+
 ## BoxCox Transformations 
+
+Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
 
 ```{r, echo=FALSE, cache=TRUE, results='asis'}
 boxcoxLambdas <- function(dataset){
@@ -219,8 +215,35 @@ boxcoxLambdas <- function(dataset){
   }
   return(data.frame(l1, colnames(dataset)))
 }
-boxcoxLambdas(wCrimes)
+dfBoxCox <- boxcoxLambdas(wCrimes %>% dplyr::select(-target))
+
+colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
+
+kable(dfBoxCox, align = c("c", "c"))
 ```
+
+Utilizing the below table of common transformations based on the lambda value of the BoxCox we further transform our independent variables.
+
+\centering
+
+Common Box-Cox Transformations[^7]
+
+\begin{tabular}{ l c }
+\hline
+$\lambda$ & Y' \\ \hline
+-2 &	$Y^{-2}$ = $\frac{1}{Y^{2}}$ \\
+-1 &	$Y^{-1}$ = $\frac{1}{Y^{1}}$ \\
+-0.5 &	$Y^{-0.5}$ = $\frac{1}{\sqrt{(Y)}}$) \\
+0	& log(Y) \\
+0.5	& $Y^{0.5}$ = $\sqrt{(Y)}$ \\
+1	& $Y^{1}$ = Y \\
+2	& $Y^{2}$ \\
+\end{tabular}
+
+\justifying
+
+[^7]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
+
 \newpage
 
 # Models Built
@@ -415,7 +438,7 @@ fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
 ```
 
-We will use a value of 5 as our threshold for multicollinearity of our variables[^7]. Here in our backwards selection model we find that `nox` exceeds our pre-established threshold.
+We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that `rad` exceeds our pre-established threshold.
 
 ```{r, echo=FALSE, results='asis'}
 dfVifFit <- setDT(as.data.frame(vif(fit)), keep.rownames = TRUE)[]
@@ -423,7 +446,7 @@ colnames(dfVifFit) <- c("variables", "VIF")
 kable(dfVifFit, align = c("l", "c"))
 ```
 
-[^7]: ["Variance Inflation Factor (VIF)."](http://www.how2stats.net/2011/09/variance-inflation-factor-vif.html)  How2stats:. N.p., n.d. Web. 27 Oct. 2016.
+[^8]: ["Variance Inflation Factor (VIF)."](http://www.how2stats.net/2011/09/variance-inflation-factor-vif.html)  How2stats:. N.p., n.d. Web. 27 Oct. 2016.
 
 \newpage
 
