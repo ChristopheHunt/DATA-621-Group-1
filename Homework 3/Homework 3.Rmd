@@ -142,7 +142,10 @@ corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
 corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .5, na.label = " ")
 ```
 
+
 \newpage 
+
+# Data Transformation
 
 ## Outliers Treatment
 
@@ -248,10 +251,10 @@ Lambda values that did not fall in the proximity of common transformations were 
 \begin{tabular}{ c c }
 \hline
 variable & variable transformation \\ \hline
-indus & $\log{indus}$ \\
+indus & $\log(indus)$ \\
 chas & $\sqrt{chas}$ \\
 nox & $nox^{-1}$ \\
-rm & $\log{rm}$ \\
+rm & $\log(rm)$ \\
 age & $age^{2}$ \\
 dis & $dis^{-.5}$ \\
 tax & $tax^{-1}$ \\
@@ -414,7 +417,7 @@ ConfusionDataFrame <- function(tp,fp,tn,fn)
   cm <- data.frame( rbind(tp,fp), rbind(fn, tn))
   colnames(cm) <- c("Act-Pos","Act-Neg")
   rownames(cm) <- c("Pred-Pos","Pred-Neg")
-  return(cm)
+  return(kable(cm))
 }
 
 ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
@@ -458,23 +461,25 @@ backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
 ```
 
+\newpage
+
 ### Model Metrics for Backwards Selection
 
 We first use an established threshold of .50 to determine our best possible threshold. In this instances our best threshold is 0.500. 
 
-```{r backwards model metrics, echo=FALSE, results='asis', eval=TRUE}
+```{r backwards model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
 dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
 predProb <- predict(fit,dfPred,type="response") #Predicted Probability
 predResp <- numeric(length(predProb)) #Predicted Class
 predResp[which(predProb>=0.50)] <- 1
 dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb, predResp))
-dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"backward", fit$aic)
-kable(dfBwdModel)
+dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Backwards Selection", fit$aic)
+kable(dfBwdModel, align = c("l","c"))
 ```
 
 ### Multicollinearity for Backwards Selection
 
-We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that `rad` exceeds our pre-established threshold.
+We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that ourt transformed `nox` and `dis` exceeds our pre-established threshold.
 
 ```{r, echo=FALSE, results='asis'}
 dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
@@ -501,8 +506,9 @@ forwardFit <- fit <- glm(formula = target ~ I(nox^-1) + rad + I(age^2) + medv + 
 stargazer(fit, header = FALSE)
 ```
 
+\newpage
 
-### Model Metrics for Forward Selection
+### Model Metrics for Forwards Selection
 
 We first use an established threshold of .50 to determine our best possible threshold. 
 
@@ -515,12 +521,16 @@ predResp[which(predProb>=0.50)] <- 1
 
 dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb,predResp))
 
-dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic)
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Forwards Selection", fit$aic)
 
-kable(dfFwdModel)
+kable(dfFwdModel, align = c("l","c"))
 ```
 
-Our results indicate that .610 would be the best threshold for this model so we re-run our metrics using this threshold. 
+Our results indicate that .610 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+#### Model Metrics for Forwards Selection with best threshold
+
+Model Metrics using best threshold of .610. 
 
 ```{r second forward model metrics, echo=FALSE, results='asis', eval=TRUE}
 dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
@@ -531,10 +541,12 @@ predResp[which(predProb>=0.610)] <- 1
 
 dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb,predResp))
 
-dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic)
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Forwards Selection", fit$aic)
 
-kable(dfFwdModel)
+kable(dfFwdModel, align = c("l", "c"))
 ```
+
+\newpage
 
 ### Multicollinearity for Forwards Selection
 
@@ -550,35 +562,63 @@ kable(dfVifFit, align = c("l", "c"))
 
 ## Model 3 - Subset Selection Method
 
-Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. The variables as indicated in line `8` of the below table will be further implement into our subset selection model. 
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. The variables as indicated in column `8` of the below table will be further implement into our subset selection model. 
 
-```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=TRUE}
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
 subsetModel <- regsubsets(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes, nbest = 1)
 summary <- summary(subsetModel)
 kable(t(summary$outmat))
 ```
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
-subsetModel <- lm(target ~ zn + I(nox^-1) + I(age^2) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + medv, data = wCrimes) ##TODO - Review before submission
+subsetModel <- lm(target ~ I(nox^-1) + I(age^2) +  I(dis^-.5) + rad + I(tax^-1) + I(black^2)  +  lstat + medv, data = wCrimes) ##TODO - Review before submission
 subsetModel <- fit <- glm(subsetModel, family = binomial, data = wCrimes)
 stargazer(subsetModel, header = FALSE)
 ```
 
+\newpage
+
+### Model Metrics for Subset Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
 
 ```{r subset model metrics, echo=FALSE, results='asis', eval=TRUE}
-dfPred <- df[,c("zn", "nox","age","rad","tax","ptratio", "black", "medv")]
+dfPred <- df[,c("nox","age","dis", "rad","tax", "black", "lstat", "medv")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
 predResp <- numeric(length(predProb)) #Predicted Class
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(df[,c("zn", "nox","age","rad","tax","ptratio", "black", "medv", "target")],predProb,predResp))
+dfPred <- data.frame(cbind(df[,c("nox","age","dis", "rad","tax", "black", "lstat", "medv", "target")],predProb,predResp))
 
-dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"subset", fit$aic)
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Subset Selection", fit$aic)
 
-kable(dfFwdModel)
+kable(dfFwdModel, align = c("l","c"))
 ```
 
+Our results indicate that .490 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+#### Model Metrics for Subset Selection with best threshold
+
+Model Metrics using best threshold of .490. 
+
+```{r subset model metrics second, echo=FALSE, results='asis', eval=TRUE}
+dfPred <- df[,c("nox","age","dis", "rad","tax", "black", "lstat", "medv")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.490)] <- 1
+
+dfPred <- data.frame(cbind(df[,c("nox","age","dis", "rad","tax", "black", "lstat", "medv", "target")],predProb,predResp))
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Subset Selection", fit$aic)
+
+kable(dfFwdModel, align = c("l","c"))
+```
+
+\newpage
+
+### Multicollinearity for Subset Selection
 
 Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
