@@ -228,19 +228,43 @@ Utilizing the below table of common transformations based on the lambda value of
 
 Common Box-Cox Transformations[^7]
 
-\begin{tabular}{ l c }
+\setlength{\tabcolsep}{12pt}
+
+\begin{tabular}{ c c }
 \hline
 $\lambda$ & Y' \\ \hline
--2 &	$Y^{-2}$ = $\frac{1}{Y^{2}}$ \\
--1 &	$Y^{-1}$ = $\frac{1}{Y^{1}}$ \\
--0.5 &	$Y^{-0.5}$ = $\frac{1}{\sqrt{(Y)}}$) \\
-0	& log(Y) \\
-0.5	& $Y^{0.5}$ = $\sqrt{(Y)}$ \\
-1	& $Y^{1}$ = Y \\
+-2 &	$Y^{-2}~=~\frac{1}{Y^{2}}$ \\
+-1 &	$Y^{-1}~=~\frac{1}{Y^{1}}$ \\
+-0.5 &	$Y^{-0.5}~=~\frac{1}{\sqrt{(Y)}}$) \\
+0	& $\log(Y)$ \\
+0.5	& $Y^{0.5}~=~\sqrt{(Y)}$ \\
+1	& $Y^{1}~=~Y$ \\
 2	& $Y^{2}$ \\
 \end{tabular}
 
 \justifying
+
+Lambda values that did not fall in the proximity of common transformations were ignored. All other Lambda values were truncated to the nearest tenth that match a common transformation as per the below table.
+
+\centering
+
+\begin{tabular}{ c c }
+\hline
+variable & variable transformation \\ \hline
+indus & $\log{indus}$ \\
+chas & $\sqrt{chas}$ \\
+nox & $nox^{-1}$ \\
+rm & $\log{rm}$ \\
+age & $age^{2}$ \\
+dis & $dis^{-.5}$ \\
+tax & $tax^{-1}$ \\
+ptratio & $ptratio^{2}$ \\
+black & $black^{2}$ 
+\end{tabular}
+
+\justifying
+
+\setlength{\tabcolsep}{6pt}
 
 [^7]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
 
@@ -248,7 +272,7 @@ $\lambda$ & Y' \\ \hline
 
 # Models Built
 
-```{r, model metrics, echo=FALSE}
+```{r model metrics, echo=FALSE}
 #Supporting Functions
 
 TP <- function(df, predResp, resp, p, n)
@@ -426,16 +450,20 @@ ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
   
   return(df)
 }
-
 ```
-
 
 ## Model 1 - Backwards Selection Method
 
 ```{r, echo=FALSE, results='asis'}
+fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = na.omit(wCrimes)) ##TODO - Review before submission
+fit <- glm(step(fullModel, direction = "backward", trace = F))
+summary(fit)
+
+stargazer(fit, header = FALSE)
+
 fullModel <- lm(target ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = na.omit(wCrimes))
 fit <- glm(step(fullModel, direction = "backward", trace = F))
-stargazer(fit, header = FALSE)
+summary(fit)
 ```
 
 We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that `rad` exceeds our pre-established threshold.
