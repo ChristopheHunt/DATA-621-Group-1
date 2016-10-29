@@ -82,3 +82,12 @@ colnames(skew) = c("variable", "skewness")
 data.frame(cbind(variables = colnames(crimes), sd = colSds(as.matrix(crimes))))
 ```
 
+In the original dataset, the proportion of blacks in the neighborhood is one variable that is transformed. As a result of this transformation, the AIC is reduced in the backward step selection model and the variable has a significant correlation with the target variable. Even if the variable was left the way it originally was the correlation with the target variable would still be negative. I personally feel that this variable should have little to absolutely no correlation with the target variable because the demographic information of a residential area should not affect anything. Not every black person is a criminal. 
+
+The negative correlation between the proportion of blacks and the target variable could be owed to the fact that most police officers patrol neighborhoods where the majority of the population is black. As a result of this, the crime rate can be lesser. 
+
+It is also counterintuitive how the crime rate has a positive correlation with the property tax. It would be anticipated that if the property tax increases, the crime rate would decrease due to the money that home occupants and owners would spend on "promised" security systems. However, when the crime rate starts to increase, the housing prices would decrease due to the fact that the home occupants and owners would not want to risk their safety. http://www.homes.com/real-estate/home-values/secure-new-home-research-crime-rates-impact-home-value/
+
+However, it could be possible that the crimes that occur are of different categories. They may not always involve murder. They can be burglaries that occur when none of the tenants would be present. One probable cause of burglaries is the fact that the neighborhood looks like a high-income neighborhood. The burglars would think that the apartments and houses in the neighborhood are loaded with jewelries and other valuable goods that they can make fortunes off of. Therefore the high property taxes can increase the rate of burglaries if not the rate of other crimes.  
+
+In the backward step selection model, all of the variables remain except the proportion of residential land zoned for large lots, proportion of non-retail business acres per suburb, the dummy variable for whether the suburb borders the Charles River, and the average number of rooms per dwelling. The resulting AIC was 204.59. 
