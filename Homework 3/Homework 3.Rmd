@@ -94,7 +94,7 @@ The skewness of each input variable is shown below. The two variables with the s
 
 ```{r skew, echo=FALSE, results='asis'}
 library(matrixStats)
-crimes <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+crimes <- dfTr <- df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
 dfSkew <- setDT(as.data.frame(abs(skewness(crimes))), keep.rownames = TRUE)[]
 colnames(dfSkew) <- c("variables", "skew")
 kable(dfSkew, align = c("l", "c"))
@@ -112,8 +112,6 @@ Histograms of most of our variables have been plotted below so that distribution
 
 
 ```{r descriptive statistics table, echo=FALSE, results='asis', cache=TRUE}
-dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
-
 digits <- c(1)
 
 descriptive <- describe( dfTr %>% dplyr::select(-target, -chas, -rad) 
@@ -453,13 +451,32 @@ ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
 
 ## Model 1 - Backwards Selection Method
 
+
 ```{r backwards model selection, echo=FALSE, results='asis'}
-fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + 
-                  I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, 
-                data = wCrimes) ##TODO - Review before submission
-backFit <- glm(step(fullModel, direction = "backward", trace = F))
-stargazer(backFit, header = FALSE)
+fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes) ##TODO - Review before submission
+backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
+stargazer(fit, header = FALSE)
 ```
+
+### Model Metrics
+
+```{r backwards model metrics, echo=FALSE, results='asis', eval=FALSE}
+dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
+
+predProb <- predict(fit,dfPred,type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.59)] <- 1
+
+dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")],predProb, predResp))
+
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic)
+dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"backward", fit$aic)
+
+```
+
+### Multicollinearity 
 
 We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that `rad` exceeds our pre-established threshold.
 
@@ -475,13 +492,37 @@ kable(dfVifFit, align = c("l", "c"))
 
 ## Model 2 - Forwards Selection Method
 
-```{r}
+The simplest data-driven model building approach is called forward selection. In this approach, one adds variables to the model one at a time. At each step, each variable that is not already in the model is tested for inclusion in the model. 
+
+Step function used in this assignment chooses a model by AIC in a Stepwise Algorithm. It continues including variables until the AIC value of <none> variable is the least in the list of variables to choose.
+
+```{r forward selection method, echo=FALSE, results='markup'}
 step(lm(target~1, data=wCrimes), direction = "forward", scope = ~zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv) ##TODO - Review before submission
-forwardFit <- glm(formula = target ~ nox + rad + age + medv + ptratio, data = wCrimes, family = binomial)
-stargazer(forwardFit, header = FALSE)
 ```
 
-Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+```{r, echo = FALSE, results='asis'}
+forwardFit <- fit <- glm(formula = target ~ I(nox^-1) + rad + I(age^2) + medv + I(ptratio^2), data = wCrimes, family = binomial)
+stargazer(fit, header = FALSE)
+```
+
+```{r forward model metrics, echo=FALSE, results='asis', eval=FALSE}
+
+dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.59)] <- 1
+
+dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")],predProb,predResp))
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"forward", fit$aic)
+
+
+dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"backward", fit$aic)
+
+```
+
+Here in our forward selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
 ```{r, echo=FALSE, results='asis'}
 dfVifFit <- setDT(as.data.frame(vif(forwardFit)), keep.rownames = TRUE)[]
