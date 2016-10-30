@@ -123,21 +123,21 @@ latex(descriptive, file = '')
 
 We implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and we noticed a few interesting correlations. 
 
-* High nitrogen oxides concentration (parts per 10 million) ("nox") is positively correlated with higher than median crime rates. As defined by the EPA  - "NOx pollution is emitted by automobiles, trucks and various non-road vehicles (e.g., construction equipment, boats, etc.) as well as industrial sources such as power plants, industrial boilers, cement kilns, and turbines"[^4]. It is clear to see that nox is concentrated in areas of high road traffic and possible high industrial use which would be neighborhoods of low value and may attract crime.
+* High nitrogen oxides concentration (parts per 10 million) ("nox") is positively correlated with higher than median crime rates. As defined by the EPA  - "NOx pollution is emitted by automobiles, trucks and various non-road vehicles (e.g., construction equipment, boats, etc.) as well as industrial sources such as power plants, industrial boilers, cement kilns, and turbines"[^3]. It is clear to see that nox is concentrated in areas of high road traffic and possible high industrial use which would be neighborhoods of low value and may attract crime.
 
-* The weighted mean of distances to five Boston employment centers is negatively correlated with a city with higher than median crime rate. This is intuitive in that employment centers would be more closely located in cities of high crime due to high unemployment being positively correlated with higher crimes rates[^5]. 
+* The weighted mean of distances to five Boston employment centers is negatively correlated with a city with higher than median crime rate. This is intuitive in that employment centers would be more closely located in cities of high crime due to high unemployment being positively correlated with higher crimes rates[^4]. 
 
-* It is also counterintuitive how the crime rate has a positive correlation with the property tax. It would be anticipated that if the property tax increases, the crime rate would decrease due to the money that home occupants and owners would spend on "promised" security systems. However, when the crime rate starts to increase, the housing prices would decrease due to the fact that the home occupants and owners would not want to risk their safety[^6].
+* It is also counterintuitive how the crime rate has a positive correlation with the property tax. It would be anticipated that if the property tax increases, the crime rate would decrease due to the money that home occupants and owners would spend on "promised" security systems. However, when the crime rate starts to increase, the housing prices would decrease due to the fact that the home occupants and owners would not want to risk their safety[^5].
 
-* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. It should be noted that this transformation causes a counter intuitive correlation but as per the data sets author this represents a parabolic relationship to the median crime rate [^7]. Also, it is possible that the AIC in our models would be higher had this transformation not been performed. None of the raw values are less than one so this transformation will not affect the correlation. 
+* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. It should be noted that this transformation causes a counter intuitive correlation but as per the data sets author this represents a parabolic relationship to the median crime rate [^6]. Also, it is possible that the AIC in our models would be higher had this transformation not been performed. None of the raw values are less than one so this transformation will not affect the correlation. 
 
-[^4]: ["Nitrogen Oxides Control Regulations | Ground-level Ozone | New England | US EPA."](https://www3.epa.gov/region1/airquality/nox.html) EPA. Environmental Protection Agency, n.d. Web. 22 Oct. 2016.
+[^3]: ["Nitrogen Oxides Control Regulations | Ground-level Ozone | New England | US EPA."](https://www3.epa.gov/region1/airquality/nox.html) EPA. Environmental Protection Agency, n.d. Web. 22 Oct. 2016.
 
-[^5]: Ajimotokin, S., Haskins, A., & Wade, Z. (2015). [The Effects of Unemployment on Crime Rates in the US.](https://smartech.gatech.edu/bitstream/handle/1853/53294/theeffectsofunemploymentoncimerates.pdf?sequence=1&isAllowed=y)
+[^4]: Ajimotokin, S., Haskins, A., & Wade, Z. (2015). [The Effects of Unemployment on Crime Rates in the US.](https://smartech.gatech.edu/bitstream/handle/1853/53294/theeffectsofunemploymentoncimerates.pdf?sequence=1&isAllowed=y)
 
-[^6]: ["Research Crime Rates and the Impact on Home Values | Homes.com."](http://www.homes.com/real-estate/home-values/secure-new-home-research-crime-rates-impact-home-value/) Everything Real Estate Everything Homescom. N.p., 13 May 2016. Web. 30 Oct. 2016.
+[^5]: ["Research Crime Rates and the Impact on Home Values | Homes.com."](http://www.homes.com/real-estate/home-values/secure-new-home-research-crime-rates-impact-home-value/) Everything Real Estate Everything Homescom. N.p., 13 May 2016. Web. 30 Oct. 2016.
 
-[^7]: Harrison, D. and Rubinfeld, D.L. 'Hedonic prices and the demand for clean air', J. Environ. Economics & Management, vol.5, 81-102, 1978.
+[^6]: Harrison, D. and Rubinfeld, D.L. 'Hedonic prices and the demand for clean air', J. Environ. Economics & Management, vol.5, 81-102, 1978.
 
 
 ```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 4, fig.width= 6, cache=TRUE}
@@ -735,7 +735,6 @@ kable(dfEval)
 ```
 
 \elandscape
-
 
 
 # Appendix A
