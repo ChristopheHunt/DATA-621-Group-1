@@ -129,7 +129,7 @@ We implement a correlation matrix to better understand the correlation between v
 
 * It is also counterintuitive how the crime rate has a positive correlation with the property tax. It would be anticipated that if the property tax increases, the crime rate would decrease due to the money that home occupants and owners would spend on "promised" security systems. However, when the crime rate starts to increase, the housing prices would decrease due to the fact that the home occupants and owners would not want to risk their safety[^6].
 
-* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. It should be noted that this transformation causes a counter intuitive correlation but as per the data sets author this represents a parabolic relationship to the median crime rate [^7]. Also, it is possible that the AIC in our models would be higher had this transformation not been performed. 
+* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. It should be noted that this transformation causes a counter intuitive correlation but as per the data sets author this represents a parabolic relationship to the median crime rate [^7]. Also, it is possible that the AIC in our models would be higher had this transformation not been performed. None of the raw values are less than one so this transformation will not affect the correlation. 
 
 [^4]: ["Nitrogen Oxides Control Regulations | Ground-level Ozone | New England | US EPA."](https://www3.epa.gov/region1/airquality/nox.html) EPA. Environmental Protection Agency, n.d. Web. 22 Oct. 2016.
 
@@ -486,7 +486,7 @@ kable(dfBwdModel, align = c("l","c"))
 
 ### Multicollinearity for Backwards Selection
 
-We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that our transformed `nox` and `dis` exceeds our pre-established threshold.
+We will use a value of 5 as our threshold for multicollinearity of our variables[^9]. Here in our backwards selection model we find that our transformed `nox` and `dis` exceeds our pre-established threshold.
 
 ```{r, echo=FALSE, results='asis'}
 dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
@@ -494,7 +494,7 @@ colnames(dfVifFit) <- c("variables", "VIF")
 kable(dfVifFit, align = c("l", "c"))
 ```
 
-[^8]: ["Variance Inflation Factor (VIF)."](http://www.how2stats.net/2011/09/variance-inflation-factor-vif.html)  How2stats:. N.p., n.d. Web. 27 Oct. 2016.
+[^9]: ["Variance Inflation Factor (VIF)."](http://www.how2stats.net/2011/09/variance-inflation-factor-vif.html)  How2stats:. N.p., n.d. Web. 27 Oct. 2016.
 
 \newpage
 
@@ -701,7 +701,7 @@ $$
 \end{aligned}
 $$
 
-#Model Metrics of Selected Model   
+## Model Metrics of Selected Model   
 
 Model Metrics using the models best threshold of .420. 
 
@@ -719,9 +719,25 @@ dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for For
 kable(dfFwdModel, align = c("l", "c"))
 ```
 
-#Make predictions in a table. 
+\blandscape
+\pagebreak[4]
+  \global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 90} <!-- provided by http://tex.stackexchange.com/questions/40683/rotate-single-pdf-page-when-viewing --> 
+  
+## Predictions using Final Model 
 
-\newpage
+```{r, echo = FALSE, results='asis'}
+dfEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-evaluation-data.csv") 
+eval.PredProb <- predict(forwardFit,dfEval,type="response") #Predicted Probability 
+eval.predResp <- numeric(nrow(dfEval)) 
+eval.predResp[which(eval.PredProb>=0.49)] <- 1 
+dfEval <- data.frame(cbind(dfEval,eval.PredProb,eval.predResp))
+kable(dfEval)
+```
+
+\elandscape
+
+
+
 # Appendix A
 
 ## Session Info

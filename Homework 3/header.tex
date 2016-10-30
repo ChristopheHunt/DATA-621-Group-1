@@ -4,3 +4,14 @@
 \usepackage[sfdefault]{roboto}
 \usepackage[T1]{fontenc}
 \usepackage{ragged2e}
+
+
+
+% pandoc does not parse latex env - https://groups.google.com/forum/?fromgroups=#!topic/pandoc-discuss/oZETB5Ii1Cw
+\newcommand{\blandscape}{\begin{landscape}}
+\newcommand{\elandscape}{\end{landscape}}
+
+% You know, for landscape
+\usepackage{lscape}
+\usepackage{pdfpages}
+\usepackage{rotating}
