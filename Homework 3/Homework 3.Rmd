@@ -129,13 +129,15 @@ We implement a correlation matrix to better understand the correlation between v
 
 * It is also counterintuitive how the crime rate has a positive correlation with the property tax. It would be anticipated that if the property tax increases, the crime rate would decrease due to the money that home occupants and owners would spend on "promised" security systems. However, when the crime rate starts to increase, the housing prices would decrease due to the fact that the home occupants and owners would not want to risk their safety[^6].
 
-* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. Further resources on why this type of transformation is being used were not available. It should be noted that this transformation causes a counter intuitive correlation. 
+* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. It should be noted that this transformation causes a counter intuitive correlation but as per the data sets author this represents a parabolic relationship to the median crime rate [^7]. Also, it is possible that the AIC in our models would be higher had this transformation not been performed. 
 
 [^4]: ["Nitrogen Oxides Control Regulations | Ground-level Ozone | New England | US EPA."](https://www3.epa.gov/region1/airquality/nox.html) EPA. Environmental Protection Agency, n.d. Web. 22 Oct. 2016.
 
 [^5]: Ajimotokin, S., Haskins, A., & Wade, Z. (2015). [The Effects of Unemployment on Crime Rates in the US.](https://smartech.gatech.edu/bitstream/handle/1853/53294/theeffectsofunemploymentoncimerates.pdf?sequence=1&isAllowed=y)
 
-[^6]
+[^6]: ["Research Crime Rates and the Impact on Home Values | Homes.com."](http://www.homes.com/real-estate/home-values/secure-new-home-research-crime-rates-impact-home-value/) Everything Real Estate Everything Homescom. N.p., 13 May 2016. Web. 30 Oct. 2016.
+
+[^7]: Harrison, D. and Rubinfeld, D.L. 'Hedonic prices and the demand for clean air', J. Environ. Economics & Management, vol.5, 81-102, 1978.
 
 
 ```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 4, fig.width= 6, cache=TRUE}
@@ -151,9 +153,9 @@ corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "blac
 
 ## Outliers Treatment
 
-We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^6].  
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^7].  
 
-[^6]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+[^7]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
 
 The below table is the summary results of the winsorizing of the data. 
 
@@ -228,7 +230,7 @@ Utilizing the below table of common transformations based on the lambda value of
 
 \centering
 
-Common Box-Cox Transformations[^7]
+Common Box-Cox Transformations[^8]
 
 \setlength{\tabcolsep}{12pt}
 
@@ -268,7 +270,7 @@ black & $black^{2}$
 
 \setlength{\tabcolsep}{6pt}
 
-[^7]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
+[^8]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
 
 \newpage
 
@@ -691,14 +693,33 @@ kable(dfVifSubset, align = c("l", "c"))
 
 Based on the Model Metrics, the Forward Selection Model rated the best due to high accuracy and least AIC. 
 
-Our Model :
+Our Final Model : 
+$$
+\begin{aligned}
+\log(target)~=~&-14.116*nox^{-1}~+~0.571*rad~+~0.227*age^{2}~-~0.0001*black^{2} \\
+               &-15.397*dis^{-.5}~+~105.924*tax^{-1}~+~0.0621*lstat~+~0.013*ptratio^{2}~+~27.411\\
+\end{aligned}
+$$
 
-TODO - Write model in latex
+#Model Metrics of Selected Model   
 
-#Model Metrics here  
+Model Metrics using the models best threshold of .420. 
+
+```{r , echo=FALSE, results='asis', eval=TRUE}
+dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.420)] <- 1
+
+dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb,predResp))
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Forwards Selection", fit$aic)
+
+kable(dfFwdModel, align = c("l", "c"))
+```
 
 #Make predictions in a table. 
-
 
 \newpage
 # Appendix A
