@@ -456,12 +456,11 @@ ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
 
 In the backward step selection model, all of the variables remain except the proportion of residential land zoned for large lots, proportion of non-retail business acres per suburb, the dummy variable for whether the suburb borders the Charles River, and the average number of rooms per dwelling. The resulting AIC was 204.59. 
 
-Negative correlations for `nox`, `dis`, and `tax` are results of inverse transformations. Also, `black` coefficient appears as 0 in our table but is `-.000002870` which is too small of a number to be represented in the table. 
+Negative correlations for `nox`, `dis`, and `tax` are results of inverse transformations. For example, as tax increases the log likelihood of the median crime rate increases, however we have inversed this relationship in this model. Also, `black` coefficient appears as 0 in our table but is `-.000002870` which is too small of a number to be represented in the table. 
 
 ```{r backwards model selection, echo=FALSE, results='asis'}
 fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes) ##TODO - Review before submission
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
-summary(fit)
 stargazer(fit, header = FALSE)
 ```
 
@@ -483,7 +482,7 @@ kable(dfBwdModel, align = c("l","c"))
 
 ### Multicollinearity for Backwards Selection
 
-We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that ourt transformed `nox` and `dis` exceeds our pre-established threshold.
+We will use a value of 5 as our threshold for multicollinearity of our variables[^8]. Here in our backwards selection model we find that our transformed `nox` and `dis` exceeds our pre-established threshold.
 
 ```{r, echo=FALSE, results='asis'}
 dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
@@ -493,9 +492,11 @@ kable(dfVifFit, align = c("l", "c"))
 
 [^8]: ["Variance Inflation Factor (VIF)."](http://www.how2stats.net/2011/09/variance-inflation-factor-vif.html)  How2stats:. N.p., n.d. Web. 27 Oct. 2016.
 
+\newpage
+
 ### Backwards Selection after Removing `nox`
 
-We removed `nox` from the backwards selection method due to high multicollinearity in the previous model. Our new model is below. 
+We removed `nox` from the backwards selection method due to high multicollinearity in the previous model. Our new model is below and we see that `zn` is now included and the log likelihood of median crime rate has increased relative to `tax`. 
 
 ```{r , echo=FALSE, results='asis'}
 fullModel <- lm(target ~zn + I(log(indus)) + I(sqrt(chas))  + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes) ##TODO - Review before submission
@@ -547,6 +548,8 @@ kable(dfVifFit, align = c("l", "c"))
 The simplest data-driven model building approach is called forward selection. In this approach, one adds variables to the model one at a time. At each step, each variable that is not already in the model is tested for inclusion in the model. 
 
 Step function used in this assignment chooses a model by AIC in a Stepwise Algorithm. It continues including variables until the AIC value of <none> variable is the least in the list of variables to choose.
+
+We see that `tax` 
 
 ```{r forward selection method, echo=FALSE, results='markup'}
 step(lm(target~1, data=wCrimes), direction = "forward", scope = ~zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv) ##TODO - Review before submission
