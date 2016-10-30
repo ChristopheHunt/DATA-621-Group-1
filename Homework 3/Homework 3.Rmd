@@ -720,9 +720,7 @@ kable(dfFwdModel, align = c("l", "c"))
 ```
 
 \blandscape
-\pagebreak[4]
-  \global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 90} <!-- provided by http://tex.stackexchange.com/questions/40683/rotate-single-pdf-page-when-viewing --> 
-  
+
 ## Predictions using Final Model 
 
 ```{r, echo = FALSE, results='asis'}
