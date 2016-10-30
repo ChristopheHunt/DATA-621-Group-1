@@ -454,10 +454,14 @@ ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
 
 ## Model 1 - Backwards Selection Method
 
+In the backward step selection model, all of the variables remain except the proportion of residential land zoned for large lots, proportion of non-retail business acres per suburb, the dummy variable for whether the suburb borders the Charles River, and the average number of rooms per dwelling. The resulting AIC was 204.59. 
+
+Negative correlations for `nox`, `dis`, and `tax` are results of inverse transformations. Also, `black` coefficient appears as 0 in our table but is `-.000002870` which is too small of a number to be represented in the table. 
 
 ```{r backwards model selection, echo=FALSE, results='asis'}
 fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes) ##TODO - Review before submission
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
+summary(fit)
 stargazer(fit, header = FALSE)
 ```
 
@@ -489,6 +493,53 @@ kable(dfVifFit, align = c("l", "c"))
 
 [^8]: ["Variance Inflation Factor (VIF)."](http://www.how2stats.net/2011/09/variance-inflation-factor-vif.html)  How2stats:. N.p., n.d. Web. 27 Oct. 2016.
 
+### Backwards Selection after Removing `nox`
+
+We removed `nox` from the backwards selection method due to high multicollinearity in the previous model. Our new model is below. 
+
+```{r , echo=FALSE, results='asis'}
+fullModel <- lm(target ~zn + I(log(indus)) + I(sqrt(chas))  + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes) ##TODO - Review before submission
+backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
+stargazer(fit, header = FALSE)
+```
+
+### Model Metrics for Backwards Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+```{r , echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+dfPred <- df[,c("zn", "indus", "age", "rad","tax", "black", "medv")]
+predProb <- predict(fit,dfPred,type="response") #Predicted Probability
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.50)] <- 1
+dfPred <- data.frame(cbind(df[,c("zn", "indus", "age", "rad","tax", "black", "medv", "target")],predProb, predResp))
+dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Backwards Selection", fit$aic)
+kable(dfBwdModel, align = c("l","c"))
+```
+
+Our results indicate that .450 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+```{r , echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+dfPred <- df[,c("zn", "indus", "age", "rad","tax", "black", "medv")]
+predProb <- predict(fit,dfPred,type="response") #Predicted Probability
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.450)] <- 1
+dfPred <- data.frame(cbind(df[,c("zn", "indus", "age", "rad","tax", "black", "medv", "target")],predProb, predResp))
+dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Backwards Selection", fit$aic)
+kable(dfBwdModel, align = c("l","c"))
+```
+
+
+### Multicollinearity for Backwards Selection without `nox`
+
+We will use a value of 5 as our threshold for multicollinearity of our variables. Now we no longer see high multicollinearity using this method. 
+
+```{r, echo=FALSE, results='asis'}
+dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
+colnames(dfVifFit) <- c("variables", "VIF")
+kable(dfVifFit, align = c("l", "c"))
+```
+
 \newpage
 
 ## Model 2 - Forwards Selection Method
@@ -502,7 +553,7 @@ step(lm(target~1, data=wCrimes), direction = "forward", scope = ~zn + I(log(indu
 ```
 
 ```{r, echo = FALSE, results='asis'}
-forwardFit <- fit <- glm(formula = target ~ I(nox^-1) + rad + I(age^2) + medv + I(ptratio^2), data = wCrimes, family = binomial)
+forwardFit <- fit <- glm(formula = target ~ I(nox^-1) + rad + medv + I(age^2) +  I(black^2) + I(dis^-.5) + I(tax^-1) + lstat + I(ptratio^2), data = wCrimes, family = binomial)
 stargazer(fit, header = FALSE)
 ```
 
@@ -513,31 +564,31 @@ stargazer(fit, header = FALSE)
 We first use an established threshold of .50 to determine our best possible threshold. 
 
 ```{r forward model metrics, echo=FALSE, results='asis', eval=TRUE}
-dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
+dfPred <- df[,c("nox","rad","medv","age","black","dis", "tax","lstat", "ptratio")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
 predResp <- numeric(length(predProb)) #Predicted Class
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb,predResp))
+dfPred <- data.frame(cbind(df[,c("nox","rad","medv","age","black","dis", "tax","lstat", "ptratio", "target")],predProb,predResp))
 
 dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Forwards Selection", fit$aic)
 
 kable(dfFwdModel, align = c("l","c"))
 ```
 
-Our results indicate that .610 would be the best threshold for this model so we re-run our metrics using this threshold.
+Our results indicate that .420 would be the best threshold for this model so we re-run our metrics using this threshold.
 
 #### Model Metrics for Forwards Selection with best threshold
 
-Model Metrics using best threshold of .610. 
+Model Metrics using best threshold of .420. 
 
 ```{r second forward model metrics, echo=FALSE, results='asis', eval=TRUE}
 dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
 predResp <- numeric(length(predProb)) #Predicted Class
-predResp[which(predProb>=0.610)] <- 1
+predResp[which(predProb>=0.420)] <- 1
 
 dfPred <- data.frame(cbind(df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv", "target")],predProb,predResp))
 
@@ -630,6 +681,13 @@ kable(dfVifSubset, align = c("l", "c"))
 
 \newpage 
 # Selected Model
+
+Based on the Model Metrics, the Forward Selection Model rated the best due to high accuracy and least AIC. 
+
+Our Model :
+
+TODO - Write model in latex
+
 
 
 \newpage
