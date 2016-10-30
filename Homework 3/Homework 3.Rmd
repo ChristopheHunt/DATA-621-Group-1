@@ -123,17 +123,19 @@ latex(descriptive, file = '')
 
 We implement a correlation matrix to better understand the correlation between variables in the data set. The below matrix is the results and we noticed a few interesting correlations. 
 
-* High nitrogen oxides concentration (parts per 10 million) ("nox") is positively correlated with higher than median crime rates. As defined by the EPA  - "NOx pollution is emitted by automobiles, trucks and various non-road vehicles (e.g., construction equipment, boats, etc.) as well as industrial sources such as power plants, industrial boilers, cement kilns, and turbines"[^4]. It is clear to see that nox is concentrated in areas of high road traffic and possible high industrial use which would be neighborhoods of low value and may attract crime. 
+* High nitrogen oxides concentration (parts per 10 million) ("nox") is positively correlated with higher than median crime rates. As defined by the EPA  - "NOx pollution is emitted by automobiles, trucks and various non-road vehicles (e.g., construction equipment, boats, etc.) as well as industrial sources such as power plants, industrial boilers, cement kilns, and turbines"[^4]. It is clear to see that nox is concentrated in areas of high road traffic and possible high industrial use which would be neighborhoods of low value and may attract crime.
 
 * The weighted mean of distances to five Boston employment centers is negatively correlated with a city with higher than median crime rate. This is intuitive in that employment centers would be more closely located in cities of high crime due to high unemployment being positively correlated with higher crimes rates[^5]. 
 
-* The tax is positively correlated with higher than median crime rate which is counter intuitive because we would think as tax increases then crime would decrease (more valuable property = higher tax = less crime). 
+* It is also counterintuitive how the crime rate has a positive correlation with the property tax. It would be anticipated that if the property tax increases, the crime rate would decrease due to the money that home occupants and owners would spend on "promised" security systems. However, when the crime rate starts to increase, the housing prices would decrease due to the fact that the home occupants and owners would not want to risk their safety[^6].
 
 * We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. Further resources on why this type of transformation is being used were not available. It should be noted that this transformation causes a counter intuitive correlation. 
 
 [^4]: ["Nitrogen Oxides Control Regulations | Ground-level Ozone | New England | US EPA."](https://www3.epa.gov/region1/airquality/nox.html) EPA. Environmental Protection Agency, n.d. Web. 22 Oct. 2016.
 
 [^5]: Ajimotokin, S., Haskins, A., & Wade, Z. (2015). [The Effects of Unemployment on Crime Rates in the US.](https://smartech.gatech.edu/bitstream/handle/1853/53294/theeffectsofunemploymentoncimerates.pdf?sequence=1&isAllowed=y)
+
+[^6]
 
 
 ```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 4, fig.width= 6, cache=TRUE}
@@ -549,7 +551,7 @@ The simplest data-driven model building approach is called forward selection. In
 
 Step function used in this assignment chooses a model by AIC in a Stepwise Algorithm. It continues including variables until the AIC value of <none> variable is the least in the list of variables to choose.
 
-We see that `tax` 
+We see that the decrease in `tax` value increases the log likilehood of median crime rate by 106, keeping all else constant. This is unexpected because it is in constrast to our previous model and our correlation matrix, but we would expect low tax property areas to be areas of high crime. 
 
 ```{r forward selection method, echo=FALSE, results='markup'}
 step(lm(target~1, data=wCrimes), direction = "forward", scope = ~zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv) ##TODO - Review before submission
@@ -616,13 +618,15 @@ kable(dfVifFit, align = c("l", "c"))
 
 ## Model 3 - Subset Selection Method
 
-Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. The variables as indicated in column `8` of the below table will be further implement into our subset selection model. 
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. 
 
 ```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
 subsetModel <- regsubsets(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes, nbest = 1)
 summary <- summary(subsetModel)
 kable(t(summary$outmat))
 ```
+
+The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in this model as our previous model. For example, the coefficient for tax was as high as 106 in the forward selection model but is -5 in this model. However, our intercept in this model is larger than any other model.  
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModel <- lm(target ~ I(nox^-1) + I(age^2) +  I(dis^-.5) + rad + I(tax^-1) + I(black^2)  +  lstat + medv, data = wCrimes) ##TODO - Review before submission
@@ -691,6 +695,9 @@ Our Model :
 
 TODO - Write model in latex
 
+#Model Metrics here  
+
+#Make predictions in a table. 
 
 
 \newpage
