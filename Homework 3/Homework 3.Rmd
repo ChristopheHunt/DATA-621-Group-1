@@ -130,7 +130,7 @@ We implement a correlation matrix to better understand the correlation between v
 
 * It is also counterintuitive how the crime rate has a positive correlation with the property tax. It would be anticipated that if the property tax increases, the crime rate would decrease due to the money that home occupants and owners would spend on "promised" security systems. However, when the crime rate starts to increase, the housing prices would decrease due to the fact that the home occupants and owners would not want to risk their safety[^5].
 
-* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. It should be noted that this transformation causes a counter intuitive correlation but as per the data sets author this represents a parabolic relationship to the median crime rate [^6]. Also, it is possible that the AIC in our models would be higher had this transformation not been performed. None of the raw values are less than one so this transformation will not affect the correlation. 
+* We also see bk is negatively correlated with higher than median crime rates but it seems to be due to the transformation of 1000(Bk - 0.63)^2. It should be noted that this transformation causes a counter intuitive correlation but as per the data sets author this represents a parabolic relationship to the median crime rate [^6]. Also, it is possible that the AIC in our models would be higher had this transformation not been performed.
 
 [^3]: ["Nitrogen Oxides Control Regulations | Ground-level Ozone | New England | US EPA."](https://www3.epa.gov/region1/airquality/nox.html) EPA. Environmental Protection Agency, n.d. Web. 22 Oct. 2016.
 
