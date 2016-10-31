@@ -92,9 +92,12 @@ kable(daDict %>%
 
 The skewness of each input variable is shown below. The two variables with the strongest skew are the proportion of residential land zoned for large lots and the proportion of blacks by town. Respectively the magnitudes of the skewness of these two variables are 2.18 and 2.92. This indicates that the distributions for these two variables are far from symmetrical. The skewness of the dummy variable (whether the suburb borders the river or not) can be neglected because it is a binary variable. All of the other variables skewnesses that are approximately of magnitude 1 or less. This indicates that the distributions for those variables can be considered symmetric even though for three of the variables (concentration of nitrogen oxides, index of accessibility to radial highways, and median value of owner-occupied homes) are multimodal.
 
-```{r skew, echo=FALSE, results='asis'}
+```{r skew, echo=FALSE, results='asis', cache=TRUE}
 library(matrixStats)
-crimes <- dfTr <- df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+#crimes <- dfTr <- df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
+#offline
+setwd(file.path("C:","users","Christophe", "Documents","Github","Data 621 - Group 1","Data-621-Group-1","Homework 3"))
+crimes <- dfTr <- df <- read.csv("crime-training-data.csv")
 dfSkew <- setDT(as.data.frame(abs(skewness(crimes))), keep.rownames = TRUE)[]
 colnames(dfSkew) <- c("variables", "skew")
 kable(dfSkew, align = c("l", "c"))
@@ -140,12 +143,11 @@ We implement a correlation matrix to better understand the correlation between v
 [^6]: Harrison, D. and Rubinfeld, D.L. 'Hedonic prices and the demand for clean air', J. Environ. Economics & Management, vol.5, 81-102, 1978.
 
 
-```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 4, fig.width= 6, cache=TRUE}
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE}
 dfTrMx <- as.matrix(dfTr)
 corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
-corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .5, na.label = " ")
+corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .75, na.label = " ")
 ```
-
 
 \newpage 
 
@@ -159,7 +161,7 @@ We chose winsorizing as the method to address outliers. Instead of trimming valu
 
 The below table is the summary results of the winsorizing of the data. 
 
-```{r winsorize function, echo=FALSE}
+```{r winsorize function, echo=FALSE,  cache=TRUE}
 winsorize <- function(x, multiple=2.2)
 {
   q <- quantile(x)
@@ -177,7 +179,7 @@ winsorize <- function(x, multiple=2.2)
 }
 ```
 
-```{r winsorize dataframe,  echo=FALSE, results='asis'}
+```{r winsorize dataframe,  echo=FALSE, results='asis',  cache=TRUE}
 library(forecast)
 
 winsorizedDataset <- function(dataset){
@@ -276,7 +278,7 @@ black & $black^{2}$
 
 # Models Built
 
-```{r model metrics, echo=FALSE}
+```{r model metrics, echo=FALSE,  cache=TRUE}
 #Supporting Functions
 
 TP <- function(df, predResp, resp, p, n)
@@ -462,7 +464,7 @@ In the backward step selection model, all of the variables remain except the pro
 
 Negative correlations for `nox`, `dis`, and `tax` are results of inverse transformations. For example, as tax increases the log likelihood of the median crime rate increases, however we have inversed this relationship in this model. Also, `black` coefficient appears as 0 in our table but is `-.000002870` which is too small of a number to be represented in the table. 
 
-```{r backwards model selection, echo=FALSE, results='asis'}
+```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE}
 fullModel <- lm(target ~ zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes) ##TODO - Review before submission
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
@@ -488,7 +490,7 @@ kable(dfBwdModel, align = c("l","c"))
 
 We will use a value of 5 as our threshold for multicollinearity of our variables[^9]. Here in our backwards selection model we find that our transformed `nox` and `dis` exceeds our pre-established threshold.
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
 colnames(dfVifFit) <- c("variables", "VIF")
 kable(dfVifFit, align = c("l", "c"))
@@ -502,11 +504,13 @@ kable(dfVifFit, align = c("l", "c"))
 
 We removed `nox` from the backwards selection method due to high multicollinearity in the previous model. Our new model is below and we see that `zn` is now included and the log likelihood of median crime rate has increased relative to `tax`. 
 
-```{r , echo=FALSE, results='asis'}
+```{r , echo=FALSE, results='asis',  cache=TRUE}
 fullModel <- lm(target ~zn + I(log(indus)) + I(sqrt(chas))  + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv, data = wCrimes) ##TODO - Review before submission
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
 ```
+
+\newpage
 
 ### Model Metrics for Backwards Selection
 
@@ -522,7 +526,15 @@ dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Bac
 kable(dfBwdModel, align = c("l","c"))
 ```
 
-Our results indicate that .450 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+Our previous results indicate that .450 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+\newpage
+
+#### Model Metrics for Backwards Selection with best threshold
+
+Model Metrics using best threshold of .450. 
+
 
 ```{r , echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
 dfPred <- df[,c("zn", "indus", "age", "rad","tax", "black", "medv")]
@@ -534,12 +546,13 @@ dfBwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Bac
 kable(dfBwdModel, align = c("l","c"))
 ```
 
+\newpage
 
 ### Multicollinearity for Backwards Selection without `nox`
 
 We will use a value of 5 as our threshold for multicollinearity of our variables. Now we no longer see high multicollinearity using this method. 
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=FALSE, results='asis', cache=TRUE}
 dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
 colnames(dfVifFit) <- c("variables", "VIF")
 kable(dfVifFit, align = c("l", "c"))
@@ -555,11 +568,11 @@ Step function used in this assignment chooses a model by AIC in a Stepwise Algor
 
 We see that the decrease in `tax` value increases the log likilehood of median crime rate by 106, keeping all else constant. This is unexpected because it is in constrast to our previous model and our correlation matrix, but we would expect low tax property areas to be areas of high crime. 
 
-```{r forward selection method, echo=FALSE, results='markup'}
+```{r forward selection method, echo=FALSE, results='markup', cache=TRUE}
 step(lm(target~1, data=wCrimes), direction = "forward", scope = ~zn + I(log(indus)) + I(sqrt(chas)) + I(nox^-1) + I(log(rm)) + I(age^2) + I(dis^-.5) + rad + I(tax^-1) + I(ptratio^2) + I(black^2) + lstat + medv) ##TODO - Review before submission
 ```
 
-```{r, echo = FALSE, results='asis'}
+```{r, echo = FALSE, results='asis',  cache=TRUE}
 forwardFit <- fit <- glm(formula = target ~ I(nox^-1) + rad + medv + I(age^2) +  I(black^2) + I(dis^-.5) + I(tax^-1) + lstat + I(ptratio^2), data = wCrimes, family = binomial)
 stargazer(fit, header = FALSE)
 ```
@@ -570,7 +583,7 @@ stargazer(fit, header = FALSE)
 
 We first use an established threshold of .50 to determine our best possible threshold. 
 
-```{r forward model metrics, echo=FALSE, results='asis', eval=TRUE}
+```{r forward model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
 dfPred <- df[,c("nox","rad","medv","age","black","dis", "tax","lstat", "ptratio")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
@@ -590,7 +603,7 @@ Our results indicate that .420 would be the best threshold for this model so we 
 
 Model Metrics using best threshold of .420. 
 
-```{r second forward model metrics, echo=FALSE, results='asis', eval=TRUE}
+```{r second forward model metrics, echo=FALSE, results='asis', eval=TRUE,  cache=TRUE}
 dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
@@ -610,7 +623,7 @@ kable(dfFwdModel, align = c("l", "c"))
 
 Here in our forward selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(vif(forwardFit)), keep.rownames = TRUE)[]
 colnames(dfVifFit) <- c("variables", "VIF")
 kable(dfVifFit, align = c("l", "c"))
@@ -620,6 +633,8 @@ kable(dfVifFit, align = c("l", "c"))
 
 ## Model 3 - Subset Selection Method
 
+### Subset Variable Selection
+
 Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. 
 
 ```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
@@ -628,7 +643,11 @@ summary <- summary(subsetModel)
 kable(t(summary$outmat))
 ```
 
-The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in this model as our previous model. For example, the coefficient for tax was as high as 106 in the forward selection model but is -5 in this model. However, our intercept in this model is larger than any other model.  
+\newpage
+
+### Subset Model
+
+The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in our independent variables to the dependent variable in this model as our previous model. For example, the coefficient for tax was as high as 106 in the forward selection model but it is -5 in this model. However, our intercept in this model is larger than any other model.  
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModel <- lm(target ~ I(nox^-1) + I(age^2) +  I(dis^-.5) + rad + I(tax^-1) + I(black^2)  +  lstat + medv, data = wCrimes) ##TODO - Review before submission
@@ -642,7 +661,7 @@ stargazer(subsetModel, header = FALSE)
 
 We first use an established threshold of .50 to determine our best possible threshold. 
 
-```{r subset model metrics, echo=FALSE, results='asis', eval=TRUE}
+```{r subset model metrics, echo=FALSE, results='asis', eval=TRUE,  cache=TRUE}
 dfPred <- df[,c("nox","age","dis", "rad","tax", "black", "lstat", "medv")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
@@ -662,7 +681,7 @@ Our results indicate that .490 would be the best threshold for this model so we 
 
 Model Metrics using best threshold of .490. 
 
-```{r subset model metrics second, echo=FALSE, results='asis', eval=TRUE}
+```{r subset model metrics second, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
 dfPred <- df[,c("nox","age","dis", "rad","tax", "black", "lstat", "medv")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
@@ -682,7 +701,7 @@ kable(dfFwdModel, align = c("l","c"))
 
 Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=FALSE, results='asis',  cache=TRUE}
 dfVifSubset <- setDT(as.data.frame(vif(subsetModel)), keep.rownames = TRUE)[]
 colnames(dfVifSubset) <- c("variables", "VIF")
 kable(dfVifSubset, align = c("l", "c"))
@@ -705,7 +724,7 @@ $$
 
 Model Metrics using the models best threshold of .420. 
 
-```{r , echo=FALSE, results='asis', eval=TRUE}
+```{r , echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
 dfPred <- df[,c("nox","age","dis","rad","tax","ptratio", "black","lstat", "medv")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
@@ -720,11 +739,15 @@ kable(dfFwdModel, align = c("l", "c"))
 ```
 
 \blandscape
+\pagebreak[4]
+  \global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 90} <!-- provided by http://tex.stackexchange.com/questions/40683/rotate-single-pdf-page-when-viewing --> 
+
 
 ## Predictions using Final Model 
 
-```{r, echo = FALSE, results='asis'}
-dfEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-evaluation-data.csv") 
+```{r, echo = FALSE, results='asis',  cache=TRUE}
+#dfEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-evaluation-data.csv")
+dfEval <- read.csv("crime-evaluation-data.csv") 
 eval.PredProb <- predict(forwardFit,dfEval,type="response") #Predicted Probability 
 eval.predResp <- numeric(nrow(dfEval)) 
 eval.predResp[which(eval.PredProb>=0.49)] <- 1 
@@ -733,19 +756,19 @@ kable(dfEval)
 ```
 
 \elandscape
-
+\global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 0}
 
 # Appendix A
 
 ## Session Info
 
-```{r, results='asis', echo=FALSE, eval = TRUE}
+```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
 toLatex(sessionInfo())
 ```
 
 ## Data Dictionary
 
-```{r, eval=TRUE, results='asis', echo=FALSE}
+```{r, eval=TRUE, results='asis', echo=FALSE,  cache=TRUE}
 kable(daDict %>% 
       filter(VARIABLE.TYPE == "Predictor Variable") %>%
       mutate(Abbreviation = VARIABLE.NAME, Definition = DEFINITION)  %>%
