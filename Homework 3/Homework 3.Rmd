@@ -95,7 +95,6 @@ The skewness of each input variable is shown below. The two variables with the s
 ```{r skew, echo=FALSE, results='asis', cache=TRUE}
 library(matrixStats)
 crimes <- dfTr <- df <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%203/crime-training-data.csv")
-crimes <- dfTr <- df <- read.csv("crime-training-data.csv")
 dfSkew <- setDT(as.data.frame(abs(skewness(crimes))), keep.rownames = TRUE)[]
 colnames(dfSkew) <- c("variables", "skew")
 kable(dfSkew, align = c("l", "c"))
