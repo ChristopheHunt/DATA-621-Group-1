@@ -1,0 +1,88 @@
+---
+title: "Homework 4"
+author: "Group 1"
+date: ''
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+```{r programming style guide, echo=FALSE, eval=FALSE}
+##Style guide
+##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
+##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
+##lower case for scalar/single value, ex. x <- 1
+##data frame start with df followed by description, ex. dfEval <- evaluation data frame
+##assignments use "<-" not "="
+```
+
+```{r library load, include = FALSE}
+library(pacman)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car)
+```
+
+\begin{center}
+\bigskip
+\bigskip
+\bigskip
+Prepared for:\\
+\medskip
+Dr. Nathan Bastian\\
+\smallskip
+City University of New York, School of Professional Studies - Data 621\\
+\bigskip
+Prepared by:\\
+\medskip
+Group 1\\ 
+\medskip
+Senthil Dhanapal\\ 
+\smallskip
+Yadu Chittampalli\\
+\smallskip
+Christophe Hunt\\  
+
+\end{center}
+
+# Introduction
+
+
+# Statement of the Problem
+
+# Data Exploration  
+
+## Variables Explained
+
+The variables provided in our evaluation data set our explained below:
+
+```{r data dictionary table, eval=FALSE, results='asis', echo=FALSE}
+kable(daDict %>% 
+      filter(VARIABLE.TYPE == "Predictor Variable") %>%
+      mutate(Abbreviation = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(Abbreviation, Definition),
+      align = c("c","l"))
+```
+
+Histograms of most of our variables have been plotted below so that distribution can be visualized. 
+
+```{r descriptive statistics table, echo=FALSE, results='asis', cache=TRUE}
+
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance_training_data.csv")
+
+digits <- c(1)
+
+descriptive <- describe( dfTr %>% dplyr::select(-INDEX, -TARGET_FLAG) 
+                        , descript = "Table 1 : Descriptive Statistics", digits = digits)
+latex(descriptive, file = '')
+```
+
+\newpage
+
+## Exploration of Variables
+
