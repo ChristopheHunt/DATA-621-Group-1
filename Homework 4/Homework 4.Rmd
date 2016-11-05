@@ -52,7 +52,6 @@ Christophe Hunt\\
 
 # Introduction
 
-
 # Statement of the Problem
 
 # Data Exploration  
@@ -85,4 +84,26 @@ latex(descriptive, file = '')
 \newpage
 
 ## Exploration of Variables
+
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE}
+
+removedollars <- function(column){
+             as.numeric(gsub("\\,","",gsub("\\$","", column)))
+          }
+
+dfTr <- dfTr %>%
+        mutate(INCOME = removedollars(INCOME),
+               HOME_VAL = removedollars(HOME_VAL),
+               BLUEBOOK = removedollars(BLUEBOOK),
+               OLDCLAIM = removedollars(OLDCLAIM),
+               MSTATUS = gsub("z_", "", MSTATUS),
+               SEX = gsub("z_", "", SEX))
+
+
+
+dfTrMx <- as.matrix(dfTr)
+corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
+corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .75, na.label = " ")
+```
+
 
