@@ -102,8 +102,11 @@ dfTr <- dfTr %>%
                CAR_TYPE = as.factor(gsub("z_", "", CAR_TYPE)),
                URBANICITY = as.factor(gsub("z_", "", URBANICITY)))
 ```
-
 \normalsize
+
+\newpage
+
+### Nominal Variables
 
 We first look at our nominal variables and their applicable proportions. Interestingly, we see that in this data set only a quarter of the customer records indicate an accident occurred. Also, the majority of consumers in this data set have no kids at home, are married, more than a high school education but less than a PhD, use their car for private purposes, typically own a SUV or minivan, and also live in an urban environment. This provides an interesting insight to the type of customer this data set represents and should be considered when further interpreting our statistical model. Additionally, we should be mindful of any selection biases in this data set as consumers with extremely risky histories are likely to have not been extended insurance coverage. 
 
@@ -117,6 +120,8 @@ reporttools::tableNominal(dfTr %>%
                         caption.placement = "top", longtable = TRUE, 
                         add.to.row = list(pos = list(0), command = "\\hline \\endhead "))
 ```
+
+### Continuous and Discrete Variables
 
 We can see that in our continuous and discrete variables there is some additional variability. The median claim amount (`TARGET_AMT`) is 0 which would coincide with only a quarter for records indicating an accident. However, the spread is large since the average payout is only \$1,504.30 but the maximum payout was \$107,586.10. Surprisingly, the median `AGE` is 45 and the average `AGE` is 44.8 years, while we expected a lower average it could be due to simple selection bias in the data set source or the aging US population bringing this average higher [^3]. We also noticed that an `INCOME` of \$0.00 seems unwise because it is unclear how the individual would be able to cover their premium costs without parental support. Finally, we should note that the data set has as `CAR_AGE` of -3, which is impossible and will need to be removed.
 
