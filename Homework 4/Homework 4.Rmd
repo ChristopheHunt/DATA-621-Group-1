@@ -54,7 +54,7 @@ Christophe Hunt\\
 
 # Introduction
 
-Consumers who own a car are often required to purchase car insurance to protect themselves from serious financial repercussions of being involved in a car accident. Insurance Providers must determine the risk of the offering insurance converage to a new customer through accurate statistical models that evaluate the risk. Since Insurance Providers are motivated by collecting the maximum amount of revenue from consumers while returning the lowest amount in accident claims, the statistical modeling provides Insurance Providers with insight into the consumers behavior and the most appropriate pricing schemes[^1]. 
+Consumers who own a car are often required to purchase car insurance to protect themselves from serious financial repercussions of being involved in a car accident. Insurance Providers must determine the risk of the offering insurance coverage to a new customer through accurate statistical models that evaluate the risk. Since Insurance Providers are motivated by collecting the maximum amount of revenue from consumers while returning the lowest amount in accident claims, the statistical modeling provides Insurance Providers with insight into the consumers behavior and the most appropriate pricing schemes[^1]. 
 
 [^1]: ["Insider Information: How Insurance Companies Measure Risk - Insurance Companies.com."](http://www.insurancecompanies.com/insider-information-how-insurance-companies-measure-risk/) Insurance Companiescom. N.p., n.d. Web. 06 Nov. 2016.
 
@@ -91,7 +91,6 @@ removeDollars <- function(column){
              as.numeric(gsub("\\,","",gsub("\\$","", column)))
             }
 
-
 dfTr <- dfTr %>%
         mutate(INCOME = removeDollars(INCOME),
                HOME_VAL = removeDollars(HOME_VAL),
@@ -111,17 +110,39 @@ descriptive <- describe(dfTr %>% dplyr::select(-INDEX),
                         digits = digits)
 
 latex(descriptive, file = '')
-
-hist.data.frame(dfTr)
 ```
 
 \newpage
 
+## Imputting Missing Values
+
+In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^2]
+
+[^2]: Stekhoven, Daniel J., and Peter Bühlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
+
+```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+registerDoParallel(cl = makeCluster(10), cores = 2)
+
+set.seed(1234)
+
+imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, parallelize = 'variables', verbose = TRUE) #Takes approximately 1 hour to process
+
+write.csv(imputed_data$ximp,"imputed_insurance_training_data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest
+```
+
+```{r, results='asis', echo = FALSE, cache=TRUE, eval=TRUE}
+imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/imputed_insurance_training_data.csv")
+
+descriptive <- describe(imputedDfTr %>% dplyr::select(-INDEX),
+                        descript = "Table 2 : Imputed Descriptive Statistics", 
+                        digits = digits)
+
+latex(descriptive, file = '')
+```
+
 ## Exploration of Variables
 
 ```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE, eval=FALSE}
-
-
 
 dfTrMx <- as.matrix(dfTr)
 corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
