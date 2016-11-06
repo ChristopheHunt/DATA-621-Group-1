@@ -1,0 +1,47 @@
+---
+title: "Untitled"
+author: "Yadu"
+date: "November 5, 2016"
+output: html_document
+---
+
+```{r}
+library(pacman)
+library(stringr)
+library(dplyr)
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance_training_data.csv")
+dfTr <- subset(dfTr, select = -INDEX)
+```
+
+```{r}
+removedollars <- function(column){
+             as.numeric(gsub("\\,","",gsub("\\$","", column)))
+}
+```
+
+```{r}
+dfTr <- dfTr %>%
+        mutate(INCOME = removedollars(INCOME),
+               HOME_VAL = removedollars(HOME_VAL),
+               BLUEBOOK = removedollars(BLUEBOOK),
+               OLDCLAIM = removedollars(OLDCLAIM),
+               MSTATUS = gsub("z_", "", MSTATUS),
+               URBANICITY = gsub("z_", "", URBANICITY),
+               EDUCATION = gsub("z_", "", EDUCATION),
+               EDUCATION = gsub("<", "Less Than ", EDUCATION),
+               JOB = gsub("z_", "", JOB),
+               CAR_TYPE = gsub("z_", "", CAR_TYPE),
+               SEX = gsub("z_", "", SEX))
+```
+
+```{r}
+library(car)
+fit = lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
+ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
+```
+
+```{r}
+spreadLevelPlot(fit)
+residualPlots(fit)
+```
+
