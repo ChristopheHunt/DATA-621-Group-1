@@ -1,10 +1,4 @@
 base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 pacman
 lattice
 survival
@@ -41,7 +35,6 @@ quantreg
 MASS
 locfit
 abc
-parallel
 doParallel
 stargazer
 zoo

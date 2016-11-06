@@ -52,7 +52,11 @@ Christophe Hunt\\
 
 # Introduction
 
+Consumers who own a car will then often purchase car insurance to protect themselves from serious financial repercussions of being involved in a car accident. Insurance Providers understand that most consumers will not be involved in accidents so they must determine accurate models to evaluate the risk of providing insurance protection to new consumers. As Insurance Providers are motivated by collecting the maximum amount of revenue from consumers while returning the lowest amount in accident coverage, statistical modeling provides Insurance Providers insight into the consumers behavior and the most appropriate pricing to provide the consumer coverage. 
+
 # Statement of the Problem
+
+The purpose of this report is to develop statistical models to better infer the likelihood of a customer being involved in a car accident and the cost associated of a customer being involved in a car accident. 
 
 # Data Exploration  
 
@@ -60,11 +64,17 @@ Christophe Hunt\\
 
 The variables provided in our evaluation data set our explained below:
 
+```{r data dictionary load, include=FALSE, cache=TRUE}
+download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%204/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW4 - Group 1.xlsx", mode = 'wb')
+daDict <- read.xlsx("Data Dictionary HW4 - Group 1.xlsx", sheetIndex = 1)
+file.remove(dir(getwd(), pattern = "Data Dictionary HW4 - Group 1", full.names = TRUE))
+```
+
+
 ```{r data dictionary table, eval=FALSE, results='asis', echo=FALSE}
 kable(daDict %>% 
-      filter(VARIABLE.TYPE == "Predictor Variable") %>%
-      mutate(Abbreviation = VARIABLE.NAME, Definition = DEFINITION)  %>%
-      dplyr::select(Abbreviation, Definition),
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
       align = c("c","l"))
 ```
 
@@ -85,7 +95,9 @@ latex(descriptive, file = '')
 
 ## Exploration of Variables
 
-```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE}
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE, eval=FALSE}
+
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance_training_data.csv")
 
 removedollars <- function(column){
              as.numeric(gsub("\\,","",gsub("\\$","", column)))
@@ -98,6 +110,8 @@ dfTr <- dfTr %>%
                OLDCLAIM = removedollars(OLDCLAIM),
                MSTATUS = gsub("z_", "", MSTATUS),
                SEX = gsub("z_", "", SEX))
+
+model <- lm(TARGET_AMT~., data = dfTr)
 
 
 
