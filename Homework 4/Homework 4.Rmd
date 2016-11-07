@@ -172,13 +172,12 @@ latex(descriptive, file = '')
 
 ## Exploration of Variables
 
-```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE, eval=TRUE}
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, cache=TRUE, eval=TRUE}
+
 
 imputedDfTrMx <- imputedDfTr %>%
                    mutate(Yes = 1) %>%
-                   spread(EDUCATION, Yes, fill = 0) %>%
-                   mutate(Yes = 1) %>%
-                   spread(JOB, Yes, fill = 0) %>%
+                   spread(EDUCATION, Yes, fill = 0)  %>%
                    mutate(Yes = 1) %>%
                    spread(CAR_TYPE, Yes, fill = 0) %>%
                    mutate(Yes = 1) %>%
@@ -192,12 +191,14 @@ imputedDfTrMx <- imputedDfTr %>%
                    mutate(PARENT1 = ifelse(PARENT1 == "No", 0, 1),
                           MSTATUS = ifelse(MSTATUS == "No", 0, 1),
                           RED_CAR = ifelse(RED_CAR == "no", 0, 1),
-                          REVOKED = ifelse(REVOKED == "No", 0, 1))
+                          REVOKED = ifelse(REVOKED == "No", 0, 1)) %>%
+                  mutate(Yes = 1) %>%
+                  spread(JOB, Yes, fill = 0)  
 
 imputedDfTrMx <- as.matrix(imputedDfTrMx)
 
 corMx <- cor(imputedDfTrMx , use = "everything",  method = c("pearson"))
-corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .75, na.label = " ")
+corrplot(corMx, order = "hclust", addrect = 10, method = "square", tl.col = "black", tl.cex = .50, na.label = " ")
 ```
 
 
