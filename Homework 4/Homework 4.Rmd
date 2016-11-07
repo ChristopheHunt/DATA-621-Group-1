@@ -82,12 +82,15 @@ kable(daDict %>%
 ```
 
 
-```{r data prep, echo=FALSE, results='asis', cache=TRUE}
+```{r data prep, echo=FALSE, results='asis'}
 dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance_training_data.csv")
 
 removeDollars <- function(column){
              as.numeric(gsub("\\,","",gsub("\\$","", column)))
             }
+
+dfTr$JOB <- as.character(dfTr$JOB)
+dfTr$JOB[(dfTr$JOB == "")] <- NA
 
 dfTr <- dfTr %>%
         mutate(INCOME = removeDollars(INCOME),
@@ -101,6 +104,7 @@ dfTr <- dfTr %>%
                JOB = as.factor(gsub("z_", "", JOB)),
                CAR_TYPE = as.factor(gsub("z_", "", CAR_TYPE)),
                URBANICITY = as.factor(gsub("z_", "", URBANICITY)))
+
 ```
 \normalsize
 
@@ -125,7 +129,7 @@ reporttools::tableNominal(dfTr %>%
 
 We can see that in our continuous and discrete variables there is some additional variability. The median claim amount (`TARGET_AMT`) is 0 which would coincide with only a quarter for records indicating an accident. However, the spread is large since the average payout is only \$1,504.30 but the maximum payout was \$107,586.10. Surprisingly, the median `AGE` is 45 and the average `AGE` is 44.8 years, while we expected a lower average it could be due to simple selection bias in the data set source or the aging US population bringing this average higher [^3]. We also noticed that an `INCOME` of \$0.00 seems unwise because it is unclear how the individual would be able to cover their premium costs without parental support. Finally, we should note that the data set has as `CAR_AGE` of -3, which is impossible and will need to be removed.
 
-There are many missing values for this portion of our data set, we have over 400 values missing for years on the job, income, home value, and car age. Due to these missing values we will need to impute these missing values to complete our statistical model. 
+There are many missing values for this portion of our data set, we have over 400 values missing for years on the job, income, home value, and car age. Due to these missing values we will need to impute to complete our statistical model. 
 
 [^3]: Ortman, Jennifer M., Victoria A. Velkoff, and Howard Hogan. "An aging nation: the older population in the United States." Washington, DC: US Census Bureau (2014): 25-1140.
 
@@ -149,7 +153,9 @@ registerDoParallel(cl = makeCluster(10), cores = 2)
 
 set.seed(1234)
 
-imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, parallelize = 'variables', verbose = TRUE) #Takes approximately 1 hour to process
+dfTr$CAR_AGE[(dfTr$CAR_AGE == -3)] <- NA
+
+imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately 1 hour to process
 
 write.csv(imputed_data$ximp,"imputed_insurance_training_data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest
 ```
@@ -166,10 +172,31 @@ latex(descriptive, file = '')
 
 ## Exploration of Variables
 
-```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE, eval=FALSE}
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 3, fig.width= 8, cache=TRUE, eval=TRUE}
 
-dfTrMx <- as.matrix(dfTr)
-corMx <- cor(dfTrMx , use = "everything",  method = c("pearson"))
+imputedDfTrMx <- imputedDfTr %>%
+                   mutate(Yes = 1) %>%
+                   spread(EDUCATION, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   spread(JOB, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   spread(CAR_TYPE, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   mutate(SEX = ifelse(SEX == "F", "Female", "Male")) %>%
+                   spread(SEX, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   mutate(CAR_USE = ifelse(CAR_USE == "Commercial", "Commercial Car Use", "Private Car Use")) %>%
+                   spread(CAR_USE, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   spread(URBANICITY, Yes, fill = 0 ) %>%
+                   mutate(PARENT1 = ifelse(PARENT1 == "No", 0, 1),
+                          MSTATUS = ifelse(MSTATUS == "No", 0, 1),
+                          RED_CAR = ifelse(RED_CAR == "no", 0, 1),
+                          REVOKED = ifelse(REVOKED == "No", 0, 1))
+
+imputedDfTrMx <- as.matrix(imputedDfTrMx)
+
+corMx <- cor(imputedDfTrMx , use = "everything",  method = c("pearson"))
 corrplot(corMx, order = "hclust", addrect = 2, method = "square", tl.col = "black", tl.cex = .75, na.label = " ")
 ```
 
