@@ -163,6 +163,8 @@ write.csv(imputed_data$ximp,"imputed_insurance_training_data.csv", row.names = F
 ```{r, results='asis', echo = FALSE, cache=TRUE, eval=TRUE}
 imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/imputed_insurance_training_data.csv")
 
+digits = 1
+
 descriptive <- describe(imputedDfTr %>% dplyr::select(-INDEX),
                         descript = "Table 2 : Imputed Descriptive Statistics", 
                         digits = digits)
