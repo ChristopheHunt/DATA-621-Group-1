@@ -203,4 +203,129 @@ corMx <- cor(imputedDfTrMx , use = "everything",  method = c("pearson"))
 corrplot(corMx, order = "hclust", addrect = 10, method = "square", tl.col = "black", tl.cex = .50, na.label = " ")
 ```
 
+# Data Transformation
 
+## Outliers Treatment
+
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^7].  
+
+[^7]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+
+The below table is the summary results of the winsorizing of the data. 
+
+```{r winsorize function, echo=FALSE,  cache=TRUE}
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+
+  return(x)  
+
+}
+```
+
+```{r winsorize dataframe,  echo=FALSE, results='asis',  cache=TRUE, eval=FALSE}
+library(forecast)
+
+winsorizedDataset <- function(dataset){
+  dataset <- dataset[,1:ncol(dataset)]
+  wdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  #l1 <- numeric(ncol(dataset))
+  for (i in 1:ncol(dataset)){
+    if(i == 3 || i == ncol(dataset)){
+      wdataset[,i] <- dataset[,i]
+    }
+    else {
+    wdataset[,i] <- winsorize(dataset[,i], multiple = 2.2)
+    }
+    colnames(wdataset) <- colnames(dataset)
+  }
+  return(data.frame(wdataset))
+}
+
+
+winzImputedDfTr <- winsorizedDataset(imputedDfTr) ##TODO - fix this for factors
+
+stargazer(winzImputedDfTr, header = FALSE)
+```
+
+## BoxCox Transformations 
+
+Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
+
+```{r boxcox transformation, echo=FALSE, cache=TRUE, results='asis'}
+boxcoxLambdas <- function(dataset){
+  dataset <- dataset[,1:ncol(dataset)]
+  #tdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
+  l1 <- numeric(ncol(dataset))
+  for (i in 1:ncol(dataset)){
+    l1[i] <- BoxCox.lambda(dataset[,i])
+  }
+  return(data.frame(l1, colnames(dataset)))
+}
+
+boxcoxSubDfTr <- as.data.frame(imputedDfTr %>% 
+                            dplyr::select(INCOME, HOME_VAL, OLDCLAIM) %>% 
+                            map_if(is.integer, as.numeric))
+
+dfBoxCox <- boxcoxLambdas(boxcoxSubDfTr)
+
+colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
+
+kable(dfBoxCox, align = c("c", "c"))
+```
+
+Utilizing the below table of common transformations based on the lambda value of the BoxCox we further transform our independent variables.
+
+\centering
+
+Common Box-Cox Transformations[^8]
+
+\setlength{\tabcolsep}{12pt}
+
+\begin{tabular}{ c c }
+\hline
+$\lambda$ & Y' \\ \hline
+-2 &	$Y^{-2}~=~\frac{1}{Y^{2}}$ \\
+-1 &	$Y^{-1}~=~\frac{1}{Y^{1}}$ \\
+-0.5 &	$Y^{-0.5}~=~\frac{1}{\sqrt{(Y)}}$ \\
+0	& $\log(Y)$ \\
+0.5	& $Y^{0.5}~=~\sqrt{(Y)}$ \\
+1	& $Y^{1}~=~Y$ \\
+2	& $Y^{2}$ \\
+\end{tabular}
+
+\justifying
+
+All other Lambda values were truncated to the nearest tenth that match a common transformation as per the below table.
+
+\centering
+
+\begin{tabular}{ c c }
+\hline
+variable & variable transformation \\ \hline
+HOME_VAL & $\log(indus)$ \\
+INCOME & $\sqrt{chas}$ \\
+OLDCLAIM & $nox^{-1}$ \\
+rm & $\log(rm)$ \\
+age & $age^{2}$ \\
+dis & $dis^{-.5}$ \\
+tax & $tax^{-1}$ \\
+ptratio & $ptratio^{2}$ \\
+black & $black^{2}$ 
+\end{tabular}
+
+\justifying
+
+\setlength{\tabcolsep}{6pt}
+
+[^8]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
+
+\newpage
