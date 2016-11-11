@@ -255,7 +255,7 @@ winsorizedDataset <- function(dataset){
   return(data.frame(wdataset))
 }
 
-wimputedDfTr <- winsorizedDataset(imputedDfTr)
+wimputedDfTr <- imputedDfTr #winsorizedDataset(imputedDfTr)
 
 stargazer(wimputedDfTr, header = FALSE)
 ```
@@ -529,7 +529,7 @@ In the backward step selection model  The resulting AIC was .
 #TODO UPDATE THIS  
 
 ```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
-fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = imputedDfTr)
+fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
 ```
@@ -538,12 +538,28 @@ stargazer(fit, header = FALSE)
 
 We first use an established threshold of .50 to determine our best possible threshold. 
 
+#TODO Add Model Metrics
+
 \newpage
 
 ### Multicollinearity for Backwards Selection
 
 ```{r, echo=FALSE, results='asis',  cache=TRUE}
-dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
-colnames(dfVifFit) <- c("variables", "VIF")
-kable(dfVifFit, align = c("l", "c"))
+dfVifFit <- setDT(as.data.frame(car::vif(backFit)), keep.rownames = TRUE)[]
+#colnames(dfVifFit) <- c("variables", "VIF", "DIF", "$\\GVIF^(\\frac{1}{(2*Df)})$")
+kable(dfVifFit, align = c("l", "c", "c", "c"))
 ```
+
+## Model 2 - Forwards Selection Method
+
+
+```{r forward selection method, echo=FALSE, results='markup', cache=TRUE}
+step(lm(TARGET_FLAG~1, data=wimputedDfTr), direction = "forward", scope = ~TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY) 
+
+```
+
+```{r, echo = FALSE, results='asis',  cache=TRUE}
+forwardFit <- fit <- glm(formula = TARGET_FLAG ~ I(log1p(OLDCLAIM)) + URBANICITY + I(sqrt(HOME_VAL)) + CAR_USE + BLUEBOOK + REVOKED + MVR_PTS + PARENT1 +  I(INCOME^(1/4)) + JOB + TRAVTIME + CAR_TYPE + TIF + KIDSDRIV + MSTATUS + CAR_AGE + CLM_FREQ + YOJ, data = wimputedDfTr, family = binomial)
+stargazer(fit, header = FALSE,  no.space = TRUE)
+```
+
