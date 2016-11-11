@@ -561,5 +561,6 @@ step(lm(TARGET_FLAG~1, data=wimputedDfTr), direction = "forward", scope = ~TARGE
 ```{r, echo = FALSE, results='asis',  cache=TRUE}
 forwardFit <- fit <- glm(formula = TARGET_FLAG ~ I(log1p(OLDCLAIM)) + URBANICITY + I(sqrt(HOME_VAL)) + CAR_USE + BLUEBOOK + REVOKED + MVR_PTS + PARENT1 +  I(INCOME^(1/4)) + JOB + TRAVTIME + CAR_TYPE + TIF + KIDSDRIV + MSTATUS + CAR_AGE + CLM_FREQ + YOJ, data = wimputedDfTr, family = binomial)
 stargazer(fit, header = FALSE,  no.space = TRUE)
+summary(fit)
 ```
 
