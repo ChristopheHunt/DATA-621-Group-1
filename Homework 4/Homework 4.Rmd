@@ -267,6 +267,7 @@ The Box-Cox transformations were done only on three of the input variables - inc
 ```{r, echo=FALSE, cache=TRUE}
 library(car)
 fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
+
 ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
 ```
 
@@ -523,12 +524,26 @@ ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
 
 ## Model 1 - Backwards Selection Method
 
-In the backward step selection modelm  The resulting AIC was . 
+In the backward step selection model  The resulting AIC was . 
 
-#TODO UPDATE THIS Negative correlations for `nox`, `dis`, and `tax` are results of inverse transformations. For example, as tax increases the log likelihood of the median crime rate increases, however we have inversed this relationship in this model. Also, `black` coefficient appears as 0 in our table but is `-.000002870` which is too small of a number to be represented in the table. 
+#TODO UPDATE THIS  
 
-```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=FALSE}
-fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
+```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
+fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = imputedDfTr)
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 stargazer(fit, header = FALSE)
+```
+
+### Model Metrics for Backwards Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+\newpage
+
+### Multicollinearity for Backwards Selection
+
+```{r, echo=FALSE, results='asis',  cache=TRUE}
+dfVifFit <- setDT(as.data.frame(vif(backFit)), keep.rownames = TRUE)[]
+colnames(dfVifFit) <- c("variables", "VIF")
+kable(dfVifFit, align = c("l", "c"))
 ```
