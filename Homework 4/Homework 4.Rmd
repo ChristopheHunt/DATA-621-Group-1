@@ -509,7 +509,7 @@ In the backward step selection model  The resulting AIC was .
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 
-stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.top = TRUE)
+stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
 
 ### Model Metrics for Backwards Selection
@@ -615,7 +615,7 @@ kable(dfFitModel, align = c("l","c"))
 
 Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
-```{r, echo=FALSE, results='asis',  cache=TRUE, eval=FALSE}
+```{r, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(subsetModel)), keep.rownames = TRUE)[]
 kable(dfVifFit, align = c("l", "c", "c", "c"))
 ```
