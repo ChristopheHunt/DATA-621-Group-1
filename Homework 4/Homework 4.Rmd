@@ -531,7 +531,8 @@ In the backward step selection model  The resulting AIC was .
 ```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
-stargazer(fit, header = FALSE)
+stargazer(fit, header = FALSE,  
+          no.space = TRUE, style = "qje", font.size = "scriptsize")
 ```
 
 ### Model Metrics for Backwards Selection
@@ -546,21 +547,102 @@ We first use an established threshold of .50 to determine our best possible thre
 
 ```{r, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(backFit)), keep.rownames = TRUE)[]
-#colnames(dfVifFit) <- c("variables", "VIF", "DIF", "$\\GVIF^(\\frac{1}{(2*Df)})$")
 kable(dfVifFit, align = c("l", "c", "c", "c"))
 ```
 
 ## Model 2 - Forwards Selection Method
 
-
 ```{r forward selection method, echo=FALSE, results='markup', cache=TRUE}
 step(lm(TARGET_FLAG~1, data=wimputedDfTr), direction = "forward", scope = ~TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY) 
-
 ```
 
 ```{r, echo = FALSE, results='asis',  cache=TRUE}
 forwardFit <- fit <- glm(formula = TARGET_FLAG ~ I(log1p(OLDCLAIM)) + URBANICITY + I(sqrt(HOME_VAL)) + CAR_USE + BLUEBOOK + REVOKED + MVR_PTS + PARENT1 +  I(INCOME^(1/4)) + JOB + TRAVTIME + CAR_TYPE + TIF + KIDSDRIV + MSTATUS + CAR_AGE + CLM_FREQ + YOJ, data = wimputedDfTr, family = binomial)
-stargazer(fit, header = FALSE,  no.space = TRUE)
-summary(fit)
+stargazer(fit, header = FALSE,  
+          no.space = TRUE, style = "qje", font.size = "scriptsize")
 ```
 
+\newpage
+
+### Model Metrics for Forwards Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+```{r forward model metrics, echo=FALSE, results='asis', eval=FALSE, cache=TRUE}
+dfPred <- df[,c()]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.50)] <- 1
+
+dfPred <- data.frame(cbind(df[,c()],predProb,predResp))
+
+dfFwdModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Forwards Selection", fit$aic)
+
+kable(dfFwdModel, align = c("l","c"))
+```
+
+### Multicollinearity for Forwards Selection
+
+Here in our forward selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r, echo=FALSE, results='asis',  cache=TRUE}
+dfVifFit <- setDT(as.data.frame(car::vif(forwardFit)), keep.rownames = TRUE)[]
+kable(dfVifFit, align = c("l", "c", "c", "c"))
+```
+
+
+\newpage
+
+## Model 3 - Subset Selection Method
+
+### Subset Variable Selection
+
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. 
+
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
+subsetModel <- regsubsets(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr, nbest = 1)
+summary <- summary(subsetModel)
+kable(t(summary$outmat))
+```
+
+\newpage
+
+### Subset Model
+
+The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in our independent variables to the dependent variable in this model as our previous model. For example, the coefficient for tax was as high as 106 in the forward selection model but it is -5 in this model. However, our intercept in this model is larger than any other model.  
+
+```{r, model from subset, eval=FALSE, cache=TRUE, echo=FALSE, results = 'asis'}
+subsetModel <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
+subsetModel <- fit <- glm(subsetModel, family = binomial, data = wimputedDfTr)
+stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "scriptsize", single.row = TRUE)
+```
+
+\newpage
+
+### Model Metrics for Subset Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+```{r subset model metrics, echo=FALSE, results='asis', eval=FALSE,  cache=TRUE}
+dfPred <- df[,c()]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.50)] <- 1
+
+dfPred <- data.frame(cbind(df[,c()],predProb,predResp))
+
+dfFitModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Subset Selection", fit$aic)
+
+kable(dfFitModel, align = c("l","c"))
+```
+
+### Multicollinearity for Subset Selection
+
+Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r, echo=FALSE, results='asis',  cache=TRUE, eval=FALSE}
+dfVifFit <- setDT(as.data.frame(car::vif(subsetModel)), keep.rownames = TRUE)[]
+kable(dfVifFit, align = c("l", "c", "c", "c"))
+```
