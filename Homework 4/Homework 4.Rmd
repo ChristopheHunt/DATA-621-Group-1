@@ -175,10 +175,17 @@ descriptive <- describe(imputedDfTr,
 
 latex(descriptive, file = '')
 ```
+\newpage
 
 ## Exploration of Variables
 
-```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, cache=TRUE, eval=TRUE}
+### Correlation Matrix
+
+If we widen our data set to a matrix to account for the many factors in our evaluation data set we can plot a correlation matrix. We can see some interesting patterns in the data, 
+
+`PLACEHOLDER TEXT`
+
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 5, fig.width= 7, cache=TRUE, eval=TRUE}
 
 imputedDfTrMx <- imputedDfTr %>%
                    mutate(Yes = 1) %>%
@@ -205,6 +212,8 @@ imputedDfTrMx <- as.matrix(imputedDfTrMx)
 corMx <- cor(imputedDfTrMx , use = "everything",  method = c("pearson"))
 corrplot(corMx, order = "hclust", addrect = 10, method = "square", tl.col = "black", tl.cex = .50, na.label = " ")
 ```
+
+\newpage
 
 # Data Transformation
 
@@ -241,20 +250,24 @@ wimputedDfTr <- cbind(sapply(c('INCOME', 'HOME_VAL', 'OLDCLAIM', 'BLUEBOOK'), fu
 stargazer(wimputedDfTr, header = FALSE)
 ```
 
+\newpage
+
 ## BoxCox Transformations 
 
 The Box-Cox transformations were done only on three of the input variables - income, house value, and the total number of claims during the past 5 years. These transformations were done based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were funnel-shaped. 
 
-```{r, echo=FALSE, cache=TRUE}
+```{r, echo=FALSE, results = 'asis', cache=TRUE}
 library(car)
 fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
 
 ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
 ```
 
-```{r, echo=FALSE,cache=TRUE}
+```{r, echo=FALSE,cache=TRUE, message = FALSE}
 residualPlots(fit)
 ```
+
+\newpage
 
 Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
 
@@ -505,8 +518,6 @@ ModelMetrics.LogReg <- function(df, predResp, resp, p, n, modelName, fit)
 }
 
 
-
-
 ModelMetrics.LinReg <- function(modelName, fit)
 {
   s.fit <- summary(fit)
@@ -544,6 +555,8 @@ backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
 
 stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
+
+\newpage
 
 ### Model Metrics for Backwards Selection
 
@@ -600,9 +613,12 @@ kable(dfBackModel, align = c("l","c"))
 
 ### Multicollinearity for Backwards Selection
 
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
 ```{r, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(backFit)), keep.rownames = TRUE)[]
-kable(dfVifFit, align = c("l", "c", "c", "c"))
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 ```
 
 \newpage
@@ -664,14 +680,16 @@ dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TA
 
 kable(dfFwdModel, align = c("l","c"))
 ```
+\newpage
 
 ### Multicollinearity for Forwards Selection
 
-Here in our forward selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
 ```{r, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(forwardFit)), keep.rownames = TRUE)[]
-kable(dfVifFit, align = c("l", "c", "c", "c"))
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 ```
 
 \newpage
@@ -719,18 +737,22 @@ dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TA
                                   p = 1, n = 0,
                                   modelName = "Model Metrics for Subset Selection", fit = subsetModel)
 
-kable(dfSubModel, align = c("l","c"))
+#kable(dfSubModel, align = c("l","c"))
 ```
+
+\newpage
 
 ### Multicollinearity for Subset Selection
 
-We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 4 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 4 for multicollinearity. 
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity. 
 
 ```{r, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(subsetModel)), keep.rownames = TRUE)[]
 dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
 kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 ```
+
+\newpage
 
 ## Linear Regression 1 - Backwards Selection
 
@@ -742,15 +764,20 @@ bkFitStep <- step(fullModel, direction = "backward", trace = F)
 print(formula(bkFitStep))
 
 backFitMLR <-  lm(formula(bkFitStep),data = wimputedDfTr)
-summary(backFitMLR)
 
+stargazer(backFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
+\newpage
 
-### Linear Regression - Backwards Selection Model Metrics
+### Linear Regression 1 - Backwards Selection Model Metrics
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
 ```
+
+\newpage
+
+## Linear Regression 2 - Forwards Selection 
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT~1,data=wimputedDfTr)
@@ -765,8 +792,10 @@ print(formula(fwdFitstep))
 
 fwdFitMLR <- lm(formula(fwdFitstep), data = wimputedDfTr)
 
-summary(fwdFitMLR)
+stargazer(fwdFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
+
+### Linear Regression 2 - Forwards Selection Model Metrics
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
