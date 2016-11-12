@@ -235,27 +235,8 @@ winsorize <- function(x, multiple=2.2)
   return(x)  
 
 }
-library(forecast)
 
-winsorizedDataset <- function(dataset){
-  dataset <- dataset[,1:ncol(dataset)]
-  wdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
-  #l1 <- numeric(ncol(dataset))
-  for (i in 1:ncol(dataset)){
-    if(i == 1 || i == 2 || i == 3 || i == 5 || i == 8 || i == 10 || i == 11 || i == 12 || i == 13 || i == 15 || i == 18 || i == 19 || i == 21 || i == 22 || i == 23 || i == ncol(dataset)){
-      wdataset[,i] <- dataset[,i]
-    }
-    else {
-    wdataset[,i] <- winsorize(dataset[,i], multiple = 2.2)
-    wdataset[,i] <- as.numeric(wdataset[,i])
-    #l1[i] <- BoxCox.lambda(wdataset[,i])
-    }
-    colnames(wdataset) <- colnames(dataset)
-  }
-  return(data.frame(wdataset))
-}
-
-wimputedDfTr <- imputedDfTr #winsorizedDataset(imputedDfTr)
+wimputedDfTr <- cbind(sapply(c('INCOME', 'HOME_VAL', 'OLDCLAIM', 'BLUEBOOK'), function(x) winsorize(imputedDfTr[,x], multiple=2.2)), subset(imputedDfTr, select = -c(INCOME, HOME_VAL, OLDCLAIM, BLUEBOOK)))
 
 stargazer(wimputedDfTr, header = FALSE)
 ```
@@ -266,9 +247,9 @@ The Box-Cox transformations were done only on three of the input variables - inc
 
 ```{r, echo=FALSE, cache=TRUE}
 library(car)
-fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
+fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
 
-ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
+ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
 ```
 
 ```{r, echo=FALSE,cache=TRUE}
@@ -280,17 +261,16 @@ Using the `BoxCox.lambda` function from the `forecast` package we are able to de
 ```{r, echo=FALSE, cache=TRUE}
 l1 <- BoxCox.lambda(as.numeric(wimputedDfTr$INCOME))
 l2 <- BoxCox.lambda(as.numeric(wimputedDfTr$HOME_VAL))
-l3 <- BoxCox.lambda(as.numeric(wimputedDfTr$OLDCLAIM))
+l3 <- BoxCox.lambda(as.numeric(wimputedDfTr$TRAVTIME))
 
 lamdas <- c(l1, l2, l3)
-Variables <- c("INCOME", "HOME_VAL", "OLDCLAIM")
+Variables <- c("INCOME", "HOME_VAL", "TRAVTIME")
 dfBoxCox <- as.data.frame(cbind(lamdas, Variables))
 
 colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
 
 kable(dfBoxCox, align = c("c", "c"))
 ```
-
 
 Utilizing the below table of common transformations based on the lambda value of the BoxCox we further transform our independent variables.
 
@@ -314,8 +294,6 @@ $\lambda$ & Y' \\ \hline
 
 \end{tabular}
 
-
-
 \justifying
 
 Lambda values were truncated to the nearest tenth that match a common transformation as per the below table.
@@ -327,7 +305,7 @@ Lambda values were truncated to the nearest tenth that match a common transforma
 variable & variable transformation \\ \hline
 INCOME & $\sqrt[4]{INCOME}$ \\
 HOME VAL & $\sqrt(HOME~VAL)$ \\
-OLDCLAIM & $\log{(OLDCLAIM)}$ 
+TRAVTIME & $\sqrt{TRAVTIME}$ 
 \end{tabular}
 
 \justifying
@@ -522,15 +500,15 @@ ModelMetrics <- function(df, predResp, resp, p, n, modelName, aic)
 }
 ```
 
-## Model 1 - Backwards Selection Method
+## Logistic Model 1 - Backwards Selection Method
 
 In the backward step selection model  The resulting AIC was . 
 
-#TODO UPDATE THIS  
 
 ```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
-fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
+fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
+
 stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.top = TRUE)
 ```
 
@@ -538,7 +516,7 @@ stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "norm
 
 We first use an established threshold of .50 to determine our best possible threshold. 
 
-#TODO Add Model Metrics
+### TODO Add Model Metrics
 
 \newpage
 
@@ -549,15 +527,12 @@ dfVifFit <- setDT(as.data.frame(car::vif(backFit)), keep.rownames = TRUE)[]
 kable(dfVifFit, align = c("l", "c", "c", "c"))
 ```
 
-## Model 2 - Forwards Selection Method
+## Logistic Model 2 - Forwards Selection Method
 
-```{r forward selection method, echo=FALSE, results='markup', cache=TRUE}
-step(lm(TARGET_FLAG~1, data=wimputedDfTr), direction = "forward", scope = ~TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY) 
-```
-
-```{r, echo = FALSE, results='asis',  cache=TRUE}
-forwardFit <- fit <- glm(formula = TARGET_FLAG ~ I(log1p(OLDCLAIM)) + URBANICITY + I(sqrt(HOME_VAL)) + CAR_USE + BLUEBOOK + REVOKED + MVR_PTS + PARENT1 +  I(INCOME^(1/4)) + JOB + TRAVTIME + CAR_TYPE + TIF + KIDSDRIV + MSTATUS + CAR_AGE + CLM_FREQ + YOJ, data = wimputedDfTr, family = binomial)
-stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.top = TRUE)
+```{r forward selection method, echo=FALSE, results='asis', cache=TRUE}
+fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
+forwardFit <- fit <- glm(step(fullModel, direction = "forward", trace = F))
+stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
 
 \newpage
@@ -592,14 +567,14 @@ kable(dfVifFit, align = c("l", "c", "c", "c"))
 
 \newpage
 
-## Model 3 - Subset Selection Method
+## Logistic Model 3 - Subset Selection Method
 
 ### Subset Variable Selection
 
 Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. 
 
 ```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
-subsetModel <- regsubsets(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + I(log1p(OLDCLAIM)) + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr, nbest = 1)
+subsetModel <- regsubsets(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr, nbest = 1)
 summary <- summary(subsetModel)
 kable(t(summary$outmat))
 ```
@@ -613,7 +588,7 @@ The variables as indicated in column `8` of the previous table will be further i
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModel <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
 subsetModel <- fit <- glm(subsetModel, family = binomial, data = wimputedDfTr)
-stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.top = TRUE)
+stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
 
 \newpage
