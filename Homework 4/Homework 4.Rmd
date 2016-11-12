@@ -492,7 +492,7 @@ ModelMetrics.LogReg <- function(df, predResp, resp, p, n, modelName, fit)
 
   print(ConfusionDataFrame(tp,fp,tn,fn))
   
-  cv.err <- cv.glm(df,fit,K=10)$delta[1]  
+  cv.err <- boot::cv.glm(df,fit,K=10)$delta[1]  
   
   M <- format(c(acc,cer,prec,sens,spec,f1score,auc,bestThreshold,fit$aic,cv.err), digits = 3)
   dfReturn <- data.frame("metric" = M)
@@ -724,11 +724,12 @@ kable(dfSubModel, align = c("l","c"))
 
 ### Multicollinearity for Subset Selection
 
-Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 4 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 4 for multicollinearity. 
 
 ```{r, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(subsetModel)), keep.rownames = TRUE)[]
-kable(dfVifFit, align = c("l", "c", "c", "c"))
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 ```
 
 ## Linear Regression 1 - Backwards Selection
@@ -737,7 +738,6 @@ kable(dfVifFit, align = c("l", "c", "c", "c"))
 fullModel <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 
 bkFitStep <- step(fullModel, direction = "backward", trace = F)
-
 
 print(formula(bkFitStep))
 
@@ -752,7 +752,6 @@ summary(backFitMLR)
 bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
 ```
 
-
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT~1,data=wimputedDfTr)
 
@@ -763,7 +762,6 @@ fwdFitstep <- step(fullModel,direction = "forward",
      + URBANICITY,trace = F)
 
 print(formula(fwdFitstep))
-
 
 fwdFitMLR <- lm(formula(fwdFitstep), data = wimputedDfTr)
 
