@@ -735,9 +735,9 @@ dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_
 
 dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
-                                  modelName = "Model Metrics for Subset Selection", fit = subsetModel)
+                                  modelName = "Model Metrics for Subset Selection", fit = fit)
 
-#kable(dfSubModel, align = c("l","c"))
+kable(dfSubModel, align = c("l","c"))
 ```
 
 \newpage
@@ -801,3 +801,4 @@ stargazer(fwdFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size =
 fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
 ```
 
+#Selected Models 
