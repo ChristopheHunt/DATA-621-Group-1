@@ -74,7 +74,7 @@ daDict <- read.xlsx("Data Dictionary HW4 - Group 1.xlsx", sheetIndex = 1)
 file.remove(dir(getwd(), pattern = "Data Dictionary HW4 - Group 1", full.names = TRUE))
 ```
 \footnotesize
-```{r data dictionary table, eval=TRUE, results='asis', echo=FALSE}
+```{r data dictionary table, eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
 kable(daDict %>% 
       mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
       dplyr::select(`Variable Code`, Definition),
@@ -82,7 +82,7 @@ kable(daDict %>%
 ```
 
 
-```{r data prep, echo=FALSE, results='asis'}
+```{r data prep, echo=FALSE, results='asis', cache=TRUE}
 dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance_training_data.csv")
 
 removeDollars <- function(column){
@@ -620,7 +620,7 @@ stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "norm
 We first use an established threshold of .50 to determine our best possible threshold. 
 
 ```{r forwards model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
-dfPred <- dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
+dfPred <- dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
 
 predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
 
@@ -628,7 +628,7 @@ predResp <- numeric(length(predProb)) #Predicted Class
 
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
 dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
