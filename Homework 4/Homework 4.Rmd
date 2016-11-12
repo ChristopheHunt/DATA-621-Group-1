@@ -564,20 +564,19 @@ We first use an established threshold of .50 to determine our best possible thre
 
 ```{r backwards model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
 
-dfPred <- dfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
 
 predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
 predResp <- numeric(length(predProb)) #Predicted Class
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(dfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+dfPred <- data.frame(cbind(wimputedDfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
 dfBackModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
                                   modelName = "Model Metrics for Backwards Selection", fit = fit)
 
 kable(dfBackModel, align = c("l","c"))
-
 ```
 
 
@@ -591,7 +590,7 @@ Model Metrics using best threshold of .320.
 
 ```{r backwards model metrics best threshold, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
 
-dfPred <- dfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
 
 predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
 
@@ -599,7 +598,7 @@ predResp <- numeric(length(predProb)) #Predicted Class
 
 predResp[which(predProb>=0.32)] <- 1
 
-dfPred <- data.frame(cbind(dfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+dfPred <- data.frame(cbind(wimputedDfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
 dfBackModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
@@ -638,7 +637,7 @@ stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "norm
 We first use an established threshold of .50 to determine our best possible threshold. 
 
 ```{r forwards model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
-dfPred <- dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
 
 predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
 
@@ -646,7 +645,7 @@ predResp <- numeric(length(predProb)) #Predicted Class
 
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
 dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
@@ -655,24 +654,24 @@ dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TA
 kable(dfFwdModel, align = c("l","c"))
 ```
 
-Our previous results indicate that .300 would be the best threshold for this model so we re-run our metrics using this threshold.
+Our previous results indicate that .310 would be the best threshold for this model so we re-run our metrics using this threshold.
 
 \newpage
 
 #### Model Metrics for Forwards Selection with best threshold
 
-Model Metrics using best threshold of .300. 
+Model Metrics using best threshold of .310. 
 
 ```{r forwards model metrics with best threshold, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
-dfPred <- dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
 
 predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
 
 predResp <- numeric(length(predProb)) #Predicted Class
 
-predResp[which(predProb>=0.300)] <- 1
+predResp[which(predProb>=0.310)] <- 1
 
-dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
 dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
@@ -710,7 +709,7 @@ kable(t(summary$outmat))
 
 ### Subset Model
 
-The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in our independent variables to the dependent variable in this model as our previous model. For example, the coefficient for tax was as high as 106 in the forward selection model but it is -5 in this model. However, our intercept in this model is larger than any other model.  
+The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in our independent variables to the dependent variable in this model as our previous model. 
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModel <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
@@ -725,13 +724,13 @@ stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "norm
 We first use an established threshold of .50 to determine our best possible threshold. 
 
 ```{r subset model metrics, echo=FALSE, results='asis', eval=TRUE,  cache=TRUE, error=TRUE}
-dfPred <- dfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY")]
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
 predResp <- numeric(length(predProb)) #Predicted Class
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb,predResp))
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb,predResp))
 
 dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
