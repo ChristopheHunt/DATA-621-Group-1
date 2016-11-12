@@ -509,7 +509,6 @@ ModelMetrics.LogReg <- function(df, predResp, resp, p, n, modelName, fit)
 
 ModelMetrics.LinReg <- function(modelName, fit)
 {
-  fit <- model1
   s.fit <- summary(fit)
   adj.r.sqrd <- s.fit$adj.r.squared
   r.sqrd <- s.fit$r.squared
@@ -532,6 +531,7 @@ ModelMetrics.LinReg <- function(modelName, fit)
   return(df)
 }
 
+
 ```
 
 ## Logistic Model 1 - Backwards Selection Method
@@ -550,21 +550,21 @@ stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "norm
 We first use an established threshold of .50 to determine our best possible threshold. 
 
 ```{r backwards model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+
 dfPred <- dfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
 
 predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
-
 predResp <- numeric(length(predProb)) #Predicted Class
-
 predResp[which(predProb>=0.50)] <- 1
 
 dfPred <- data.frame(cbind(dfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
-dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+dfBackModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
                                   modelName = "Model Metrics for Backwards Selection", fit = fit)
 
-kable(dfFwdModel, align = c("l","c"))
+kable(dfBackModel, align = c("l","c"))
+
 ```
 
 
@@ -577,6 +577,7 @@ Our previous results indicate that .320 would be the best threshold for this mod
 Model Metrics using best threshold of .320. 
 
 ```{r backwards model metrics best threshold, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+
 dfPred <- dfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
 
 predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
@@ -587,11 +588,12 @@ predResp[which(predProb>=0.32)] <- 1
 
 dfPred <- data.frame(cbind(dfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
-dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+dfBackModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
                                   modelName = "Model Metrics for Backwards Selection with best threshold", fit = fit)
 
-kable(dfFwdModel, align = c("l","c"))
+kable(dfBackModel, align = c("l","c"))
+
 ```
 
 \newpage
@@ -637,6 +639,31 @@ dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TA
 kable(dfFwdModel, align = c("l","c"))
 ```
 
+Our previous results indicate that .300 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+\newpage
+
+#### Model Metrics for Forwards Selection with best threshold
+
+Model Metrics using best threshold of .300. 
+
+```{r forwards model metrics with best threshold, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+dfPred <- dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
+
+predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+
+predResp[which(predProb>=0.300)] <- 1
+
+dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Forwards Selection", fit = fit)
+
+kable(dfFwdModel, align = c("l","c"))
+```
 
 ### Multicollinearity for Forwards Selection
 
@@ -679,19 +706,20 @@ stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "norm
 
 We first use an established threshold of .50 to determine our best possible threshold. 
 
-```{r subset model metrics, echo=FALSE, results='asis', eval=FALSE,  cache=TRUE}
-
-dfPred <- dfTr[,c()]
+```{r subset model metrics, echo=FALSE, results='asis', eval=TRUE,  cache=TRUE, error=TRUE}
+dfPred <- dfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY")]
 predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 
 predResp <- numeric(length(predProb)) #Predicted Class
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(df[,c()],predProb,predResp))
+dfPred <- data.frame(cbind(dfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb,predResp))
 
-dfFitModel <- ModelMetrics(dfPred,"predResp","target",1,0,"Model Metrics for Subset Selection", fit$aic)
+dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Subset Selection", fit = subsetModel)
 
-kable(dfFitModel, align = c("l","c"))
+kable(dfSubModel, align = c("l","c"))
 ```
 
 ### Multicollinearity for Subset Selection
@@ -702,3 +730,47 @@ Here in our subset selection model we find that no variable exceeds our pre-esta
 dfVifFit <- setDT(as.data.frame(car::vif(subsetModel)), keep.rownames = TRUE)[]
 kable(dfVifFit, align = c("l", "c", "c", "c"))
 ```
+
+## Linear Regression 1 - Backwards Selection
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+fullModel <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
+
+bkFitStep <- step(fullModel, direction = "backward", trace = F)
+
+
+print(formula(bkFitStep))
+
+backFitMLR <-  lm(formula(bkFitStep),data = wimputedDfTr)
+summary(backFitMLR)
+
+```
+
+### Linear Regression - Backwards Selection Model Metrics
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
+```
+
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+fullModel <- lm(TARGET_AMT~1,data=wimputedDfTr)
+
+fwdFitstep <- step(fullModel,direction = "forward",
+      scope=~KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) 
+     + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF 
+     + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE 
+     + URBANICITY,trace = F)
+
+print(formula(fwdFitstep))
+
+
+fwdFitMLR <- lm(formula(fwdFitstep), data = wimputedDfTr)
+
+summary(fwdFitMLR)
+```
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
+```
+
