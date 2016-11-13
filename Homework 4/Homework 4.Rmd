@@ -622,7 +622,7 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 \newpage
 
-## Logistic Model 2 - Forwards Selection Method
+## Logistic Regression 2 - Forwards Selection Method
 
 ```{r forward selection method, echo=FALSE, results='asis', cache=TRUE}
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
@@ -650,6 +650,7 @@ dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ",
 dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
                                   modelName = "Model Metrics for Forwards Selection", fit = fit)
+
 
 kable(dfFwdModel, align = c("l","c"))
 ```
@@ -693,7 +694,7 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 \newpage
 
-## Logistic Model 3 - Subset Selection Method
+## Logistic Regression 3 - Subset Selection Method
 
 ### Subset Variable Selection
 
@@ -712,8 +713,8 @@ kable(t(summary$outmat))
 The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in our independent variables to the dependent variable in this model as our previous model. 
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
-subsetModel <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
-subsetModel <- fit <- glm(subsetModel, family = binomial, data = wimputedDfTr)
+subsetModelFormula <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
+subsetModel <- fit <- glm(subsetModelFormula, family = binomial, data = wimputedDfTr)
 stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
 
@@ -730,7 +731,7 @@ predProb <- predict(fit, dfPred, type="response") #Predicted Probability
 predResp <- numeric(length(predProb)) #Predicted Class
 predResp[which(predProb>=0.50)] <- 1
 
-dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb,predResp))
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
 
 dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
@@ -801,3 +802,11 @@ fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
 ```
 
 #Selected Models 
+
+## Logistic Regression Selected
+
+```{r}
+cbind(dfFwdModel, dfSubModel, dfBackModel)
+```
+
+
