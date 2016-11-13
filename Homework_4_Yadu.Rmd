@@ -51,44 +51,32 @@ winsorize <- function(x, multiple=2.2)
 }
 library(forecast)
 
-winsorizedDataset <- function(dataset){
-  dataset <- dataset[,1:ncol(dataset)]
-  wdataset <- matrix(data = 0, nrow = nrow(dataset), ncol = ncol(dataset))
-  #l1 <- numeric(ncol(dataset))
-  for (i in 1:ncol(dataset)){
-    if(i == 1 || i == 2 || i == 3 || i == 5 || i == 8 || i == 10 || i == 11 || i == 12 || i == 13 || i == 15 || i == 18 || i == 19 || i == 21 || i == 22 || i == 23 || i == ncol(dataset)){
-      wdataset[,i] <- dataset[,i]
-    }
-    else {
-    wdataset[,i] <- winsorize(dataset[,i], multiple = 2.2)
-    wdataset[,i] <- as.numeric(wdataset[,i])
-    #l1[i] <- BoxCox.lambda(wdataset[,i])
-    }
-    colnames(wdataset) <- colnames(dataset)
-  }
-  return(data.frame(wdataset))
-}
-#lambdas <- winsorizedandtransformed(crimes)[[2]]
-#wtcrimes <- winsorizedandtransformed(crimes)[[1]]
-wimputedDfTr <- winsorizedDataset(imputedDfTr)
+wimputedDfTr <- cbind(sapply(c('INCOME', 'HOME_VAL', 'OLDCLAIM', 'BLUEBOOK'), function(x) winsorize(imputedDfTr[,x], multiple=2.2)), subset(imputedDfTr, select = -c(INCOME, HOME_VAL, OLDCLAIM, BLUEBOOK)))
 #library(stargazer)
 #stargazer(wimputedDfTr, header = FALSE)
 ```
 
 ```{r}
 library(car)
-fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
-ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=dfTr)
+fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
+ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
 ```
 
 ```{r}
 residualPlots(fit)
+
 ```
 
 ```{r}
-l1 = BoxCox.lambda(as.numeric(wimputedDfTr$INCOME))
-l2 = BoxCox.lambda(as.numeric(wimputedDfTr$HOME_VAL))
-l3 = BoxCox.lambda(as.numeric(wimputedDfTr$OLDCLAIM))
+l1 = BoxCox.lambda(wimputedDfTr$INCOME)
+l2 = BoxCox.lambda(wimputedDfTr$HOME_VAL)
+l3 = BoxCox.lambda(wimputedDfTr$TRAVTIME)
 ```
 
 The Box-Cox transformations were done only on three of the input variables - income, house value, and the total number of claims during the past 5 years. These transformations were done based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were funnel-shaped. 
+
+MODEL SELECTION
+
+Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much.
+
+In the linear models rendered, some of the correlation coefficients do make sense. For example, in both models, it would make sense for a student to have to pay less in a car crash due to the fact that the student would spend more time studying and less time on the road. It would also make sense for urbanicity to affect the cost during a car crash because in urban areas, there are more people and pedestrians and the probability of people getting killed in a car crash would be very high as opposed to rural areas where there would be less pedestrians.   
