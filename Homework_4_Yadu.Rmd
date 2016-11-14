@@ -89,6 +89,16 @@ In the forwards selection model, the resulting AIC was 7,712.07. All of the vari
 
 In the subset selection model, the resulting AIC was 7,708.37. Very few of the variables remained. These variables were number of kids driving, income, marital status, job category, car use, whether the license was revoked or not, urbanicity, and motor vehicle record points. In this model, the target variable has a stronger correlation with urbanicity than it does in the other logistic models. 
 
-In the backwards linear regression model, the target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
+In the backwards linear regression model, the variables eliminated were the number of years on the job, whether the car is red or not, number of kids at home, total claims within the past 5 years, and age of the driver. The target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
 
-In the forwards linear regression model
+In the forwards linear regression model, the variables eliminated were the same as the variables eliminated in the backwards linear regression. Just like the previous model, the target variable has the strongest correlation with urbanicity. 
+
+After looking at the backwards selection model, we removed the variables that appeared to not be significant in the forwards selection model. The variables that we removed were bluebook, 
+
+Correlation Matrix explanation
+
+target flag in the third bullet has to be lower case.
+
+elaborate more on the forwards selection model.
+
+In the subset selection model, the AIC is not the lowest. However, it is a simpler model with a better precision. This is why we chose this model over the other two. 
