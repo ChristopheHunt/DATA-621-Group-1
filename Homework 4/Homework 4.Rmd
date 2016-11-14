@@ -555,9 +555,9 @@ ModelMetrics.LinReg <- function(modelName, fit)
 
 ```
 
-## Logistic Model 1 - Backwards Selection Method
+## Logistic Regressions 1 - Backwards Selection Method
 
-In the backward step selection model  The resulting AIC was . 
+In the backwards selection model, the resulting AIC was 7,703.13. All of the variables remain except the age of the driver, sex, whether the car was red or not, number of kids at home, car use, and car age. Zero correlation for bluebook value is a result of our transformations. As the bluebook value increases, the log likelihood that the vehicle gets into a crash decreases.
 
 ```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
@@ -636,6 +636,8 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 ## Logistic Regression 2 - Forwards Selection Method
 
+In the forwards selection model, the resulting AIC was 7,712.07. All of the variables remain in the model. 
+
 ```{r forward selection method, echo=FALSE, results='asis', cache=TRUE}
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 forwardFit <- fit <- glm(step(fullModel, direction = "forward", trace = F))
@@ -688,7 +690,7 @@ dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ",
 
 dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
                                   p = 1, n = 0,
-                                  modelName = "Model Metrics for Forwards Selection", fit = fit)
+                                  modelName = "Model Metrics for Forwards Selection with Best Threshold", fit = fit)
 
 kable(dfFwdModel, align = c("l","c"))
 ```
@@ -722,7 +724,7 @@ kable(t(summary$outmat))
 
 ### Subset Model
 
-The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. We don't see as strong of a relationship in our independent variables to the dependent variable in this model as our previous model. 
+The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. In the subset selection model, the resulting AIC was 7,708.37. Very few of the variables remained. These variables were number of kids driving, income, marital status, job category, car use, whether the license was revoked or not, urbanicity, and motor vehicle record points. In this model, the target variable has a stronger correlation with urbanicity than it does in the other logistic models. 
 
 ```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModelFormula <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
@@ -752,6 +754,26 @@ dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TA
 kable(dfSubModel, align = c("l","c"))
 ```
 
+#### Model Metrics for Subset Selection with best threshold
+
+Model Metrics using best threshold of .280.
+
+```{r subset model metrics with best threshold, echo=FALSE, results='asis', eval=TRUE,  cache=TRUE, error=TRUE}
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.280)] <- 1
+
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Subset Selection with Best Threshold", fit = fit)
+
+kable(dfSubModel, align = c("l","c"))
+```
+
 \newpage
 
 ### Multicollinearity for Subset Selection
@@ -768,12 +790,14 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 ## Linear Regression 1 - Backwards Selection
 
+In the backwards linear regression model, the variables eliminated were The target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
+
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 
 bkFitStep <- step(fullModel, direction = "backward", trace = F)
 
-print(formula(bkFitStep))
+#print(formula(bkFitStep))
 
 backFitMLR <-  lm(formula(bkFitStep),data = wimputedDfTr)
 
@@ -789,36 +813,94 @@ bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
 
 \newpage
 
-## Linear Regression 2 - Forwards Selection 
+## Linear Regression 2 - Both Selection 
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT~1,data=wimputedDfTr)
 
-fwdFitstep <- step(fullModel,direction = "forward",
+fwdFitstep <- step(fullModel,direction = "both",
       scope=~KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) 
      + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF 
      + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE 
      + URBANICITY,trace = F)
 
-print(formula(fwdFitstep))
+#print(formula(fwdFitstep))
 
 fwdFitMLR <- lm(formula(fwdFitstep), data = wimputedDfTr)
 
 stargazer(fwdFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
 
-### Linear Regression 2 - Forwards Selection Model Metrics
+### Linear Regression 2 - Both Selection Model Metrics
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
 ```
 
+\newpage
+
 #Selected Models 
 
 ## Logistic Regression Selected
 
-```{r}
-cbind(dfFwdModel, dfSubModel, dfBackModel)
+Logistic Regression Model Metrics 
+
+Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much.
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+pander::pander(cbind(dfFwdModel, dfSubModel, dfBackModel), split.cell = 80, split.table = Inf)
 ```
 
+Our Final Logistic Model (Subset Selection Method): 
+
+$$
+\begin{aligned}
+\log(TARGET FLAG)~=~&-469*KIDSDRIV~+~-0.085*I(INCOME^(1/4))~+~-0.748*MSTATUSYes\\
+&~+~0.148*JOBClerical~+~-0.972*JOBDoctor~+~-0.421*JOBHome Maker\\
+&~+~-0.466*JOBLawyer~+~-0.954*JOBManager~+~-0.398*JOBProfessional\\
+&~+~-0.343*JOBStudent~+~-0.725*CAR_USEPrivate~+~0.752*REVOKEDYes\\
+&~+~0.151*MVR_PTS~+~2.282672*URBANICITYHighly Urban/ Urban~+~-1.135467\\
+\end{aligned}
+$$
+\newpage
+
+## Linear Regression Selected
+
+In the linear models rendered, some of the correlation coefficients do make sense. For example, in both models, it would make sense for a student to have to pay less in a car crash due to the fact that the student would spend more time studying and less time on the road. It would also make sense for urbanicity to affect the cost during a car crash because in urban areas, there are more people and pedestrians and the probability of people getting killed in a car crash would be very high as opposed to rural areas where there would be less pedestrians. 
+
+
+## Predictions using Final Model on Evaluation Data Set 
+
+The below table represents our predictions as indicated in column `eval.predResp` using our final model using the provided evaluation data set.
+
+```{r,, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
+dfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance-evaluation-data.csv")
+
+
+dfTrEval$JOB <- as.character(dfTrEval$JOB)
+
+#dfTrEval$JOB[(dfTrEval$JOB == "")] <- NA
+
+dfTr <- dfTr %>%
+        mutate(INCOME = removeDollars(INCOME),
+               HOME_VAL = removeDollars(HOME_VAL),
+               BLUEBOOK = removeDollars(BLUEBOOK),
+               OLDCLAIM = removeDollars(OLDCLAIM),
+               MSTATUS = as.factor(gsub("z_", "", MSTATUS)),
+               SEX = as.factor(gsub("z_", "", SEX)),
+               EDUCATION = factor((gsub("<", "Less Than ", gsub("z_", "", EDUCATION))), 
+                                  levels = c("Less Than High School", "High School", "Bachelors", "Masters", "PhD")),
+               JOB = as.factor(gsub("z_", "", JOB)),
+               CAR_TYPE = as.factor(gsub("z_", "", CAR_TYPE)),
+               URBANICITY = as.factor(gsub("z_", "", URBANICITY)))
+
+```
+
+# Appendix A
+
+## Session Info
+
+```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
+toLatex(sessionInfo())
+```
 
