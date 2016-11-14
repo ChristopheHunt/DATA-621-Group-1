@@ -190,9 +190,9 @@ If we widen our data set to a matrix to account for the many factors in our eval
 
 * It is intuitive how both target variables have no correlation with an education level that is less than high school. If the person who wants to buy the vehicle does not have a sufficient level of education, obviously he or she would not have a high-paying job and therefore would not be able to buy the vehicle. 
 
-* Not surprisingly, the target flag variable has negative correlation with marital status. If a married couple owns the vehicle and both the husband and wife share the vehicle, each of them would have to be careful while driving it so as to not get into any accident. 
+* Not surprisingly, the `TARGET_FLG` variable has negative correlation with marital status. If a married couple owns the vehicle and both the husband and wife share the vehicle, each of them would have to be careful while driving it so as to not get into any accident. 
 
-* We see that the Target Flag variable is negatively correlated with bluebook value. If the bluebook value is high then that means that the car would be very expensive and the owner would likely not want to get the new car into an accident. Otherwise the owner may see their premiums increase sharply after the accident.  
+* We see that the `TARGET_FLG` variable is negatively correlated with bluebook value. If the bluebook value is high then that means that the car would be very expensive and the owner would likely not want to get the new car into an accident. Otherwise the owner may see their premiums increase sharply after the accident.  
 
 
 ```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 5.5, fig.width= 10, cache=FALSE, eval=TRUE}
@@ -790,7 +790,7 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 ## Linear Regression 1 - Backwards Selection
 
-In the backwards linear regression model, the variables eliminated were The target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
+In the backwards linear regression model, the variables eliminated were the number of years on the job, whether the car is red or not, number of kids at home, total claims within the past 5 years, and age of the driver. The target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
@@ -847,7 +847,7 @@ fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
 
 Logistic Regression Model Metrics 
 
-Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much.
+Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much. This is why we chose this model over the other two. 
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 pander::pander(cbind(dfFwdModel, dfSubModel, dfBackModel), split.cell = 80, split.table = Inf)
@@ -868,7 +868,9 @@ $$
 
 ## Linear Regression Selected
 
-In the linear models rendered, some of the correlation coefficients do make sense. For example, in both models, it would make sense for a student to have to pay less in a car crash due to the fact that the student would spend more time studying and less time on the road. It would also make sense for urbanicity to affect the cost during a car crash because in urban areas, there are more people and pedestrians and the probability of people getting killed in a car crash would be very high as opposed to rural areas where there would be less pedestrians. 
+In the linear models rendered, some of the correlation coefficients do make sense. For example, in both models, it would make sense for a student to have to pay less in a car crash due to the fact that the student would spend more time studying and less time on the road. It would also make sense for urbanicity to affect the cost during a car crash because in urban areas, there are more people and pedestrians and the probability of people getting killed in a car crash would be very high as opposed to rural areas where there would be less pedestrians. However, while both models have the same adjusted R^2, the Forward Selection Model has fewer variables which makes it easier to understand and is therefore the selected Linear Regresion.
+
+Our Final Linear Model (Forward Selection Method):
 
 $$
 \begin{aligned}
@@ -933,6 +935,8 @@ write.csv(imputed_data$ximp,"imputed_insurance_evaluation_data.csv", row.names =
 
 The below table represents our predictions as indicated in column `TARGET_FLAG` and `TARGET_AMT` using our final models and using the provided evaluation data set after transformation.
 
+\tiny
+
 ```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
 imputeddfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/imputed_insurance_evaluation_data.csv")
 eval.PredProb <- predict(subsetModel, imputeddfTrEval ,type = "response") #Predicted Probability
@@ -941,14 +945,14 @@ TARGET_FLAG[which(eval.PredProb>=0.28)] <- 1
 imputeddfTrEval <- data.frame(cbind(imputeddfTrEval,eval.PredProb,TARGET_FLAG))
 imputeddfTrEval$TARGET_AMT <- predict(fwdFitMLR, imputeddfTrEval)
 imputeddfTrEval$TARGET_AMT <- dollar(imputeddfTrEval$TARGET_AMT)
-kable(imputeddfTrEval)
+pander::pander(imputeddfTrEval, split.cell = 20, split.table = Inf)
 ```
 
 \elandscape
 \global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 0}
-
-
 \newpage
+\normalsize
+
 # Appendix A
 
 ## Session Info
@@ -956,4 +960,21 @@ kable(imputeddfTrEval)
 ```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
 toLatex(sessionInfo())
 ```
+
+## Data Dictionary
+
+\footnotesize
+```{r , eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
+kable(daDict %>% 
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
+      align = c("c","l"))
+```
+\normalsize
+
+## R source code
+
+Please see [Homework 4.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%204/Homework%204.Rmd) on GitHub for source code.   
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%204/Homework%204.Rmd
 
