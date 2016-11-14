@@ -870,12 +870,27 @@ $$
 
 In the linear models rendered, some of the correlation coefficients do make sense. For example, in both models, it would make sense for a student to have to pay less in a car crash due to the fact that the student would spend more time studying and less time on the road. It would also make sense for urbanicity to affect the cost during a car crash because in urban areas, there are more people and pedestrians and the probability of people getting killed in a car crash would be very high as opposed to rural areas where there would be less pedestrians. 
 
+$$
+\begin{aligned}
+TARGET AMT~=~&170.55*MVR_PTS~+~1,674.58*URBANICITYHighly Urban/ Urban\\
+&+~61.16*JOBClerical~+~-1,209.74*JOBDoctor~+~-318.80*JOBHome Maker\\
+&+~-338.710*JOBLawyer~+~-1,029.96*JOBManager~+~11.61*JOBProfessional\\
+&~+~-377.47*JOBStudent~+~-601.84*MSTATUSYes~+~-829.33*CAR_USEPrivate\\
+&~+~376.86*KIDSDRIV~+~463.35*CAR_TYPEPanel Truck~+~362.62*CAR_TYPEPickup\\
+&~+~923.23*CAR_TYPESports Car~+~668.78*CAR_TYPESUV~+~591.35*CAR_TYPEVan\\
+&~+~-47.8*TIF~+~132.59*I(sqrt(TRAVTIME))\\
+&~+~642.15*PARENT1Yes~+~-44.23*I(INCOME^(1/4))\\
+&~+~434.91*REVOKEDYes~+~-27.49*CAR_AGE~+~107.28*CLM FREQ~+~247.62*SEXM\\
+&~+~185.76*EDUCATIONHigh School~+~284.79*EDUCATIONLess Than High School\\
+&~+~356.36*EDUCATIONMasters~+~651.01*EDUCATIONPhD
+\end{aligned}
+$$
 
 ## Predictions using Final Model on Evaluation Data Set 
 
 The below table represents our predictions as indicated in column `eval.predResp` using our final model using the provided evaluation data set.
 
-```{r,, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
+```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
 dfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance-evaluation-data.csv")
 
 dfTrEval$JOB <- as.character(dfTrEval$JOB)
@@ -900,6 +915,7 @@ dfTrEval <- dfTrEval %>%
 
 ```
 
+\newpage
 # Appendix A
 
 ## Session Info
