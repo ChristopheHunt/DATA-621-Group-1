@@ -857,7 +857,7 @@ Our Final Logistic Model (Subset Selection Method):
 
 $$
 \begin{aligned}
-\log(TARGET FLAG)~=~&-469*KIDSDRIV~+~-0.085*I(INCOME^(1/4))~+~-0.748*MSTATUSYes\\
+\log(TARGET FLAG)~=~&-469*KIDSDRIV~+~-0.085*\sqrt[4]{INCOME}~+~-0.748*MSTATUSYes\\
 &~+~0.148*JOBClerical~+~-0.972*JOBDoctor~+~-0.421*JOBHome Maker\\
 &~+~-0.466*JOBLawyer~+~-0.954*JOBManager~+~-0.398*JOBProfessional\\
 &~+~-0.343*JOBStudent~+~-0.725*CAR_USEPrivate~+~0.752*REVOKEDYes\\
@@ -875,27 +875,32 @@ $$
 TARGET AMT~=~&170.55*MVR_PTS~+~1,674.58*URBANICITYHighly Urban/ Urban\\
 &+~61.16*JOBClerical~+~-1,209.74*JOBDoctor~+~-318.80*JOBHome Maker\\
 &+~-338.710*JOBLawyer~+~-1,029.96*JOBManager~+~11.61*JOBProfessional\\
-&~+~-377.47*JOBStudent~+~-601.84*MSTATUSYes~+~-829.33*CAR_USEPrivate\\
-&~+~376.86*KIDSDRIV~+~463.35*CAR_TYPEPanel Truck~+~362.62*CAR_TYPEPickup\\
-&~+~923.23*CAR_TYPESports Car~+~668.78*CAR_TYPESUV~+~591.35*CAR_TYPEVan\\
-&~+~-47.8*TIF~+~132.59*I(sqrt(TRAVTIME))\\
-&~+~642.15*PARENT1Yes~+~-44.23*I(INCOME^(1/4))\\
-&~+~434.91*REVOKEDYes~+~-27.49*CAR_AGE~+~107.28*CLM FREQ~+~247.62*SEXM\\
+&~+~-377.47*JOBStudent~+~-601.84*MSTATUSYes~+~-829.33*CAR USEPrivate\\
+&~+~376.86*KIDSDRIV~+~463.35*CAR TYPEPanel Truck~+~362.62*CAR_TYPEPickup\\
+&~+~923.23*CAR TYPESports Car~+~668.78*CAR TYPESUV~+~591.35*CAR_TYPEVan\\
+&~+~-47.8*TIF~+~132.59*\sqrt{TRAVTIME}\\
+&~+~642.15*PARENT1Yes~+~-44.23*\sqrt[4]{INCOME}\\
+&~+~434.91*REVOKEDYes~+~-27.49*CAR AGE~+~107.28*CLM FREQ~+~247.62*SEXM\\
 &~+~185.76*EDUCATIONHigh School~+~284.79*EDUCATIONLess Than High School\\
 &~+~356.36*EDUCATIONMasters~+~651.01*EDUCATIONPhD
 \end{aligned}
 $$
 
+\blandscape
+\pagebreak[4]
+  \global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 90} <!-- provided by http://tex.stackexchange.com/questions/40683/rotate-single-pdf-page-when-viewing --> 
+
+
 ## Predictions using Final Model on Evaluation Data Set 
 
-The below table represents our predictions as indicated in column `eval.predResp` using our final model using the provided evaluation data set.
+The Evaluation Data Set needed to be data cleansed much like our Training Data Set. we modified the Evaluation Data Set variables to conform to the Training Data Set and we also imputed the missing values in the Evaluation Data Set in order to be able to make predictions. 
 
-```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
+```{r, results='asis', echo=FALSE, eval = FALSE,  cache=TRUE}
 dfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance-evaluation-data.csv")
 
 dfTrEval$JOB <- as.character(dfTrEval$JOB)
 
-#dfTrEval$JOB[(dfTrEval$JOB == "")] <- NA
+dfTrEval$JOB[(dfTrEval$JOB == "")] <- NA
 
 dfTrEval <- dfTrEval %>%
         mutate(INCOME = removeDollars(INCOME),
@@ -912,8 +917,36 @@ dfTrEval <- dfTrEval %>%
                JOB = as.factor(gsub("z_", "", JOB)),
                CAR_TYPE = as.factor(gsub("z_", "", CAR_TYPE)),
                URBANICITY = as.factor(gsub("z_", "", URBANICITY)))
-
 ```
+
+```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+registerDoParallel(cl = makeCluster(10), cores = 2)
+
+set.seed(1234)
+
+dfTrEval <- dfTrEval %>% dplyr::select(-TARGET_FLAG,-TARGET_AMT)
+
+imputed_data <- dfTrEval %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) 
+
+write.csv(imputed_data$ximp,"imputed_insurance_evaluation_data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest
+```
+
+The below table represents our predictions as indicated in column `TARGET_FLAG` and `TARGET_AMT` using our final models and using the provided evaluation data set after transformation.
+
+```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
+imputeddfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/imputed_insurance_evaluation_data.csv")
+eval.PredProb <- predict(subsetModel, imputeddfTrEval ,type = "response") #Predicted Probability
+TARGET_FLAG <- numeric(nrow(imputeddfTrEval)) 
+TARGET_FLAG[which(eval.PredProb>=0.28)] <- 1 
+imputeddfTrEval <- data.frame(cbind(imputeddfTrEval,eval.PredProb,TARGET_FLAG))
+imputeddfTrEval$TARGET_AMT <- predict(fwdFitMLR, imputeddfTrEval)
+imputeddfTrEval$TARGET_AMT <- dollar(imputeddfTrEval$TARGET_AMT)
+kable(imputeddfTrEval)
+```
+
+\elandscape
+\global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 0}
+
 
 \newpage
 # Appendix A
