@@ -813,14 +813,16 @@ bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
 
 \newpage
 
-## Linear Regression 2 - Both Selection 
+## Linear Regression 2 - Forwards Selection 
+
+In the forwards linear regression model, the variables eliminated were the same as the variables eliminated in the backwards linear regression. Additionally, we removed `HOME_VAL` and `BLUEBOOK` because they did not appear to be significant in the previous model. Just like the previous model, the target variable has the strongest correlation with urbanicity.
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT~1,data=wimputedDfTr)
 
 fwdFitstep <- step(fullModel,direction = "both",
-      scope=~KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) 
-     + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF 
+      scope=~KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 
+     + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE +  TIF 
      + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE 
      + URBANICITY,trace = F)
 
@@ -831,7 +833,7 @@ fwdFitMLR <- lm(formula(fwdFitstep), data = wimputedDfTr)
 stargazer(fwdFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
 ```
 
-### Linear Regression 2 - Both Selection Model Metrics
+### Linear Regression 2 - Forwards Selection Model Metrics
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
@@ -876,20 +878,22 @@ The below table represents our predictions as indicated in column `eval.predResp
 ```{r,, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
 dfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance-evaluation-data.csv")
 
-
 dfTrEval$JOB <- as.character(dfTrEval$JOB)
 
 #dfTrEval$JOB[(dfTrEval$JOB == "")] <- NA
 
-dfTr <- dfTr %>%
+dfTrEval <- dfTrEval %>%
         mutate(INCOME = removeDollars(INCOME),
                HOME_VAL = removeDollars(HOME_VAL),
                BLUEBOOK = removeDollars(BLUEBOOK),
                OLDCLAIM = removeDollars(OLDCLAIM),
                MSTATUS = as.factor(gsub("z_", "", MSTATUS)),
                SEX = as.factor(gsub("z_", "", SEX)),
-               EDUCATION = factor((gsub("<", "Less Than ", gsub("z_", "", EDUCATION))), 
-                                  levels = c("Less Than High School", "High School", "Bachelors", "Masters", "PhD")),
+               EDUCATION = factor((gsub("<", "Less Than ", 
+                                        gsub("z_", "", EDUCATION))), 
+                                  levels = c("Less Than High School", 
+                                             "High School", "Bachelors", 
+                                             "Masters", "PhD")),
                JOB = as.factor(gsub("z_", "", JOB)),
                CAR_TYPE = as.factor(gsub("z_", "", CAR_TYPE)),
                URBANICITY = as.factor(gsub("z_", "", URBANICITY)))
