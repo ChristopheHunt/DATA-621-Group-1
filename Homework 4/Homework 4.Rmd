@@ -557,7 +557,7 @@ ModelMetrics.LinReg <- function(modelName, fit)
 
 ## Logistic Regressions 1 - Backwards Selection Method
 
-In the backwards selection model, the resulting AIC was 7,703.13. All of the variables remain except the age of the driver, sex, whether the car was red or not, number of kids at home, and car age. Zero correlation for bluebook value is a result of our transformations. As the bluebook value increases, the log odds that the vehicle gets into a crash decreases.
+In the backwards selection model, the resulting AIC was 7,703.13. All of the variables remain except the age of the driver, sex, whether the car was red or not, number of kids at home, and car age. Zero correlation for bluebook value is a result of our transformations. We also see that having a sports car increases the log odds of an accident the most of any car type. 
 
 ```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
@@ -630,7 +630,7 @@ dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
 kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 ```
 
-[^7]: ["Which Variance Inflation Factor Should I Be Using: $text{GVIF}$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
+[^7]: ["Which Variance Inflation Factor Should I Be Using: $GVIF$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
 
 \newpage
 
