@@ -88,3 +88,7 @@ In the backwards selection model, the resulting AIC was 7,703.13. All of the var
 In the forwards selection model, the resulting AIC was 7,712.07. All of the variables remain in the model. 
 
 In the subset selection model, the resulting AIC was 7,708.37. Very few of the variables remained. These variables were number of kids driving, income, marital status, job category, car use, whether the license was revoked or not, urbanicity, and motor vehicle record points. In this model, the target variable has a stronger correlation with urbanicity than it does in the other logistic models. 
+
+In the backwards linear regression model, the target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
+
+In the forwards linear regression model
