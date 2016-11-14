@@ -1,0 +1,983 @@
+---
+title: "Homework 4"
+author: "Group 1"
+date: ''
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+```{r programming style guide, echo=FALSE, eval=FALSE}
+##Style guide
+##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
+##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
+##lower case for scalar/single value, ex. x <- 1
+##data frame start with df followed by description, ex. dfEval <- evaluation data frame
+##assignments use "<-" not "="
+```
+
+```{r library load, include = FALSE}
+library(pacman)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot)
+```
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.pos = 'H')
+```
+
+\begin{center}
+\bigskip
+\bigskip
+\bigskip
+Prepared for:\\
+\medskip
+Dr. Nathan Bastian\\
+\smallskip
+City University of New York, School of Professional Studies - Data 621\\
+\bigskip
+Prepared by:\\
+\medskip
+Group 1\\ 
+\medskip
+Senthil Dhanapal\\ 
+\smallskip
+Yadu Chittampalli\\
+\smallskip
+Christophe Hunt\\  
+
+\end{center}
+
+\newpage
+
+# Introduction
+
+Consumers who own a car are often required to purchase car insurance to protect themselves from serious financial repercussions of being involved in a car accident. Insurance Providers must determine the risk of offering insurance coverage to a new customer through accurate statistical models that evaluate the consumers propensity for accidents. Since Insurance Providers are motivated by collecting the maximum amount of revenue from consumers while returning the lowest amount in accident claims, statistical modeling provides Insurance Providers with insight into the consumers behavior and the most appropriate pricing schemes[^1]. 
+
+[^1]: ["Insider Information: How Insurance Companies Measure Risk - Insurance Companies.com."](http://www.insurancecompanies.com/insider-information-how-insurance-companies-measure-risk/) Insurance Companiescom. N.p., n.d. Web. 06 Nov. 2016.
+
+# Statement of the Problem
+
+The purpose of this report is to develop statistical models to make inference into the likelihood of a customer being involved in a car accident and the cost associated of a customer being involved in a car accident. 
+
+# Data Exploration  
+
+## Variables Explained
+
+The variables provided in the `Insurance Training Data Set` are explained below:
+
+```{r data dictionary load, include=FALSE, cache=TRUE}
+download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%204/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW4 - Group 1.xlsx", mode = 'wb')
+daDict <- read.xlsx("Data Dictionary HW4 - Group 1.xlsx", sheetIndex = 1)
+file.remove(dir(getwd(), pattern = "Data Dictionary HW4 - Group 1", full.names = TRUE))
+```
+\footnotesize
+```{r data dictionary table, eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
+kable(daDict %>% 
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
+      align = c("c","l"))
+```
+
+
+```{r data prep, echo=FALSE, results='asis', cache=TRUE}
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance_training_data.csv")
+
+removeDollars <- function(column){
+             as.numeric(gsub("\\,","",gsub("\\$","", column)))
+            }
+
+dfTr$JOB <- as.character(dfTr$JOB)
+
+dfTr$JOB[(dfTr$JOB == "")] <- NA
+
+dfTr <- dfTr %>%
+        mutate(INCOME = removeDollars(INCOME),
+               HOME_VAL = removeDollars(HOME_VAL),
+               BLUEBOOK = removeDollars(BLUEBOOK),
+               OLDCLAIM = removeDollars(OLDCLAIM),
+               MSTATUS = as.factor(gsub("z_", "", MSTATUS)),
+               SEX = as.factor(gsub("z_", "", SEX)),
+               EDUCATION = factor((gsub("<", "Less Than ", gsub("z_", "", EDUCATION))), 
+                                  levels = c("Less Than High School", "High School", "Bachelors", "Masters", "PhD")),
+               JOB = as.factor(gsub("z_", "", JOB)),
+               CAR_TYPE = as.factor(gsub("z_", "", CAR_TYPE)),
+               URBANICITY = as.factor(gsub("z_", "", URBANICITY)))
+
+```
+\normalsize
+
+\newpage
+
+### Nominal Variables
+
+We first look at our nominal variables and their applicable proportions. Interestingly, we see that in this data set only a quarter of the customer records indicate an accident occurred. Also, the majority of consumers in this data set have no kids at home, are married, more than a high school education but less than a PhD, use their car for private purposes, typically own a SUV or minivan, and also live in an urban environment. This provides an interesting insight to the type of customer this data set represents and should be considered when further interpreting our statistical model. Additionally, we should be mindful of any selection biases in this data set as consumers with extremely risky histories are likely to have not been extended insurance coverage. 
+
+```{r nominal variables, echo=FALSE, results='asis', cache=TRUE}
+options(xtable.comment = FALSE)
+
+reporttools::tableNominal(dfTr %>% 
+                        dplyr::select(TARGET_FLAG, KIDSDRIV, HOMEKIDS, PARENT1, MSTATUS, SEX, 
+                                      EDUCATION, JOB, CAR_USE,  CAR_TYPE,RED_CAR, CLM_FREQ, REVOKED, URBANICITY), 
+                        cap = "Table of nominal variables", lab = "tab: nominal", print.pval = "fisher",
+                        caption.placement = "top", longtable = TRUE, 
+                        add.to.row = list(pos = list(0), command = "\\hline \\endhead "))
+```
+
+### Continuous and Discrete Variables
+
+We can see that in our continuous and discrete variables there is some additional variability. The median claim amount (`TARGET_AMT`) is 0 which would coincide with only a quarter for records indicating an accident. However, the spread is large since the average payout is only \$1,504.30 but the maximum payout was \$107,586.10. Surprisingly, the median `AGE` is 45 and the average `AGE` is 44.8 years, while we expected a lower average it could be due to simple selection bias in the data set source or the aging US population bringing this average higher [^2]. We also noticed that an `INCOME` of \$0.00 seems unwise because it is unclear how the individual would be able to cover their premium costs without parental support. Finally, we should note that the data set has as `CAR_AGE` of -3, which is impossible and will need to be removed.
+
+There are many missing values for this portion of our data set, we have over 400 values missing for years on the job, income, home value, and car age. Due to these missing values we will need to impute to complete our statistical model. 
+
+[^2]: Ortman, Jennifer M., Victoria A. Velkoff, and Howard Hogan. "An aging nation: the older population in the United States." Washington, DC: US Census Bureau (2014): 25-1140.
+
+```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
+reporttools::tableContinuous(dfTr %>% 
+                               dplyr::select(TARGET_AMT, TIF, AGE, YOJ, INCOME, HOME_VAL,
+                                             TRAVTIME, BLUEBOOK, OLDCLAIM, MVR_PTS, CAR_AGE), 
+                             longtable = TRUE)
+```
+
+\newpage
+
+## Imputting Missing Values
+
+In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^3]
+
+[^3]: Stekhoven, Daniel J., and Peter B?hlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
+
+```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+registerDoParallel(cl = makeCluster(10), cores = 2)
+
+set.seed(1234)
+
+dfTr$CAR_AGE[(dfTr$CAR_AGE == -3)] <- NA
+
+imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately 1 hour to process
+
+write.csv(imputed_data$ximp,"imputed_insurance_training_data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest
+```
+
+```{r, results='asis', echo = FALSE, cache=TRUE, eval=TRUE}
+imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/imputed_insurance_training_data.csv")
+
+imputedDfTr <- imputedDfTr %>% 
+               dplyr::select(-INDEX)
+
+digits = 1
+
+descriptive <- describe(imputedDfTr,
+                        descript = "Table 2 : Imputed Descriptive Statistics", 
+                        digits = digits)
+
+latex(descriptive, file = '')
+```
+\newpage
+
+
+## Exploration of Variables
+
+### Correlation Matrix
+
+If we widen our data set to a matrix to account for the many factors in our evaluation data set we can plot a correlation matrix. We can see some interesting patterns in the data. 
+
+* It is intuitive how both target variables have no correlation with an education level that is less than high school. If the person who wants to buy the vehicle does not have a sufficient level of education, obviously he or she would not have a high-paying job and therefore would not be able to buy the vehicle. 
+
+* Not surprisingly, the `TARGET_FLG` variable has negative correlation with marital status. If a married couple owns the vehicle and both the husband and wife share the vehicle, each of them would have to be careful while driving it so as to not get into any accident. 
+
+* We see that the `TARGET_FLG` variable is negatively correlated with bluebook value. If the bluebook value is high then that means that the car would be very expensive and the owner would likely not want to get the new car into an accident. Otherwise the owner may see their premiums increase sharply after the accident.  
+
+
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 5.5, fig.width= 10, cache=FALSE, eval=TRUE}
+
+imputedDfTrMx <- imputedDfTr %>%
+                   mutate(Yes = 1) %>%
+                   spread(EDUCATION, Yes, fill = 0)  %>%
+                   mutate(Yes = 1) %>%
+                   spread(CAR_TYPE, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   mutate(SEX = ifelse(SEX == "F", "Female", "Male")) %>%
+                   spread(SEX, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   mutate(CAR_USE = ifelse(CAR_USE == "Commercial", "Commercial Car Use", "Private Car Use")) %>%
+                   spread(CAR_USE, Yes, fill = 0) %>%
+                   mutate(Yes = 1) %>%
+                   spread(URBANICITY, Yes, fill = 0 ) %>%
+                   mutate(PARENT1 = ifelse(PARENT1 == "No", 0, 1),
+                          MSTATUS = ifelse(MSTATUS == "No", 0, 1),
+                          RED_CAR = ifelse(RED_CAR == "no", 0, 1),
+                          REVOKED = ifelse(REVOKED == "No", 0, 1)) %>%
+                  mutate(Yes = 1) %>%
+                  spread(JOB, Yes, fill = 0)  
+
+imputedDfTrMx <- as.matrix(imputedDfTrMx)
+
+corMx <- cor(imputedDfTrMx , use = "everything",  method = c("pearson"))
+corrplot(corMx, order = "hclust", addrect = 10, method = "square", tl.col = "black", tl.cex = .50, na.label = " ")
+```
+
+\newpage
+
+# Data Transformation
+
+## Outliers Treatment
+
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^4].  
+
+[^4]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+
+The below table is the summary results of the winsorizing of the data. 
+
+
+```{r winsorize dataframe,  echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
+library(forecast)
+
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+
+  return(x)  
+
+}
+
+wimputedDfTr <- cbind(sapply(c('INCOME', 'HOME_VAL', 'OLDCLAIM', 'BLUEBOOK'), function(x) winsorize(imputedDfTr[,x], multiple=2.2)), subset(imputedDfTr, select = -c(INCOME, HOME_VAL, OLDCLAIM, BLUEBOOK)))
+
+stargazer(wimputedDfTr, header = FALSE)
+```
+
+\newpage
+
+## BoxCox Transformations 
+
+The Box-Cox transformations were done only on three of the input variables - income, house value, and the total number of claims during the past 5 years. These transformations were done based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were funnel-shaped. 
+
+```{r, echo=FALSE, results = 'asis', cache=TRUE}
+library(car)
+fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
+
+ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
+```
+
+```{r, echo=FALSE,cache=TRUE, message = FALSE}
+residualPlots(fit)
+```
+
+\newpage
+
+Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
+
+```{r, echo=FALSE, cache=TRUE}
+l1 <- BoxCox.lambda(as.numeric(wimputedDfTr$INCOME))
+l2 <- BoxCox.lambda(as.numeric(wimputedDfTr$HOME_VAL))
+l3 <- BoxCox.lambda(as.numeric(wimputedDfTr$TRAVTIME))
+
+lamdas <- c(l1, l2, l3)
+Variables <- c("INCOME", "HOME_VAL", "TRAVTIME")
+dfBoxCox <- as.data.frame(cbind(lamdas, Variables))
+
+colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
+
+kable(dfBoxCox, align = c("c", "c"))
+```
+
+Utilizing the below table of common transformations based on the lambda value of the BoxCox we further transform our independent variables.
+
+\centering
+
+Common Box-Cox Transformations[^6] [^5]
+
+\setlength{\tabcolsep}{12pt}
+
+\begin{tabular}{ c c }
+\hline
+$\lambda$ & Y' \\ \hline
+-2 &	$Y^{-2}~=~\frac{1}{Y^{2}}$ \\
+-1 &	$Y^{-1}~=~\frac{1}{Y^{1}}$ \\
+-0.5 &	$Y^{-0.5}~=~\frac{1}{\sqrt{(Y)}}$ \\
+0	& $\log(Y)$ \\
+.25  & $\sqrt[4]{Y}$\\  
+0.5	& $Y^{0.5}~=~\sqrt{(Y)}$ \\
+1	& $Y^{1}~=~Y$ \\
+2	& $Y^{2}$ \\
+
+\end{tabular}
+
+\justifying
+
+Lambda values were truncated to the nearest tenth that match a common transformation as per the below table.
+
+\centering
+
+\begin{tabular}{ c c }
+\hline
+variable & variable transformation \\ \hline
+INCOME & $\sqrt[4]{INCOME}$ \\
+HOME VAL & $\sqrt(HOME~VAL)$ \\
+TRAVTIME & $\sqrt{TRAVTIME}$ 
+\end{tabular}
+
+\justifying
+
+\setlength{\tabcolsep}{6pt}
+
+[^5]: Osborne, Jason W. "Improving your data transformations: Applying the Box-Cox transformation." Practical Assessment, Research & Evaluation 15.12 (2010): 1-9.
+
+[^6]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
+
+\newpage
+
+# Models Built
+
+```{r model metrics, echo=FALSE,  message=FALSE,cache=TRUE}
+#Supporting Functions
+
+library(boot)
+
+TP <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==p & df[resp]==p),1]))
+}
+
+TN <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==n & df[resp]==n),1]))
+}
+
+FP <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==p & df[resp]==n),1]))
+}
+
+FN <- function(df, predResp, resp, p, n)
+{
+  return(length(df[which(df[predResp]==n & df[resp]==p),1]))
+}
+
+
+Accuracy <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  tn <- TN(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  fn <- FN(df,predResp,resp,p,n)
+  
+  return ((tp + tn)/(tp + fp + tn + fn))
+  
+}
+
+ClassificationErrorRate <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  tn <- TN(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  fn <- FN(df,predResp,resp,p,n)
+  
+  return ((fp + fn)/(tp + fp + tn + fn))
+  
+}
+
+Precision <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  
+  return (tp/(tp + fp))
+  
+}
+
+Sensitivity <- function(df, predResp, resp, p, n)
+{
+  tp <- TP(df,predResp,resp,p,n)
+  fn <- FN(df,predResp,resp,p,n)
+  
+  return (tp/(tp + fn))
+  
+}
+
+Specificity <- function(df, predResp, resp, p, n)
+{
+  tn <- TN(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  
+  return (tn/(tn + fp))
+  
+}
+
+F1Score <- function(df, predResp, resp, p, n)
+{
+  precision <- Precision(df,predResp,resp,p,n)
+  sensitivity <- Sensitivity(df,predResp,resp,p,n)
+  
+  return ((2 * precision * sensitivity)/(precision + sensitivity))
+  
+}
+
+
+ROC <- function(df, respProb, resp, p, n, thresholds, plotTitle)
+{
+  x <- thresholds
+  dfForPlot <- data.frame(threshold=integer(), fpr=double(),tpr=double(), auc=double(), dist=double())
+  for(i in x)
+  {
+    plotCoord <- ROC.Coordinates(df,resp, respProb, p, n, i)
+    #print(plotCoord)
+    dfForPlot <-  data.frame(rbind(dfForPlot,data.frame(plotCoord)))
+  }
+  plot(x=dfForPlot$fpr,y=dfForPlot$tpr,lwd=2, type="l", xlab="FPR", ylab="TPR", main=plotTitle)
+  lines(x=c(0, 1), y=c(0, 1), col="black", lwd=1)
+  return (dfForPlot)
+  
+}
+
+
+ROC.Coordinates <- function(df, resp, respProb, p, n, threshold)
+{
+  pred <- rep(n,length(df[,1]))
+  dfNew <- df
+  pred[which(df[respProb]>=threshold)]  <- p
+  dfNew$pred <- as.factor(pred)
+  
+  sensitivity <- Sensitivity(df = dfNew, predResp = "pred",resp = resp,p = p,n = n)
+  specificity <- Specificity(df = dfNew, predResp = "pred",resp = resp,p = p,n = n)
+  
+  tpr <- sensitivity
+  fpr <- 1 - specificity
+  auc <- (sensitivity + specificity)/2
+  dist <- sqrt((1-tpr)^2 + (fpr)^2)
+  
+  return (data.frame(threshold,fpr,tpr,auc,dist))
+  
+}
+
+calculateAUC <- function(curveInfo)
+{
+  tpr1 <- 0
+  fpr1 <- 0
+  auc <- 0
+  curveInfo <- curveInfo[order(-curveInfo$threshold),]
+  for(i in 1:nrow(curveInfo))
+  {
+    tpr2 <- curveInfo[i,"tpr"]
+    fpr2 <- curveInfo[i,"fpr"]
+    
+    auc <- auc + ((tpr1 + tpr2)/2)*(fpr2-fpr1)
+    
+    
+    tpr1 <- tpr2
+    fpr1 <- fpr2
+  }
+  return(auc)
+}
+
+
+ConfusionDataFrame <- function(tp,fp,tn,fn)
+{
+  cm <- data.frame( rbind(tp,fp), rbind(fn, tn))
+  colnames(cm) <- c("Act-Pos","Act-Neg")
+  rownames(cm) <- c("Pred-Pos","Pred-Neg")
+  return(kable(cm))
+}
+
+ModelMetrics.LogReg <- function(df, predResp, resp, p, n, modelName, fit)
+{
+  acc <- Accuracy(df,predResp,resp,p,n)
+  cer <- ClassificationErrorRate(df,predResp,resp,p,n)
+  prec <- Precision(df,predResp,resp,p,n)
+  sens <- Sensitivity(df,predResp,resp,p,n)
+  spec <- Specificity(df,predResp,resp,p,n)
+  f1score <- F1Score(df,predResp,resp,p,n)
+  roc <- ROC(df,"predProb",resp,p,n, seq(0,p,.01),modelName)
+  
+  auc <- calculateAUC(roc)
+  
+  bestThreshold <- roc[which(roc$auc == max(roc$auc)),][1,][,1]
+
+  
+  tp <- TP(df,predResp,resp,p,n)
+  tn <- TN(df,predResp,resp,p,n)
+  fp <- FP(df,predResp,resp,p,n)
+  fn <- FN(df,predResp,resp,p,n)
+
+  print(ConfusionDataFrame(tp,fp,tn,fn))
+  
+  cv.err <- boot::cv.glm(df,fit,K=10)$delta[1]  
+  
+  M <- format(c(acc,cer,prec,sens,spec,f1score,auc,bestThreshold,fit$aic,cv.err), digits = 3)
+  dfReturn <- data.frame("metric" = M)
+  r.n <- c("accuracy", "classif.error","precision","sensitivity","specificity","f1score","auc","best.threshold", "aic","CVError")
+  rownames(dfReturn) <- r.n
+  colnames(dfReturn) <- modelName
+  
+  
+  return(dfReturn)
+}
+
+
+ModelMetrics.LinReg <- function(modelName, fit)
+{
+  s.fit <- summary(fit)
+  adj.r.sqrd <- s.fit$adj.r.squared
+  r.sqrd <- s.fit$r.squared
+  f.stats <- s.fit$fstatistic[1]
+  
+  mse <- sum(fit$residuals^2)/s.fit$df[2]
+  rmse <-sqrt(mse)
+  mae <- mean(abs(fit$residuals))
+
+  p <- par(mfrow=c(2,2))
+  plot(fit)
+  par(p)
+  
+
+  M <- round(c(adj.r.sqrd,mse,rmse,mae,r.sqrd,f.stats), digits = 3)
+  df <- data.frame("metric" = M)
+  r.n <- c("Adjusted R-Sqrd", "MSE", "RMSE","MAE","R-Sqrd","f.stats")
+  rownames(df) <- r.n
+  colnames(df) <- modelName
+  return(df)
+}
+
+
+```
+
+## Logistic Regressions 1 - Backwards Selection Method
+
+In the backwards selection model, the resulting AIC was 7,703.13. All of the variables remain except the age of the driver, sex, whether the car was red or not, number of kids at home, and car age. Zero correlation for bluebook value is a result of our transformations. As the bluebook value increases, the log likelihood that the vehicle gets into a crash decreases.
+
+```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
+fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
+backFit <- fit <- glm(step(fullModel, direction = "backward", trace = F))
+
+stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+```
+
+\newpage
+
+### Model Metrics for Backwards Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+```{r backwards model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
+
+predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.50)] <- 1
+
+dfPred <- data.frame(cbind(wimputedDfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfBackModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Backwards Selection", fit = fit)
+
+kable(dfBackModel, align = c("l","c"))
+```
+
+
+Our previous results indicate that .320 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+\newpage
+
+#### Model Metrics for Backwards Selection with best threshold
+
+Model Metrics using best threshold of .320. 
+
+```{r backwards model metrics best threshold, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY")]
+
+predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+
+predResp[which(predProb>=0.32)] <- 1
+
+dfPred <- data.frame(cbind(wimputedDfTr[,c( "KIDSDRIV", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfBackModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Backwards Selection with best threshold", fit = fit)
+
+kable(dfBackModel, align = c("l","c"))
+
+```
+
+\newpage
+
+### Multicollinearity for Backwards Selection
+
+We square `GVIF^(1/(2*Df))` [^7] in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r, echo=FALSE, results='asis',  cache=TRUE}
+dfVifFit <- setDT(as.data.frame(car::vif(backFit)), keep.rownames = TRUE)[]
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
+```
+
+[^7]: ["Which Variance Inflation Factor Should I Be Using: $text{GVIF}$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
+
+\newpage
+
+## Logistic Regression 2 - Forwards Selection Method
+
+In the forwards selection model, the resulting AIC was 7,712.07. All of the variables remain in the model. The coefficients are relatively similar to the previous model, while `BLUEBOOK` and `OLDCLAIM` are significant they have very low coefficients and therefore don't explain a great deal of the log odds. 
+
+```{r forward selection method, echo=FALSE, results='asis', cache=TRUE}
+fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
+forwardFit <- fit <- glm(step(fullModel, direction = "forward", trace = F))
+stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+```
+
+\newpage
+
+### Model Metrics for Forwards Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+```{r forwards model metrics, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
+
+predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+
+predResp[which(predProb>=0.50)] <- 1
+
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Forwards Selection", fit = fit)
+
+
+kable(dfFwdModel, align = c("l","c"))
+```
+
+Our previous results indicate that .310 would be the best threshold for this model so we re-run our metrics using this threshold.
+
+\newpage
+
+#### Model Metrics for Forwards Selection with best threshold
+
+Model Metrics using best threshold of .310. 
+
+```{r forwards model metrics with best threshold, echo=FALSE, results='asis', eval=TRUE, cache=TRUE}
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY")]
+
+predProb <- predict(fit, dfPred, type = "response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+
+predResp[which(predProb>=0.310)] <- 1
+
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "AGE", "HOMEKIDS", "YOJ", "INCOME", "PARENT1", "HOME_VAL", "MSTATUS", "SEX", "EDUCATION", "JOB", "TRAVTIME", "CAR_USE", "BLUEBOOK", "TIF", "RED_CAR", "CAR_TYPE", "OLDCLAIM", "CLM_FREQ", "REVOKED", "MVR_PTS", "CAR_AGE", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfFwdModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Forwards Selection with Best Threshold", fit = fit)
+
+kable(dfFwdModel, align = c("l","c"))
+```
+\newpage
+
+### Multicollinearity for Forwards Selection
+
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r, echo=FALSE, results='asis',  cache=TRUE}
+dfVifFit <- setDT(as.data.frame(car::vif(forwardFit)), keep.rownames = TRUE)[]
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
+```
+
+\newpage
+
+## Logistic Regression 3 - Subset Selection Method
+
+### Subset Variable Selection
+
+Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. 
+
+```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
+subsetModel <- regsubsets(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr, nbest = 1)
+summary <- summary(subsetModel)
+kable(t(summary$outmat))
+```
+
+\newpage
+
+### Subset Model
+
+The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. In the subset selection model, the resulting AIC was 7,708.37. Very few of the variables remained. These variables were number of kids driving, income, marital status, job category, car use, whether the license was revoked or not, urbanicity, and motor vehicle record points. In this model, the target variable has a stronger correlation with urbanicity than it does in the other logistic models. 
+
+```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
+subsetModelFormula <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
+subsetModel <- fit <- glm(subsetModelFormula, family = binomial, data = wimputedDfTr)
+stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+```
+
+\newpage
+
+### Model Metrics for Subset Selection
+
+We first use an established threshold of .50 to determine our best possible threshold. 
+
+```{r subset model metrics, echo=FALSE, results='asis', eval=TRUE,  cache=TRUE, error=TRUE}
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.50)] <- 1
+
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Subset Selection", fit = fit)
+
+kable(dfSubModel, align = c("l","c"))
+```
+
+#### Model Metrics for Subset Selection with best threshold
+
+Model Metrics using best threshold of .280.
+
+```{r subset model metrics with best threshold, echo=FALSE, results='asis', eval=TRUE,  cache=TRUE, error=TRUE}
+dfPred <- wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY")]
+predProb <- predict(fit, dfPred, type="response") #Predicted Probability
+
+predResp <- numeric(length(predProb)) #Predicted Class
+predResp[which(predProb>=0.280)] <- 1
+
+dfPred <- data.frame(cbind(wimputedDfTr[,c("KIDSDRIV", "INCOME", "MSTATUS", "JOB", "CAR_USE", "REVOKED", "MVR_PTS", "URBANICITY", "TARGET_FLAG")], predProb, predResp))
+
+dfSubModel <- ModelMetrics.LogReg(df = dfPred, predResp = "predResp", resp = "TARGET_FLAG",
+                                  p = 1, n = 0,
+                                  modelName = "Model Metrics for Subset Selection with Best Threshold", fit = fit)
+
+kable(dfSubModel, align = c("l","c"))
+```
+
+\newpage
+
+### Multicollinearity for Subset Selection
+
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity. 
+
+```{r, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
+dfVifFit <- setDT(as.data.frame(car::vif(subsetModel)), keep.rownames = TRUE)[]
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
+```
+
+\newpage
+
+## Linear Regression 1 - Backwards Selection
+
+In the backwards linear regression model, the variables eliminated were the number of years on the job, whether the car is red or not, number of kids at home, total claims within the past 5 years, and age of the driver. The target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+fullModel <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
+
+bkFitStep <- step(fullModel, direction = "backward", trace = F)
+
+#print(formula(bkFitStep))
+
+backFitMLR <-  lm(formula(bkFitStep),data = wimputedDfTr)
+
+stargazer(backFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+```
+\newpage
+
+### Linear Regression 1 - Backwards Selection Model Metrics
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
+```
+
+\newpage
+
+## Linear Regression 2 - Forwards Selection 
+
+In the forwards linear regression model, the variables eliminated were the same as the variables eliminated in the backwards linear regression. Additionally, we removed `HOME_VAL` and `BLUEBOOK` because they did not appear to be significant in the previous model. Just like the previous model, the target variable has the strongest correlation with urbanicity.
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+fullModel <- lm(TARGET_AMT~1,data=wimputedDfTr)
+
+fwdFitstep <- step(fullModel,direction = "both",
+      scope=~KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 
+     + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE +  TIF 
+     + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE 
+     + URBANICITY,trace = F)
+
+#print(formula(fwdFitstep))
+
+fwdFitMLR <- lm(formula(fwdFitstep), data = wimputedDfTr)
+
+stargazer(fwdFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+```
+
+### Linear Regression 2 - Forwards Selection Model Metrics
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
+```
+
+\newpage
+
+#Selected Models 
+
+Of note, the urban and rural flag had the most influence on both Target variables. This is not surprising as someone living in an urban environment is driving their car among many other cars and it is intiuitive that accidents would be more likely in this environment. 
+
+## Logistic Regression Selected
+
+Logistic Regression Model Metrics 
+
+
+Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much. Additionally, it is a simpler model with a better precision. This is why we chose this model over the other two. 
+
+```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+pander::pander(cbind(dfFwdModel, dfSubModel, dfBackModel), split.cell = 80, split.table = Inf)
+```
+
+Our Final Logistic Model (Subset Selection Method): 
+
+$$
+\begin{aligned}
+\log(TARGET FLAG)~=~&-469*KIDSDRIV~+~-0.085*\sqrt[4]{INCOME}~+~-0.748*MSTATUSYes\\
+&~+~0.148*JOBClerical~+~-0.972*JOBDoctor~+~-0.421*JOBHome Maker\\
+&~+~-0.466*JOBLawyer~+~-0.954*JOBManager~+~-0.398*JOBProfessional\\
+&~+~-0.343*JOBStudent~+~-0.725*CAR_USEPrivate~+~0.752*REVOKEDYes\\
+&~+~0.151*MVR_PTS~+~2.282672*URBANICITYHighly Urban/ Urban~+~-1.135467\\
+\end{aligned}
+$$
+\newpage
+
+## Linear Regression Selected
+
+In the linear models rendered, some of the correlation coefficients do make sense. For example, in both models, it would make sense for a student to have to pay less in a car crash due to the fact that the student would spend more time studying and less time on the road. It would also make sense for urbanicity to affect the cost during a car crash because in urban areas, there are more people and pedestrians and the probability of people getting killed in a car crash would be very high as opposed to rural areas where there would be less pedestrians. However, while both models have the same adjusted R^2, the Forward Selection Model has fewer variables which makes it easier to understand and is therefore the selected Linear Regresion.
+
+Our Final Linear Model (Forward Selection Method):
+
+$$
+\begin{aligned}
+TARGET AMT~=~&170.55*MVR_PTS~+~1,674.58*URBANICITYHighly Urban/ Urban\\
+&+~61.16*JOBClerical~+~-1,209.74*JOBDoctor~+~-318.80*JOBHome Maker\\
+&+~-338.710*JOBLawyer~+~-1,029.96*JOBManager~+~11.61*JOBProfessional\\
+&~+~-377.47*JOBStudent~+~-601.84*MSTATUSYes~+~-829.33*CAR USEPrivate\\
+&~+~376.86*KIDSDRIV~+~463.35*CAR TYPEPanel Truck~+~362.62*CAR_TYPEPickup\\
+&~+~923.23*CAR TYPESports Car~+~668.78*CAR TYPESUV~+~591.35*CAR_TYPEVan\\
+&~+~-47.8*TIF~+~132.59*\sqrt{TRAVTIME}\\
+&~+~642.15*PARENT1Yes~+~-44.23*\sqrt[4]{INCOME}\\
+&~+~434.91*REVOKEDYes~+~-27.49*CAR AGE~+~107.28*CLM FREQ~+~247.62*SEXM\\
+&~+~185.76*EDUCATIONHigh School~+~284.79*EDUCATIONLess Than High School\\
+&~+~356.36*EDUCATIONMasters~+~651.01*EDUCATIONPhD
+\end{aligned}
+$$
+
+\blandscape
+\pagebreak[4]
+  \global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 90} <!-- provided by http://tex.stackexchange.com/questions/40683/rotate-single-pdf-page-when-viewing --> 
+
+
+## Predictions using Final Model on Evaluation Data Set 
+
+The Evaluation Data Set needed to be data cleansed much like our Training Data Set. We modified the Evaluation Data Set variables to conform to the Training Data Set and we also imputed the missing values in the Evaluation Data Set in order to be able to make predictions. 
+
+```{r, results='asis', echo=FALSE, eval = FALSE,  cache=TRUE}
+dfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance-evaluation-data.csv")
+
+dfTrEval$JOB <- as.character(dfTrEval$JOB)
+
+dfTrEval$JOB[(dfTrEval$JOB == "")] <- NA
+
+dfTrEval <- dfTrEval %>%
+        mutate(INCOME = removeDollars(INCOME),
+               HOME_VAL = removeDollars(HOME_VAL),
+               BLUEBOOK = removeDollars(BLUEBOOK),
+               OLDCLAIM = removeDollars(OLDCLAIM),
+               MSTATUS = as.factor(gsub("z_", "", MSTATUS)),
+               SEX = as.factor(gsub("z_", "", SEX)),
+               EDUCATION = factor((gsub("<", "Less Than ", 
+                                        gsub("z_", "", EDUCATION))), 
+                                  levels = c("Less Than High School", 
+                                             "High School", "Bachelors", 
+                                             "Masters", "PhD")),
+               JOB = as.factor(gsub("z_", "", JOB)),
+               CAR_TYPE = as.factor(gsub("z_", "", CAR_TYPE)),
+               URBANICITY = as.factor(gsub("z_", "", URBANICITY)))
+```
+
+```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+registerDoParallel(cl = makeCluster(10), cores = 2)
+
+set.seed(1234)
+
+dfTrEval <- dfTrEval %>% dplyr::select(-TARGET_FLAG,-TARGET_AMT)
+
+imputed_data <- dfTrEval %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) 
+
+write.csv(imputed_data$ximp,"imputed_insurance_evaluation_data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest
+```
+
+The below table represents our predictions as indicated in column `TARGET_FLAG` and `TARGET_AMT` using our final models and using the provided evaluation data set after transformation.
+
+\tiny
+
+```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
+imputeddfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/imputed_insurance_evaluation_data.csv")
+eval.PredProb <- predict(subsetModel, imputeddfTrEval ,type = "response") #Predicted Probability
+TARGET_FLAG <- numeric(nrow(imputeddfTrEval)) 
+TARGET_FLAG[which(eval.PredProb>=0.28)] <- 1 
+imputeddfTrEval <- data.frame(cbind(imputeddfTrEval,eval.PredProb,TARGET_FLAG))
+imputeddfTrEval$TARGET_AMT <- predict(fwdFitMLR, imputeddfTrEval)
+imputeddfTrEval$TARGET_AMT <- dollar(imputeddfTrEval$TARGET_AMT)
+pander::pander(imputeddfTrEval, split.cell = 30, split.table = Inf, round = 2)
+```
+
+\elandscape
+\global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 0}
+\newpage
+\normalsize
+
+# Appendix A
+
+## Session Info
+
+```{r, results='asis', echo=FALSE, eval = TRUE,  cache=TRUE}
+toLatex(sessionInfo())
+```
+
+## Data Dictionary
+
+\footnotesize
+```{r , eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
+kable(daDict %>% 
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
+      align = c("c","l"))
+```
+\normalsize
+
+## R source code
+
+Please see [Homework 4.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%204/Homework%204.Rmd) on GitHub for source code.   
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%204/Homework%204.Rmd
+

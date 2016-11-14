@@ -132,11 +132,11 @@ reporttools::tableNominal(dfTr %>%
 
 ### Continuous and Discrete Variables
 
-We can see that in our continuous and discrete variables there is some additional variability. The median claim amount (`TARGET_AMT`) is 0 which would coincide with only a quarter for records indicating an accident. However, the spread is large since the average payout is only \$1,504.30 but the maximum payout was \$107,586.10. Surprisingly, the median `AGE` is 45 and the average `AGE` is 44.8 years, while we expected a lower average it could be due to simple selection bias in the data set source or the aging US population bringing this average higher [^3]. We also noticed that an `INCOME` of \$0.00 seems unwise because it is unclear how the individual would be able to cover their premium costs without parental support. Finally, we should note that the data set has as `CAR_AGE` of -3, which is impossible and will need to be removed.
+We can see that in our continuous and discrete variables there is some additional variability. The median claim amount (`TARGET_AMT`) is 0 which would coincide with only a quarter for records indicating an accident. However, the spread is large since the average payout is only \$1,504.30 but the maximum payout was \$107,586.10. Surprisingly, the median `AGE` is 45 and the average `AGE` is 44.8 years, while we expected a lower average it could be due to simple selection bias in the data set source or the aging US population bringing this average higher [^2]. We also noticed that an `INCOME` of \$0.00 seems unwise because it is unclear how the individual would be able to cover their premium costs without parental support. Finally, we should note that the data set has as `CAR_AGE` of -3, which is impossible and will need to be removed.
 
 There are many missing values for this portion of our data set, we have over 400 values missing for years on the job, income, home value, and car age. Due to these missing values we will need to impute to complete our statistical model. 
 
-[^3]: Ortman, Jennifer M., Victoria A. Velkoff, and Howard Hogan. "An aging nation: the older population in the United States." Washington, DC: US Census Bureau (2014): 25-1140.
+[^2]: Ortman, Jennifer M., Victoria A. Velkoff, and Howard Hogan. "An aging nation: the older population in the United States." Washington, DC: US Census Bureau (2014): 25-1140.
 
 ```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
 reporttools::tableContinuous(dfTr %>% 
@@ -149,9 +149,9 @@ reporttools::tableContinuous(dfTr %>%
 
 ## Imputting Missing Values
 
-In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^2]
+In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^3]
 
-[^2]: Stekhoven, Daniel J., and Peter B?hlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
+[^3]: Stekhoven, Daniel J., and Peter B?hlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
 
 ```{r, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
 registerDoParallel(cl = makeCluster(10), cores = 2)
@@ -229,9 +229,9 @@ corrplot(corMx, order = "hclust", addrect = 10, method = "square", tl.col = "bla
 
 ## Outliers Treatment
 
-We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^7].  
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^4].  
 
-[^7]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+[^4]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
 
 The below table is the summary results of the winsorizing of the data. 
 
@@ -299,7 +299,7 @@ Utilizing the below table of common transformations based on the lambda value of
 
 \centering
 
-Common Box-Cox Transformations[^8] [^4]
+Common Box-Cox Transformations[^6] [^5]
 
 \setlength{\tabcolsep}{12pt}
 
@@ -335,9 +335,9 @@ TRAVTIME & $\sqrt{TRAVTIME}$
 
 \setlength{\tabcolsep}{6pt}
 
-[^4]: Osborne, Jason W. "Improving your data transformations: Applying the Box-Cox transformation." Practical Assessment, Research & Evaluation 15.12 (2010): 1-9.
+[^5]: Osborne, Jason W. "Improving your data transformations: Applying the Box-Cox transformation." Practical Assessment, Research & Evaluation 15.12 (2010): 1-9.
 
-[^8]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
+[^6]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
 
 \newpage
 
@@ -557,7 +557,7 @@ ModelMetrics.LinReg <- function(modelName, fit)
 
 ## Logistic Regressions 1 - Backwards Selection Method
 
-In the backwards selection model, the resulting AIC was 7,703.13. All of the variables remain except the age of the driver, sex, whether the car was red or not, number of kids at home, car use, and car age. Zero correlation for bluebook value is a result of our transformations. As the bluebook value increases, the log likelihood that the vehicle gets into a crash decreases.
+In the backwards selection model, the resulting AIC was 7,703.13. All of the variables remain except the age of the driver, sex, whether the car was red or not, number of kids at home, and car age. Zero correlation for bluebook value is a result of our transformations. As the bluebook value increases, the log likelihood that the vehicle gets into a crash decreases.
 
 ```{r backwards model selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
@@ -622,7 +622,7 @@ kable(dfBackModel, align = c("l","c"))
 
 ### Multicollinearity for Backwards Selection
 
-We square `GVIF^(1/(2*Df))` [^4] in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+We square `GVIF^(1/(2*Df))` [^7] in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
 ```{r, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(backFit)), keep.rownames = TRUE)[]
@@ -630,13 +630,13 @@ dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
 kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 ```
 
-[^4]: ["Which Variance Inflation Factor Should I Be Using: $text{GVIF}$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
+[^7]: ["Which Variance Inflation Factor Should I Be Using: $text{GVIF}$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
 
 \newpage
 
 ## Logistic Regression 2 - Forwards Selection Method
 
-In the forwards selection model, the resulting AIC was 7,712.07. All of the variables remain in the model. 
+In the forwards selection model, the resulting AIC was 7,712.07. All of the variables remain in the model. The coefficients are relatively similar to the previous model, while `BLUEBOOK` and `OLDCLAIM` are significant they have very low coefficients and therefore don't explain a great deal of the log odds. 
 
 ```{r forward selection method, echo=FALSE, results='asis', cache=TRUE}
 fullModel <- lm(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
@@ -843,11 +843,14 @@ fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
 
 #Selected Models 
 
+Of note, the urban and rural flag had the most influence on both Target variables. This is not surprising as someone living in an urban environment is driving their car among many other cars and it is intiuitive that accidents would be more likely in this environment. 
+
 ## Logistic Regression Selected
 
 Logistic Regression Model Metrics 
 
-Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much. This is why we chose this model over the other two. 
+
+Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much. Additionally, it is a simpler model with a better precision. This is why we chose this model over the other two. 
 
 ```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 pander::pander(cbind(dfFwdModel, dfSubModel, dfBackModel), split.cell = 80, split.table = Inf)
@@ -895,7 +898,7 @@ $$
 
 ## Predictions using Final Model on Evaluation Data Set 
 
-The Evaluation Data Set needed to be data cleansed much like our Training Data Set. we modified the Evaluation Data Set variables to conform to the Training Data Set and we also imputed the missing values in the Evaluation Data Set in order to be able to make predictions. 
+The Evaluation Data Set needed to be data cleansed much like our Training Data Set. We modified the Evaluation Data Set variables to conform to the Training Data Set and we also imputed the missing values in the Evaluation Data Set in order to be able to make predictions. 
 
 ```{r, results='asis', echo=FALSE, eval = FALSE,  cache=TRUE}
 dfTrEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%204/insurance-evaluation-data.csv")
@@ -945,7 +948,7 @@ TARGET_FLAG[which(eval.PredProb>=0.28)] <- 1
 imputeddfTrEval <- data.frame(cbind(imputeddfTrEval,eval.PredProb,TARGET_FLAG))
 imputeddfTrEval$TARGET_AMT <- predict(fwdFitMLR, imputeddfTrEval)
 imputeddfTrEval$TARGET_AMT <- dollar(imputeddfTrEval$TARGET_AMT)
-pander::pander(imputeddfTrEval, split.cell = 20, split.table = Inf)
+pander::pander(imputeddfTrEval, split.cell = 30, split.table = Inf, round = 2)
 ```
 
 \elandscape
