@@ -266,14 +266,14 @@ stargazer(wimputedDfTr, header = FALSE)
 
 The Box-Cox transformations were done only on three of the input variables - income, house value, and the total number of claims during the past 5 years. These transformations were done based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were funnel-shaped. 
 
-```{r, echo=FALSE, results = 'asis', cache=TRUE}
+```{r box cox linear, echo=FALSE, results = 'asis', cache=TRUE}
 library(car)
 fit <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
 
 ncvTest(fit, ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data=wimputedDfTr)
 ```
 
-```{r, echo=FALSE,cache=TRUE, message = FALSE}
+```{r box cox plot, echo=FALSE,cache=TRUE, message = FALSE}
 residualPlots(fit)
 ```
 
@@ -281,7 +281,7 @@ residualPlots(fit)
 
 Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
 
-```{r, echo=FALSE, cache=TRUE}
+```{r box cox table, echo=FALSE, cache=TRUE, eval=TRUE}
 l1 <- BoxCox.lambda(as.numeric(wimputedDfTr$INCOME))
 l2 <- BoxCox.lambda(as.numeric(wimputedDfTr$HOME_VAL))
 l3 <- BoxCox.lambda(as.numeric(wimputedDfTr$TRAVTIME))
@@ -343,7 +343,7 @@ TRAVTIME & $\sqrt{TRAVTIME}$
 
 # Models Built
 
-```{r model metrics, echo=FALSE,  message=FALSE,cache=TRUE}
+```{r model metrics, echo=FALSE,  message=FALSE, cache=TRUE}
 #Supporting Functions
 
 library(boot)
@@ -624,7 +624,7 @@ kable(dfBackModel, align = c("l","c"))
 
 We square `GVIF^(1/(2*Df))` [^7] in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
-```{r, echo=FALSE, results='asis',  cache=TRUE}
+```{r backwards selection log, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(backFit)), keep.rownames = TRUE)[]
 dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
 kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
@@ -700,7 +700,7 @@ kable(dfFwdModel, align = c("l","c"))
 
 We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
-```{r, echo=FALSE, results='asis',  cache=TRUE}
+```{r multi forwards selection, echo=FALSE, results='asis',  cache=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(forwardFit)), keep.rownames = TRUE)[]
 dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
 kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
@@ -714,7 +714,7 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 Using the `leaps` package and the `regsubsets` function we are able to subset our independent variables by looking at the best model for each predictor. 
 
-```{r, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
+```{r sub set variable selection, subset, eval=TRUE, cache=TRUE, results = 'asis', echo=FALSE}
 subsetModel <- regsubsets(TARGET_FLAG ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr, nbest = 1)
 summary <- summary(subsetModel)
 kable(t(summary$outmat))
@@ -726,7 +726,7 @@ kable(t(summary$outmat))
 
 The variables as indicated in column `8` of the previous table will be further implement into our subset selection model in the following table. In the subset selection model, the resulting AIC was 7,708.37. Very few of the variables remained. These variables were number of kids driving, income, marital status, job category, car use, whether the license was revoked or not, urbanicity, and motor vehicle record points. In this model, the target variable has a stronger correlation with urbanicity than it does in the other logistic models. 
 
-```{r, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
+```{r sub set model, model from subset, eval=TRUE, cache=TRUE, echo=FALSE, results = 'asis'}
 subsetModelFormula <- lm(TARGET_FLAG ~ KIDSDRIV + I(INCOME^(1/4)) + MSTATUS + JOB + CAR_USE + REVOKED + MVR_PTS + URBANICITY, data = wimputedDfTr) ##TODO - Review before submission
 subsetModel <- fit <- glm(subsetModelFormula, family = binomial, data = wimputedDfTr)
 stargazer(fit, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
@@ -780,7 +780,7 @@ kable(dfSubModel, align = c("l","c"))
 
 We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Here in our subset selection model we find that no variable exceeds our pre-established threshold of 5 for multicollinearity. 
 
-```{r, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
+```{r multi subset selection, echo=FALSE, results='asis',  cache=TRUE, eval=TRUE}
 dfVifFit <- setDT(as.data.frame(car::vif(subsetModel)), keep.rownames = TRUE)[]
 dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
 kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
@@ -792,7 +792,7 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 In the backwards linear regression model, the variables eliminated were the number of years on the job, whether the car is red or not, number of kids at home, total claims within the past 5 years, and age of the driver. The target variable has the strongest correlation with the urbanicity. Due to our transformation of the income variable, income does have some correlation now with the target amount. Before our tranformation there was no correlation at all between these two variables. 
 
-```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+```{r backwards selection, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT ~ KIDSDRIV + AGE + HOMEKIDS + YOJ + I(INCOME^(1/4)) + PARENT1 + I(sqrt(HOME_VAL)) + MSTATUS + SEX + EDUCATION + JOB + I(sqrt(TRAVTIME)) + CAR_USE + BLUEBOOK + TIF + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY, data = wimputedDfTr)
 
 bkFitStep <- step(fullModel, direction = "backward", trace = F)
@@ -807,8 +807,9 @@ stargazer(backFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size 
 
 ### Linear Regression 1 - Backwards Selection Model Metrics
 
-```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+```{r backwards selection model metrics, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
+kable(bkMLRMetrics)
 ```
 
 \newpage
@@ -817,7 +818,7 @@ bkMLRMetrics <- ModelMetrics.LinReg("BackMLR",backFitMLR)
 
 In the forwards linear regression model, the variables eliminated were the same as the variables eliminated in the backwards linear regression. Additionally, we removed `HOME_VAL` and `BLUEBOOK` because they did not appear to be significant in the previous model. Just like the previous model, the target variable has the strongest correlation with urbanicity.
 
-```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+```{r forwards selection, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fullModel <- lm(TARGET_AMT~1,data=wimputedDfTr)
 
 fwdFitstep <- step(fullModel,direction = "both",
@@ -835,8 +836,9 @@ stargazer(fwdFitMLR, header = FALSE, no.space = TRUE, style = "qje", font.size =
 
 ### Linear Regression 2 - Forwards Selection Model Metrics
 
-```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+```{r Forwards selection, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 fwdMLRMetrics <- ModelMetrics.LinReg("FwdMLR",fwdFitMLR)
+kable(fwdMLRMetrics)
 ```
 
 \newpage
@@ -852,7 +854,7 @@ Logistic Regression Model Metrics
 
 Out of all the logistic models, the Subset Selection Model rated the best due to the highest accuracy. The AIC for this model was not the lowest. However, the difference between this AIC (7708.37) and the lowest AIC (7703.13) is not too much. Additionally, it is a simpler model with a better precision. This is why we chose this model over the other two. 
 
-```{r, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+```{r log model metrics, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
 pander::pander(cbind(dfFwdModel, dfSubModel, dfBackModel), split.cell = 80, split.table = Inf)
 ```
 
@@ -872,6 +874,10 @@ $$
 ## Linear Regression Selected
 
 In the linear models rendered, some of the correlation coefficients do make sense. For example, in both models, it would make sense for a student to have to pay less in a car crash due to the fact that the student would spend more time studying and less time on the road. It would also make sense for urbanicity to affect the cost during a car crash because in urban areas, there are more people and pedestrians and the probability of people getting killed in a car crash would be very high as opposed to rural areas where there would be less pedestrians. However, while both models have the same adjusted R^2, the Forward Selection Model has fewer variables which makes it easier to understand and is therefore the selected Linear Regresion.
+
+```{r linear model metrics, echo = FALSE, results = 'asis', cache=TRUE, eval=TRUE}
+pander::pander(cbind(fwdMLRMetrics, bkMLRMetrics), split.cell = 80, split.table = Inf)
+```
 
 Our Final Linear Model (Forward Selection Method):
 
