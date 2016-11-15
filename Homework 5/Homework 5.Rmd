@@ -75,3 +75,15 @@ pandoc.table(daDict %>%
       justify = c("center","left"), emphasize.strong.rows = seq(from = 1, to = nrow(daDict), by = 2),
       table.alignment.rownames = 'centre',style="multiline")
 ```
+
+
+```{r data prep, echo=FALSE, results='asis', cache=TRUE}
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/wine-training-data.csv") %>%
+        dplyr::select(-dplyr::contains("INDEX")) %>%
+        map_if(is.integer, as.numeric) %>%
+        as.data.frame()
+```
+
+```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
+reporttools::tableContinuous(dfTr , longtable = TRUE)
+```
