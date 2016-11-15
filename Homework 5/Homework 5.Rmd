@@ -25,7 +25,7 @@ output:
 
 ```{r library load, include = FALSE, cache=TRUE}
 library(pacman)
-p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander)
 ```
 
 \begin{center}
@@ -59,3 +59,19 @@ Christophe Hunt\\
 # Data Exploration  
 
 ## Variables Explained
+
+The variables provided in the `Wine Training Data Set` are explained below:
+
+```{r data dictionary load, include=FALSE, cache=TRUE}
+download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%205/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW5 - Group 1.xlsx", mode = 'wb')
+daDict <- read.xlsx("Data Dictionary HW5 - Group 1.xlsx", sheetIndex = 1)
+file.remove(dir(getwd(), pattern = "Data Dictionary HW5 - Group 1", full.names = TRUE))
+```
+
+```{r data dictionary table, eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
+pandoc.table(daDict %>% 
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
+      justify = c("center","left"), emphasize.strong.rows = seq(from = 1, to = nrow(daDict), by = 2),
+      table.alignment.rownames = 'centre',style="multiline")
+```
