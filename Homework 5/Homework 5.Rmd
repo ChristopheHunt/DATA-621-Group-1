@@ -1,0 +1,61 @@
+---
+title: "Homework 5"
+author: "Group 1"
+date: ''
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+```{r programming style guide, echo=FALSE, eval=FALSE}
+##Style guide
+##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
+##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
+##lower case for scalar/single value, ex. x <- 1
+##data frame start with df followed by description, ex. dfEval <- evaluation data frame
+##assignments use "<-" not "="
+```
+
+```{r library load, include = FALSE, cache=TRUE}
+library(pacman)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot)
+```
+
+\begin{center}
+\bigskip
+\bigskip
+\bigskip
+Prepared for:\\
+\medskip
+Dr. Nathan Bastian\\
+\smallskip
+City University of New York, School of Professional Studies - Data 621\\
+\bigskip
+Prepared by:\\
+\medskip
+Group 1\\ 
+\medskip
+Senthil Dhanapal\\ 
+\smallskip
+Yadu Chittampalli\\
+\smallskip
+Christophe Hunt\\  
+
+\end{center}
+
+\newpage
+
+# Introduction
+
+# Statement of the Problem
+
+# Data Exploration  
+
+## Variables Explained
