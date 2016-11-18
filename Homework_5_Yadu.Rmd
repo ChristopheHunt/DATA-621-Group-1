@@ -1,0 +1,38 @@
+---
+title: "Untitled"
+author: "Yadu"
+date: "November 17, 2016"
+output: html_document
+---
+
+```{r}
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv")
+library(ggplot2)
+ggplot(stack(subset(dfTr, select = -TARGET)), aes(x = ind, y = values)) + geom_boxplot(fill = "grey80", colour = "#3366FF")
+```
+
+The variables that would need to be winsorized are Free Sulfur Dioxide, Residual Sugar, and Total Sulfur Dioxide. 
+
+```{r}
+library(forecast)
+
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+
+  return(x)  
+
+}
+
+wDfTr <- cbind(sapply(c('FreeSulfurDioxide', 'TotalSulfurDioxide', 'ResidualSugar'), function(x) winsorize(dfTr[,x], multiple=2.2)), subset(dfTr, select = -c(FreeSulfurDioxide, TotalSulfurDioxide, ResidualSugar)))
+
+wDfTr
+```
