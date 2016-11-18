@@ -16,6 +16,8 @@ output:
 
 # Abstract: use 250 words or less to summarize your problem, methodology, and major outcomes (might need to wait to complete the major outcomes portion). 
 
+#### Problem = our problem is to create a statiscal model for the number of bottle sold. This will help us predict inventory and if we were a wholesale distributor we could adjust our inventory. 
+
 # Key words: select a few key words (up to five) related to your work.
 
 # Introduction: describe the background and motivation of your problem.
