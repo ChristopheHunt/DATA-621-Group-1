@@ -34,5 +34,11 @@ winsorize <- function(x, multiple=2.2)
 
 wDfTr <- cbind(sapply(c('FreeSulfurDioxide', 'TotalSulfurDioxide', 'ResidualSugar'), function(x) winsorize(dfTr[,x], multiple=2.2)), subset(dfTr, select = -c(FreeSulfurDioxide, TotalSulfurDioxide, ResidualSugar)))
 
-wDfTr
+fwDfTr <- rbind(wDfTr, dfTr$TARGET)
+```
+
+```{r}
+library(car)
+fit <- lm(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data=fwDfTr)
+residualPlots(fit)
 ```

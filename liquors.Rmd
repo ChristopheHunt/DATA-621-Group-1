@@ -1,0 +1,14 @@
+---
+title: "liquors"
+author: "Yadu"
+date: "November 20, 2016"
+output: html_document
+---
+
+According to a recent market report, there was a slight increase in market share vs. beer for 5 consecutive years. Distilled Spirits Council President and CEO Peter H. Cressy says, "Consumer interest in industry innovations and premium products from distilled spirits producers of all sizes contributed to another year of steady growth in 2014." The continuous growth of this industry is owed to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permiumization across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category. 
+
+The Council Senior Vice President for International Trade Christine LoCascio predicted that in 2014, American spirits exports would grow 3.7% to total $1.56 billion. LoCascio said, "The industry anticipates its fifth continuous year of record exports through a combination of market opening agreements, innovative marketing programs by individual companies and the spirits industry's export promotion program." 
+
+http://www.discus.org/2014-us-market-report-distilled-spirits-industry-delivers-steady-growth/
+
+In another study conducted in 2012 in Idaho, the monthly revenue generated from liquor sales can increase if the month has five weekends instead of four. There were no changes made in marketing or pricing in response to the regulatory shift in Washington.  
