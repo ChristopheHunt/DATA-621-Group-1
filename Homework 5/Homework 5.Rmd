@@ -23,9 +23,11 @@ output:
 ##assignments use "<-" not "="
 ```
 
-```{r library load, include = FALSE, cache=TRUE}
+```{r options and library load, include = FALSE, cache=TRUE}
+options(xtable.comment = FALSE)
+
 library(pacman)
-p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2)
 ```
 
 \begin{center}
@@ -54,7 +56,13 @@ Christophe Hunt\\
 
 # Introduction
 
+The wine industry was valued at \$257.5 billion in 2012 and is predicted to be valued at \$303.6 billion by 2016.[^1] As wine is a consumer product, adjusting and accomodating consumer prefence is critical to a competitive advantage. By understanding the cases sold 
+
+[^1]: "Research and Markets: Wine: 2012 Global Industry Almanac - The Global Wine Market Grew by 3.1% in 2011 to Reach a Value of \$257.5 Billion." Research and Markets: Wine: 2012 Global Industry Almanac - The Global Wine Market Grew by 3.1% in 2011 to Reach a Value of $257.5 Billion | Business Wire. N.p., 21 May 2012. Web. 20 Nov. 2016.
+
 # Statement of the Problem
+
+The purpose of this report is to develop statistical models to make inference into the factors associated with the number of cases of wine sold.
 
 # Data Exploration  
 
@@ -84,6 +92,93 @@ dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Grou
         as.data.frame()
 ```
 
+\newpage
+
+## Variables Summary Statistics
+
 ```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
-reporttools::tableContinuous(dfTr , longtable = TRUE)
+options(xtable.comment = FALSE)
+reporttools::tableContinuous(dfTr , longtable = TRUE, cap = "Wine Training Data Set Summary Statistics")
+```
+
+```{r missForest imputation of data, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+registerDoParallel(cl = makeCluster(10), cores = 2)
+
+set.seed(1234)
+
+imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately 20 minutes to process, resource intensive
+
+write.csv(imputed_data$ximp,"imputed_wine-training-data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest and random results. 
+```
+
+```{r imputed data frame load from github, echo = FALSE, include=FALSE, cache=TRUE, eval=TRUE}
+imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv")
+```
+
+\newpage
+
+# Data Transformation
+
+## Outliers Treatment
+
+### Violin Plots of Variables for Winsorizing
+
+Violin Plots provide a visualization of the density plots and are capable of showing bi-modal or other non-normal  characteristics of data.[^5] Using the violin plots, we are can conclude that the variables to be winsorized are Free Sulfur Dioxide, Residual Sugar, and Total Sulfur Dioxide. 
+
+[^5]: Ridgway, Gerard (2015): [A simple comparison of box plots and violin plots. figshare.](https://dx.doi.org/10.6084/m9.figshare.1544525.v1) Retrieved: 01 33, Nov 21, 2016 (GMT)
+
+```{r boxplots, echo = FALSE, cache=TRUE, fig.height=10, fig.width=10}
+plot <- ggplot(stack(subset(imputedDfTr, select = -TARGET)), aes(x = ind, y = values)) + 
+          geom_violin() +
+          facet_wrap(~ind, scales = "free", ncol = 3) +
+          theme_minimal() +
+          theme(axis.text.x = element_blank()) + 
+          ylab(label = "") +
+          xlab(label = "") + 
+          stat_summary(fun.y = mean, geom = "point", shape = 5, size = 4)
+plot
+```
+
+### Winsorizing
+
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^4].  
+
+[^4]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+
+The below table is the summary results of the winsorizing of the data. 
+
+```{r winsorize dataframe, echo=FALSE, results='asis', cache=TRUE}
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+
+  return(x)  
+
+}
+
+wDfTr <- cbind(sapply(c('FreeSulfurDioxide', 'TotalSulfurDioxide', 'ResidualSugar'), function(x) winsorize(imputedDfTr[,x], multiple=2.2)), subset(imputedDfTr, select = -c(FreeSulfurDioxide, TotalSulfurDioxide, ResidualSugar)))
+
+fwDfTr <- rbind(wDfTr, imputedDfTr$TARGET)
+
+stargazer(fwDfTr, header = FALSE)
+```
+
+\newpage
+
+## BoxCox Transformations 
+
+The Box-Cox transformations were done on . These transformations were done based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were funnel-shaped. 
+
+```{r residual plots, echo=FALSE, results='asis', cache=TRUE}
+library(car)
+fit <- lm(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data = fwDfTr)
+residualPlots(fit)
 ```
