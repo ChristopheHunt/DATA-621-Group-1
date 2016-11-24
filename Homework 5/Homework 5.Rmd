@@ -56,7 +56,8 @@ Christophe Hunt\\
 
 # Introduction
 
-The wine industry was valued at \$257.5 billion in 2012 and is predicted to be valued at \$303.6 billion by 2016.[^1] As wine is a consumer product, adjusting and accomodating consumer prefence is critical to a competitive advantage. By understanding the cases sold 
+The wine industry was valued at \$257.5 billion in 2012 and is predicted to be valued at \$303.6 billion by 2016.[^1] As wine is a consumer product, accommodating consumer preference is critical to maintaing a competitive advantage. By understanding the factors involved in wine sales we can better understand consumer behavior and adjust our strategies accordingly. 
+
 
 [^1]: "Research and Markets: Wine: 2012 Global Industry Almanac - The Global Wine Market Grew by 3.1% in 2011 to Reach a Value of \$257.5 Billion." Research and Markets: Wine: 2012 Global Industry Almanac - The Global Wine Market Grew by 3.1% in 2011 to Reach a Value of $257.5 Billion | Business Wire. N.p., 21 May 2012. Web. 20 Nov. 2016.
 
@@ -89,16 +90,33 @@ pandoc.table(daDict %>%
 dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/wine-training-data.csv") %>%
         dplyr::select(-dplyr::contains("INDEX")) %>%
         map_if(is.integer, as.numeric) %>%
-        as.data.frame()
+        as.data.frame() %>%
+        mutate(LabelAppeal = factor(LabelAppeal, levels = c(-2, -1, 0, 1, 2)),
+               STARS = factor(STARS, levels = c(1,2,3,4)),
+               TARGET = as.integer(TARGET)) 
 ```
 
 \newpage
 
 ## Variables Summary Statistics
 
+### Nominal Variables
+
+```{r nominal variables, echo=FALSE, results='asis', cache=TRUE}
+options(xtable.comment = FALSE)
+
+reporttools::tableNominal(dfTr %>% dplyr::select(TARGET, LabelAppeal, STARS), 
+                        cap = "Table of nominal variables", lab = "tab: nominal", print.pval = "fisher",
+                        caption.placement = "top", longtable = TRUE, 
+                        add.to.row = list(pos = list(0), command = "\\hline \\endhead "))
+```
+
+
+Continous Variables
+
 ```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
 options(xtable.comment = FALSE)
-reporttools::tableContinuous(dfTr , longtable = TRUE, cap = "Wine Training Data Set Summary Statistics")
+reporttools::tableContinuous(dfTr %>% dplyr::select(-TARGET, -LabelAppeal, -STARS) , longtable = TRUE, cap = "Wine Training Data Set Summary Statistics")
 ```
 
 ```{r missForest imputation of data, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
