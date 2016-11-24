@@ -146,7 +146,12 @@ Box Plots provide a visualization of the quartiles and outliers of our data set.
 [^5]: "Box Plot." Wikipedia. Wikimedia Foundation, n.d. Web. 24 Nov. 2016.
 
 ```{r boxplots, echo = FALSE, cache=TRUE, fig.height=10, fig.width=10}
-plot <- ggplot(stack(subset(imputedDfTr, select = -TARGET)), aes(x = ind, y = values)) + 
+plotDf <- imputedDfTr %>% 
+          dplyr::select(-TARGET) %>% 
+          mutate(STARS = as.numeric(STARS)) %>% 
+          stack()
+
+plot <- ggplot(plotDf, aes(x = ind, y = values)) + 
           geom_boxplot() +
           facet_wrap(~ind, scales = "free", ncol = 3) +
           theme_minimal() +
@@ -182,11 +187,13 @@ winsorize <- function(x, multiple=2.2)
 
 }
 
-wDfTr <- cbind(sapply(c('FreeSulfurDioxide', 'TotalSulfurDioxide', 'ResidualSugar'), function(x) winsorize(imputedDfTr[,x], multiple=2.2)), subset(imputedDfTr, select = -c(FreeSulfurDioxide, TotalSulfurDioxide, ResidualSugar)))
+wDfTr <- cbind(sapply(c('FreeSulfurDioxide', 'TotalSulfurDioxide', 'ResidualSugar'), 
+                      function(x) winsorize(imputedDfTr[,x], multiple=2.2)), 
+               subset(imputedDfTr, select = -c(FreeSulfurDioxide, TotalSulfurDioxide, ResidualSugar)))
 
-fwDfTr <- rbind(wDfTr, imputedDfTr$TARGET)
+#fwDfTr <- rbind(wDfTr, imputedDfTr$TARGET)
 
-stargazer(fwDfTr, header = FALSE)
+stargazer(wDfTr %>% mutate(STARS = as.numeric(STARS)), header = FALSE)
 ```
 
 \newpage
