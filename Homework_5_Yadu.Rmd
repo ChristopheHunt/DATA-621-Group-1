@@ -42,3 +42,11 @@ library(car)
 fit <- lm(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data=fwDfTr)
 residualPlots(fit)
 ```
+
+```{r}
+library(MASS)
+b1 = glm.nb(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data=fwDfTr, link = log)
+summary(b1)
+b2 = glm.nb(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data=fwDfTr, link = sqrt)
+summary(b2)
+```
