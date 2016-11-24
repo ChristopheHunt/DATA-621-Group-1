@@ -139,15 +139,15 @@ imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-6
 
 ## Outliers Treatment
 
-### Violin Plots of Variables for Winsorizing
+### Box Plots of Variables for Winsorizing
 
-Violin Plots provide a visualization of the density plots and are capable of showing bi-modal or other non-normal  characteristics of data.[^5] Using the violin plots, we are can conclude that the variables to be winsorized are Free Sulfur Dioxide, Residual Sugar, and Total Sulfur Dioxide. 
+Box Plots provide a visualization of the quartiles and outliers of our data set.[^5] Using the box plots, we are can conclude that the variables to be winsorized are Free Sulfur Dioxide, Residual Sugar, and Total Sulfur Dioxide. 
 
-[^5]: Ridgway, Gerard (2015): [A simple comparison of box plots and violin plots. figshare.](https://dx.doi.org/10.6084/m9.figshare.1544525.v1) Retrieved: 01 33, Nov 21, 2016 (GMT)
+[^5]: "Box Plot." Wikipedia. Wikimedia Foundation, n.d. Web. 24 Nov. 2016.
 
 ```{r boxplots, echo = FALSE, cache=TRUE, fig.height=10, fig.width=10}
 plot <- ggplot(stack(subset(imputedDfTr, select = -TARGET)), aes(x = ind, y = values)) + 
-          geom_violin() +
+          geom_boxplot() +
           facet_wrap(~ind, scales = "free", ncol = 3) +
           theme_minimal() +
           theme(axis.text.x = element_blank()) + 
