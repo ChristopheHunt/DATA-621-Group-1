@@ -112,7 +112,7 @@ reporttools::tableNominal(dfTr %>% dplyr::select(TARGET, LabelAppeal, STARS),
 ```
 
 
-Continous Variables
+### Continous Variables
 
 ```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
 options(xtable.comment = FALSE)
@@ -124,7 +124,7 @@ registerDoParallel(cl = makeCluster(10), cores = 2)
 
 set.seed(1234)
 
-imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately 20 minutes to process, resource intensive
+imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately  minutes to process, resource intensive
 
 write.csv(imputed_data$ximp,"imputed_wine-training-data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest and random results. 
 ```
