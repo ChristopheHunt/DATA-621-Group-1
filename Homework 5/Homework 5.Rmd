@@ -124,13 +124,13 @@ registerDoParallel(cl = makeCluster(10), cores = 2)
 
 set.seed(1234)
 
-imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately  minutes to process, resource intensive
+imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately 30 minutes to process, resource intensive
 
 write.csv(imputed_data$ximp,"imputed_wine-training-data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest and random results. 
 ```
 
 ```{r imputed data frame load from github, echo = FALSE, include=FALSE, cache=TRUE, eval=TRUE}
-imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv")
+imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv") %>% mutate(STARS = factor(round(STARS, 0), levels = c(1,2,3,4)))
 ```
 
 \newpage
