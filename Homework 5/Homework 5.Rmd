@@ -27,7 +27,7 @@ output:
 options(xtable.comment = FALSE)
 
 library(pacman)
-p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2)
 ```
 
 \begin{center}
@@ -118,6 +118,8 @@ reporttools::tableNominal(dfTr %>% dplyr::select(TARGET, LabelAppeal, STARS),
 
 ### Continous Variables
 
+We see that Density is a very narrow measurement, the minimum value is 0.9 and the maximum is 1.1. 
+
 ```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
 options(xtable.comment = FALSE)
 reporttools::tableContinuous(dfTr %>% dplyr::select(-TARGET, -LabelAppeal, -STARS) , 
@@ -125,6 +127,14 @@ reporttools::tableContinuous(dfTr %>% dplyr::select(-TARGET, -LabelAppeal, -STAR
                              cap = "Wine Training Data Table of Continuous Variables",
                              caption.placement = "top")
 ```
+
+\newpage
+
+## Imputting Missing Values
+
+In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^3]
+
+[^3]: Stekhoven, Daniel J., and Peter B?hlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
 
 ```{r missForest imputation of data, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
 registerDoParallel(cl = makeCluster(10), cores = 2)
@@ -140,6 +150,38 @@ write.csv(imputed_data$ximp,"imputed_wine-training-data.csv", row.names = FALSE)
 imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv") %>% mutate(STARS = factor(round(STARS, 0), levels = c(1,2,3,4)))
 ```
 
+```{r, results='asis', echo = FALSE, cache=TRUE, eval=TRUE}
+digits = 1
+
+descriptive <- describe(imputedDfTr %>% dplyr::select(-TARGET),
+                        descript = "Table 4 : Imputed Descriptive Statistics", 
+                        digits = digits)
+
+latex(descriptive, file = '')
+```
+\newpage
+## Correlation of Variables
+
+### Correlation Matrix
+
+If we modify our data frame to a matrix in our evaluation data set we can further plot a correlation matrix. Unfortunately, we can only see a few interesting correlations in the data. 
+
+* `STARS` has the most positive correlation and strongest correlation with our dependent variable `TARGET`. It is intuitive that the greater the `STARS` value the more cases our wine would sell.
+
+* `LabelAppeal` is the second most correlated with our dependent variable to our dependent variable. It is interesting that the two most correlated variables have less to do with wine quality and more to do with the appearance of a sophisticated wine. 
+
+* The lack of strong correlations is interesting in itself. It is concerning that most variables have nearly no correlation with our dependent variable but represent the actual quality of the wine. We see that public perception of wine is more important than the actual quality of the wine as measured by these variables.    
+
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 7, fig.width= 12, cache=FALSE, eval=TRUE}
+imputedDfTrMx <- imputedDfTr                   %>% 
+                map_if(is.integer, as.numeric) %>%
+                map_if(is.factor, as.numeric)  %>%
+                as.data.frame()                %>%
+                as.matrix()
+
+corMx <- cor(imputedDfTrMx , use = "everything",  method = c("spearman"))
+corrplot(corMx, order = "hclust", addrect = 10, method = "circle", tl.col = "black", na.label = " ", bg = "gray80")
+```
 \newpage
 
 # Data Transformation
@@ -168,6 +210,7 @@ plot <- ggplot(plotDf, aes(x = ind, y = values)) +
           stat_summary(fun.y = mean, geom = "point", shape = 5, size = 4)
 plot
 ```
+
 
 ### Winsorizing
 
@@ -198,9 +241,9 @@ wDfTr <- cbind(sapply(c('FreeSulfurDioxide', 'TotalSulfurDioxide', 'ResidualSuga
                       function(x) winsorize(imputedDfTr[,x], multiple=2.2)), 
                subset(imputedDfTr, select = -c(FreeSulfurDioxide, TotalSulfurDioxide, ResidualSugar)))
 
-#fwDfTr <- rbind(wDfTr, imputedDfTr$TARGET)
+fwDfTr <- rbind(wDfTr, imputedDfTr$TARGET)
 
-stargazer(wDfTr %>% mutate(STARS = as.numeric(STARS)), header = FALSE)
+stargazer(fwDfTr, header = FALSE)
 ```
 
 \newpage
@@ -209,7 +252,7 @@ stargazer(wDfTr %>% mutate(STARS = as.numeric(STARS)), header = FALSE)
 
 The Box-Cox transformations were done on . These transformations were done based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were funnel-shaped. 
 
-```{r residual plots, echo=FALSE, results='asis', cache=TRUE}
+```{r residual plots, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
 library(car)
 fit <- lm(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data = fwDfTr)
 residualPlots(fit)
