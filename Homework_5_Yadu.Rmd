@@ -44,9 +44,17 @@ residualPlots(fit)
 ```
 
 ```{r}
+fwDfTr$STARS <- factor(fwDfTr$STARS, levels=c(1,2,3,4))
+fwDfTr$LabelAppeal <- factor(fwDfTr$LabelAppeal, levels=c(-2,-1,0,1,2,3))
 library(MASS)
-b1 = glm.nb(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data=fwDfTr, link = log)
-summary(b1)
-b2 = glm.nb(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data=fwDfTr, link = sqrt)
-summary(b2)
+b1 <- glm.nb(TARGET ~ ResidualSugar + Alcohol + STARS, data=fwDfTr, link = log)
+summary(b1) # Residual Sugar, STARS, Alcohol
+b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data=fwDfTr, link = log)
+summary(b2) # Label Appeal, Citric Acid, pH
 ```
+
+In the first backwards model, all of the coefficients are positive. The standard error in this very high thus guaranteeing high variance. The theta value is also very high. This means that there is a high level of dispersion. 
+
+In the second backwards model, all of the coefficients are positive except for that of pH. The standard error is 3.5. The theta value is 23.46, guaranteeing a lower level of overdispersion. 
+
+In both models, the categorical variables - the label appeal and number of stars appear highly signficicant in predicting the target variable. 
