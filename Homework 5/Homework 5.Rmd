@@ -275,11 +275,11 @@ colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
 kable(dfBoxCox, align = c("c", "c"))
 ```
 
-Utilizing the below table of common transformations based on the lambda value of the BoxCox we further transform our independent variables for our linear regression. 
+Utilizing transformations based on the lambda value of the BoxCox and rounding to the nearest tenth we further transform our independent variables for our regression models. 
 
 \centering
 
-Common Box-Cox Transformations[^6] [^5]
+Box-Cox Transformations [^5]
 
 \setlength{\tabcolsep}{12pt}
 
@@ -300,8 +300,6 @@ $\lambda$ & Y' \\ \hline
 
 \justifying
 
-Lambda values were truncated to the nearest tenth that match a common transformation as per the below table.
-
 \centering
 
 \begin{tabular}{ c c }
@@ -315,7 +313,6 @@ variable & variable transformation \\ \hline
 
 [^5]: Osborne, Jason W. "Improving your data transformations: Applying the Box-Cox transformation." Practical Assessment, Research & Evaluation 15.12 (2010): 1-9.
 
-[^6]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
 
 
 \newpage
@@ -344,7 +341,6 @@ kable(vif(lm))
 influence.measures(lm)
 plot(lm$residuals, imputedDfTr$TARGET, ylab = "Residuals", xlab = "Cases Sold", main = "Residual plot of Cases of Wine Sold") 
 ```
-
 
 ## Model Selection using AIC
 
