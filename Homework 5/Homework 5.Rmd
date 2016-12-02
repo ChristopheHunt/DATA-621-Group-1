@@ -27,7 +27,7 @@ output:
 options(xtable.comment = FALSE)
 
 library(pacman)
-p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2, lars, MASS)
 ```
 
 \begin{center}
@@ -164,7 +164,7 @@ latex(descriptive, file = '')
 
 ### Correlation Matrix
 
-If we modify our data frame to a matrix in our evaluation data set we can further plot a correlation matrix. Unfortunately, we can only see a few interesting correlations in the data. 
+If we modify our data frame to a matrix in our evaluation data set we can further plot a correlation matrix. There are surprisingly few interesting correlations in the data, but the lack of correlation in the data set is in itself interesting. 
 
 * `STARS` has the most positive correlation and strongest correlation with our dependent variable `TARGET`. It is intuitive that the greater the `STARS` value the more cases our wine would sell.
 
@@ -172,12 +172,12 @@ If we modify our data frame to a matrix in our evaluation data set we can furthe
 
 * The lack of strong correlations is interesting in itself. It is concerning that most variables have nearly no correlation with our dependent variable but represent the actual quality of the wine. We see that public perception of wine is more important than the actual quality of the wine as measured by these variables.    
 
-```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 7, fig.width= 12, cache=FALSE, eval=TRUE}
-imputedDfTrMx <- imputedDfTr                   %>% 
-                map_if(is.integer, as.numeric) %>%
-                map_if(is.factor, as.numeric)  %>%
-                as.data.frame()                %>%
-                as.matrix()
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 7, fig.width= 12, cache=TRUE, eval=TRUE}
+imputedDfTrMx <- imputedDfTr                       %>% 
+                    map_if(is.integer, as.numeric) %>%
+                    map_if(is.factor, as.numeric)  %>%
+                    as.data.frame()                %>%
+                    as.matrix()
 
 corMx <- cor(imputedDfTrMx , use = "everything",  method = c("spearman"))
 corrplot(corMx, order = "hclust", addrect = 10, method = "circle", tl.col = "black", na.label = " ", bg = "gray80")
@@ -250,10 +250,145 @@ stargazer(fwDfTr, header = FALSE)
 
 ## BoxCox Transformations 
 
-The Box-Cox transformations were done on . These transformations were done based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were funnel-shaped. 
+Even after Winsorization we see non-constant variance in the Pearson Residuals for FreeSulferDioxide, TotalSulfurDioxide, and ResidualSugar. The Box-Cox evaluation was completed on these variables, based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were hyperbolic-shaped. 
 
-```{r residual plots, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
+```{r residual plots, echo=FALSE, results='asis', fig.width=7, fig.height=5, cache=TRUE, eval=TRUE}
 library(car)
 fit <- lm(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data = fwDfTr)
 residualPlots(fit)
 ```
+
+Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
+
+```{r box cox table, echo=FALSE, cache=TRUE, eval=TRUE, message=FALSE}
+l1 <- BoxCox.lambda(as.numeric(fwDfTr$FreeSulfurDioxide))
+l2 <- BoxCox.lambda(as.numeric(fwDfTr$TotalSulfurDioxide))
+l3 <- BoxCox.lambda(as.numeric(fwDfTr$ResidualSugar))
+
+lamdas <- c(l1, l2, l3)
+Variables <- c("Free Sulfur Dioxide", "Total Sulfur Dioxide", "Residual Sugar")
+
+dfBoxCox <- as.data.frame(cbind(lamdas, Variables))
+
+colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
+
+kable(dfBoxCox, align = c("c", "c"))
+```
+
+Utilizing the below table of common transformations based on the lambda value of the BoxCox we further transform our independent variables for our linear regression. 
+
+\centering
+
+Common Box-Cox Transformations[^6] [^5]
+
+\setlength{\tabcolsep}{12pt}
+
+\begin{tabular}{ c c }
+\hline
+$\lambda$ & Y' \\ \hline
+-2 &	$Y^{-2}~=~\frac{1}{Y^{2}}$ \\
+-1 &	$Y^{-1}~=~\frac{1}{Y^{1}}$ \\
+-0.5 &	$Y^{-0.5}~=~\frac{1}{\sqrt{(Y)}}$ \\
+0	& $\log(Y)$ \\
+.25  & $\sqrt[4]{Y}$\\  
+0.5	& $Y^{0.5}~=~\sqrt{(Y)}$ \\
+1	& $Y^{1}~=~Y$ \\
+1.25 & $Y^{1.25}$ \\
+2	& $Y^{2}$ \\
+
+\end{tabular}
+
+\justifying
+
+Lambda values were truncated to the nearest tenth that match a common transformation as per the below table.
+
+\centering
+
+\begin{tabular}{ c c }
+\hline
+variable & variable transformation \\ \hline
+\end{tabular}
+
+\justifying
+
+\setlength{\tabcolsep}{6pt}
+
+[^5]: Osborne, Jason W. "Improving your data transformations: Applying the Box-Cox transformation." Practical Assessment, Research & Evaluation 15.12 (2010): 1-9.
+
+[^6]: [By Understanding Both the Concept of Transformation and the Box-Cox Method, Practitioners Will Be Better Prepared to Work with Non-normal Data.](https://www.isixsigma.com/tools-templates/normality/making-data-normal-using-box-cox-power-transformation/) . "Making Data Normal Using Box-Cox Power Transformation." ISixSigma. N.p., n.d. Web. 29 Oct. 2016.
+
+
+\newpage
+
+# Models Built
+
+## Multiple Linear Regression
+
+## Model with All Variables
+
+The first linear regression we generate includes all variables from our data set. As we can see 
+
+```{r linear regression variable all variables, echo=FALSE, results='asis', cache=TRUE}
+options(xtable.comment = FALSE)
+lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + CitricAcid + I(ResidualSugar^1.25) + Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + Density + pH +  Sulphates + Alcohol + LabelAppeal + STARS, data =  imputedDfTr)
+
+stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+```
+
+\newpage
+
+### Model Metrics with all Variables
+
+```{r linear regression model metrics, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
+kable(vif(lm))
+influence.measures(lm)
+plot(lm$residuals, imputedDfTr$TARGET, ylab = "Residuals", xlab = "Cases Sold", main = "Residual plot of Cases of Wine Sold") 
+```
+
+
+## Model Selection using AIC
+
+### Variable Selection 
+
+Using the R package `MASS` we can utilize the `stepAIC` function in the direction of both to select our best subset of variable for a new wmodel. 
+
+```{r random forest variable selection, echo=FALSE, results='markup', cache=TRUE}
+lm <- lm(TARGET ~ ., data = imputedDfTr)
+bothlm <- stepAIC(lm, direction = "both", trace = FALSE)
+bothlm$anova
+```
+
+```{r linear regression variable subset, echo=FALSE, results='asis', cache=TRUE}
+lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + Chlorides + FreeSulfurDioxide + 
+    TotalSulfurDioxide + Density + Sulphates + Alcohol + LabelAppeal + 
+    STARS, data =  imputedDfTr)
+
+stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+```
+
+
+# Appendix A
+
+## Session Info
+
+```{r, results='asis', echo=FALSE, eval = TRUE}
+toLatex(sessionInfo())
+```
+
+## Data Dictionary
+
+\footnotesize
+```{r data dictionary appendix, eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
+pandoc.table(daDict %>% 
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
+      justify = c("center","left"), emphasize.strong.rows = seq(from = 1, to = nrow(daDict), by = 2),
+      table.alignment.rownames = 'centre',style="multiline")
+```
+
+## R source code
+
+Please see [Homework 5.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd) on GitHub for source code.   
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd
+
