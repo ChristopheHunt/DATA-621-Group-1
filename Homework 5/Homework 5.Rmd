@@ -102,7 +102,7 @@ dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Grou
 
 ### Discrete Variables
 
-Interestingly, we can see some general sense of the make up of our data set. In this set, most wines sell between 3 and 5 cases, have no label appeal, and very few received 4 stars. 
+Interestingly, we can see some general sense of the make up of our data set. In this set, most wines sell between 3 and 5 cases, have no label appeal, and very few received 4 stars with most wines receiving 2 or 1 stars. Additionally, we should note that `21.4%` of our wines had no case sales. 
 
 ```{r nominal variables, echo=FALSE, results='asis', cache=TRUE}
 options(xtable.comment = FALSE)
@@ -118,7 +118,7 @@ reporttools::tableNominal(dfTr %>% dplyr::select(TARGET, LabelAppeal, STARS),
 
 ### Continous Variables
 
-We see that Density is a very narrow measurement, the minimum value is 0.9 and the maximum is 1.1. 
+We see that Density is a very narrow measurement, the minimum value is 0.9 and the maximum is 1.1. The remaining continuous variables appear to have a larger range of variability, with the largest being `TotalSulfurDioxide` which has a range from -823 to 1057. In our models, this variability will provide some insights to our coefficients and the impact to the dependent variable. 
 
 ```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
 options(xtable.comment = FALSE)
@@ -132,9 +132,9 @@ reporttools::tableContinuous(dfTr %>% dplyr::select(-TARGET, -LabelAppeal, -STAR
 
 ## Imputting Missing Values
 
-In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^3]
+In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^2]
 
-[^3]: Stekhoven, Daniel J., and Peter B?hlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
+[^2]: Stekhoven, Daniel J., and Peter B?hlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
 
 ```{r missForest imputation of data, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
 registerDoParallel(cl = makeCluster(10), cores = 2)
@@ -190,9 +190,9 @@ corrplot(corMx, order = "hclust", addrect = 10, method = "circle", tl.col = "bla
 
 ### Box Plots of Variables for Winsorizing
 
-Box Plots provide a visualization of the quartiles and outliers of our data set.[^5] Using the box plots, we are can conclude that the variables to be winsorized are Free Sulfur Dioxide, Residual Sugar, and Total Sulfur Dioxide. 
+Box Plots provide a visualization of the quartiles and outliers of our data set.[^3] Using the box plots, we are can conclude that the variables to be winsorized are Free Sulfur Dioxide, Residual Sugar, and Total Sulfur Dioxide. 
 
-[^5]: "Box Plot." Wikipedia. Wikimedia Foundation, n.d. Web. 24 Nov. 2016.
+[^3]: "Box Plot." Wikipedia. Wikimedia Foundation, n.d. Web. 24 Nov. 2016.
 
 ```{r boxplots, echo = FALSE, cache=TRUE, fig.height=10, fig.width=10}
 plotDf <- imputedDfTr %>% 
@@ -250,17 +250,22 @@ stargazer(fwDfTr, header = FALSE)
 
 ## BoxCox Transformations 
 
-Even after Winsorization we see non-constant variance in the Pearson Residuals for FreeSulferDioxide, TotalSulfurDioxide, and ResidualSugar. The Box-Cox evaluation was completed on these variables, based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were hyperbolic-shaped. 
+Even after Winsorization we see non-constant variance in the Pearson Residuals for `FreeSulferDioxide`, `TotalSulfurDioxide`, and `ResidualSugar`. The Box-Cox evaluation was completed on these variables, based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were hyperbolic-shaped. 
 
-```{r residual plots, echo=FALSE, results='asis', fig.width=7, fig.height=5, cache=TRUE, eval=TRUE}
+```{r residual plots, echo=FALSE, results='markup', fig.width=7, fig.height=5, cache=TRUE, eval=TRUE}
 library(car)
 fit <- lm(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data = fwDfTr)
-residualPlots(fit)
+residualPlots(fit, layout = NULL, ask = FALSE, main = "", fitted = TRUE, AsIs=TRUE, plot = TRUE,
+tests = TRUE)
 ```
+
+\newpage
+
+### Determing BoxCox Transformations 
 
 Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
 
-```{r box cox table, echo=FALSE, cache=TRUE, eval=TRUE, message=FALSE}
+```{r box cox table, echo=FALSE, cache=TRUE, eval=TRUE, warning=FALSE ,message=FALSE}
 l1 <- BoxCox.lambda(as.numeric(fwDfTr$FreeSulfurDioxide))
 l2 <- BoxCox.lambda(as.numeric(fwDfTr$TotalSulfurDioxide))
 l3 <- BoxCox.lambda(as.numeric(fwDfTr$ResidualSugar))
@@ -275,7 +280,7 @@ colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
 kable(dfBoxCox, align = c("c", "c"))
 ```
 
-Utilizing transformations based on the lambda value of the BoxCox and rounding to the nearest tenth we further transform our independent variables for our regression models. 
+Utilizing transformations based on the lambda value of the BoxCox and rounding to the nearest tenth we further transform our independent variables for our regression models. We see that the `TotalSulfurDioxide` variable does not require further transformation
 
 \centering
 
@@ -286,15 +291,11 @@ Box-Cox Transformations [^5]
 \begin{tabular}{ c c }
 \hline
 $\lambda$ & Y' \\ \hline
--2 &	$Y^{-2}~=~\frac{1}{Y^{2}}$ \\
--1 &	$Y^{-1}~=~\frac{1}{Y^{1}}$ \\
--0.5 &	$Y^{-0.5}~=~\frac{1}{\sqrt{(Y)}}$ \\
 0	& $\log(Y)$ \\
 .25  & $\sqrt[4]{Y}$\\  
 0.5	& $Y^{0.5}~=~\sqrt{(Y)}$ \\
 1	& $Y^{1}~=~Y$ \\
 1.25 & $Y^{1.25}$ \\
-2	& $Y^{2}$ \\
 
 \end{tabular}
 
@@ -305,6 +306,8 @@ $\lambda$ & Y' \\ \hline
 \begin{tabular}{ c c }
 \hline
 variable & variable transformation \\ \hline
+ResidualSugar & $ResidualSugar^{1.25}$ \\
+FreeSulfurDioxide & $FreeSulfurDioxide^{1.25}$ \\
 \end{tabular}
 
 \justifying
@@ -313,55 +316,105 @@ variable & variable transformation \\ \hline
 
 [^5]: Osborne, Jason W. "Improving your data transformations: Applying the Box-Cox transformation." Practical Assessment, Research & Evaluation 15.12 (2010): 1-9.
 
-
-
 \newpage
 
 # Models Built
 
 ## Multiple Linear Regression
 
-## Model with All Variables
+### Linear Regression with All Variables
 
-The first linear regression we generate includes all variables from our data set. As we can see 
+The first linear regression we generate includes all variables from our data set. The intercept is at `3.139` cases and `Density` shows a large negative impact on cases sold but with its narrow range its difficult to tell how meaningful this variable is in cases sold. The `STARS` variable shows an expected impact on cases sold, the difference between 1 Star and 4 Stars is an added `3.36` cases in sales.
 
 ```{r linear regression variable all variables, echo=FALSE, results='asis', cache=TRUE}
 options(xtable.comment = FALSE)
 lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + CitricAcid + I(ResidualSugar^1.25) + Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + Density + pH +  Sulphates + Alcohol + LabelAppeal + STARS, data =  imputedDfTr)
 
-stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Linear Model with all variables")
 ```
 
 \newpage
 
-### Model Metrics with all Variables
+#### Linear Model Metrics with all Variables
 
-```{r linear regression model metrics, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
-kable(vif(lm))
-influence.measures(lm)
-plot(lm$residuals, imputedDfTr$TARGET, ylab = "Residuals", xlab = "Cases Sold", main = "Residual plot of Cases of Wine Sold") 
+##### Multicollinearity
+
+We square `GVIF^(1/(2*Df))` [^6] in order to use the VIF threshold of 5 for multicollinearity. Fortunately, we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r multicollinearity all variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
+lmfit <- setDT(as.data.frame(car::vif(lm)), keep.rownames = TRUE)[]
+lmfit$Adjusted_GVIF <- (lmfit$`GVIF^(1/(2*Df))`^2)
+kable(lmfit, align = c("l", "c", "c", "c", "c"))
 ```
 
-## Model Selection using AIC
+[^6]: ["Which Variance Inflation Factor Should I Be Using: $GVIF$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
 
-### Variable Selection 
+##### Diagnositic Plots
 
-Using the R package `MASS` we can utilize the `stepAIC` function in the direction of both to select our best subset of variable for a new wmodel. 
+```{r linear regression model metrics, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
+p <- par(mfrow=c(2,2))
+plot(lm)
+par(p)
+```
+
+\newpage
+
+### Linear Regression Selection using AIC
+
+#### Variable Selection 
+
+Using the R package `MASS` we can utilize the `stepAIC` function with the parameter of `direction` set to `both` to select our best subset of variables for a new model. 
+
+The method effectively removed `pH` and `CitricAcid` which were both shown to be not significiant in the previous linear model using all variables. 
 
 ```{r random forest variable selection, echo=FALSE, results='markup', cache=TRUE}
-lm <- lm(TARGET ~ ., data = imputedDfTr)
+lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + CitricAcid + I(ResidualSugar^1.25) + Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + Density + pH +  Sulphates + Alcohol + LabelAppeal + STARS, data = imputedDfTr)
 bothlm <- stepAIC(lm, direction = "both", trace = FALSE)
 bothlm$anova
 ```
+\newpage
+
+#### Model using Variable Selection
+
+We see slight variation in our intercept and some variable coefficient which is expected with the reduced number of variables. However, we don't see any large changes, one benefit with the reduced variables is our model interpretability is improved and our F Statistic has increased with the reduced degrees of freedom. 
+
+Additionally, we see that the adjusted $R^2$ has not changed which is expected since we removed variables that were not considered significant. 
 
 ```{r linear regression variable subset, echo=FALSE, results='asis', cache=TRUE}
-lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + Chlorides + FreeSulfurDioxide + 
-    TotalSulfurDioxide + Density + Sulphates + Alcohol + LabelAppeal + 
-    STARS, data =  imputedDfTr)
+lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + I(ResidualSugar^1.25) + 
+    Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + 
+    Density + Sulphates + Alcohol + LabelAppeal + STARS, data =  imputedDfTr)
 
-stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "qje", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE)
+stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title="Linear Model with select variables")
 ```
 
+\newpage
+
+#### Linear Model Metrics with select Variables
+
+##### Diagnositic Plots
+
+```{r linear regression model metrics with select variables, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
+p <- par(mfrow=c(2,2))
+plot(lm)
+par(p)
+```
+
+##### Multicollinearity
+
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Fortunately, we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r multicollinearity select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
+lmfit <- setDT(as.data.frame(car::vif(lm)), keep.rownames = TRUE)[]
+lmfit$Adjusted_GVIF <- (lmfit$`GVIF^(1/(2*Df))`^2)
+kable(lmfit, align = c("l", "c", "c", "c", "c"))
+```
+
+\newpage
+
+# Selected Model
+
+\newpage
 
 # Appendix A
 
