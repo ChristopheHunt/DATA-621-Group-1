@@ -220,7 +220,7 @@ We chose winsorizing as the method to address outliers. Instead of trimming valu
 
 The below table is the summary results of the winsorizing of the data. 
 
-```{r winsorize dataframe, echo=FALSE, results='asis', cache=TRUE}
+```{r winsorize dataframe, echo=FALSE, results='asis', cache=TRUE, warning=FALSE}
 winsorize <- function(x, multiple=2.2)
 {
   q <- quantile(x)
@@ -347,15 +347,15 @@ lmfit$Adjusted_GVIF <- (lmfit$`GVIF^(1/(2*Df))`^2)
 kable(lmfit, align = c("l", "c", "c", "c", "c"))
 ```
 
-[^6]: ["Which Variance Inflation Factor Should I Be Using: $GVIF$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
-
 ##### Diagnositic Plots
 
-```{r linear regression model metrics, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
+```{r linear regression model metrics, echo=FALSE, results='asis', cache=TRUE, eval=TRUE, fig.height=4.5, fig.width=6}
 p <- par(mfrow=c(2,2))
 plot(lm)
 par(p)
 ```
+
+[^6]: ["Which Variance Inflation Factor Should I Be Using: $GVIF$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
 
 \newpage
 
@@ -376,7 +376,7 @@ bothlm$anova
 
 #### Model using Variable Selection
 
-We see slight variation in our intercept and some variable coefficient which is expected with the reduced number of variables. However, we don't see any large changes, one benefit with the reduced variables is our model interpretability is improved and our F Statistic has increased with the reduced degrees of freedom. 
+We see slight variation in our intercept and some variable coefficients which is expected with the reduced number of variables. However, we don't see any large changes, one benefit with the reduced variables is our model interpretability is improved and our F Statistic has increased with the reduced degrees of freedom. 
 
 Additionally, we see that the adjusted $R^2$ has not changed which is expected since we removed variables that were not considered significant. 
 
@@ -394,7 +394,7 @@ stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "all2", font.s
 
 ##### Diagnositic Plots
 
-```{r linear regression model metrics with select variables, echo=FALSE, results='asis', cache=TRUE, eval=FALSE}
+```{r linear regression model metrics with select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
 p <- par(mfrow=c(2,2))
 plot(lm)
 par(p)
