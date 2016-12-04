@@ -45,6 +45,8 @@ summary(model1)$deviance/summary(model1)$df.residual
 #Since this value is not greater than 1.5, we can claim that the data is not over-dispersed.
 #Reference http://rcompanion.org/rcompanion/e_07.html
 
+library(boot)
+(cv.err <- cv.glm(dfTrForPoissonReg,model1,K=10)$delta[1] )
 
 #Influential points in the dataset
 influencePlot(model1)
@@ -60,6 +62,8 @@ c2 <- as.data.frame(c2)
 dfObsVsPred <- cbind(c1,c2)
 colnames(dfObsVsPred) <- c("Target","Obs","Predicted")
 print(dfObsVsPred)
+
+var(round(dfWithPredicted$Fitted,0))
 
 #goodness of fit test
 round(pchisq(model1$deviance, df=model1$df.residual, lower.tail=FALSE),3)
@@ -129,3 +133,15 @@ round(pchisq(model2$deviance, df=model2$df.residual, lower.tail=FALSE),3)
 plot(model2)
 
 #---------------------------------------------------------------------------------------------------------
+
+
+HeteroModelValidation <- function(df, model, modelName)
+{
+  library(boot)
+  cv.err <- cv.glm(df,model,K=10)$delta[1]  
+  #model$aic
+  dfOutput <- as.data.frame(cbind(model=modelName, AIC=round(model$aic,2),CVMean=round(cv.err,2)))
+  return(dfOutput)
+}
+
+#HeteroModelValidation(df,model,"Poisson1")
