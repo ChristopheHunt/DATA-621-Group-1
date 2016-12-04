@@ -6,7 +6,8 @@ output: html_document
 ---
 
 ```{r}
-dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv")
+library(tidyverse)
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv") %>% mutate(STARS = factor(round(STARS, 0), levels = c(1,2,3,4)))
 library(ggplot2)
 ggplot(stack(subset(dfTr, select = -TARGET)), aes(x = ind, y = values)) + geom_boxplot(fill = "grey80", colour = "#3366FF")
 ```
@@ -49,37 +50,43 @@ residualPlots(fit)
 fwDfTr$STARS <- factor(fwDfTr$STARS, levels=c(1,2,3,4))
 fwDfTr$LabelAppeal <- factor(fwDfTr$LabelAppeal, levels=c(-2,-1,0,1,2,3))
 library(MASS)
-b1 <- glm.nb(TARGET ~ ResidualSugar + Alcohol + STARS, data=fwDfTr, link = log)
+b1 <- glm.nb(data = fwDfTr, formula = TARGET~STARS + Alcohol + ResidualSugar)
 summary(b1) # Residual Sugar, STARS, Alcohol
-b1r <- glm.nb(TARGET ~ Alcohol + STARS, data=fwDfTr, link = log)
+```
+
+```{r}
+b1r <- glm.nb(TARGET ~ Alcohol + ResidualSugar, data=fwDfTr)
 summary(b1r)
 ```
 
-In the first negative binomial regression model, all of the coefficients are positive. The variable that had to be removed was residual sugar, due to the fact that it was the least significant variable. The categorical variable used (wine rating) guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4). The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. The standard error in this model was very high thus guaranteeing high variance. The theta value is also very high. This means that there is a high level of dispersion.
+In the first negative binomial regression model, all of the coefficients are positive. The variable that had to be removed was wine rating, due to the fact that it led to an error in the model, stating that the iteration limit was reached. Even though this categorical variable guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4), this variable would not be appropriate to use for negative binomial regression. The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. However, this variable and residual sugar can be used for negative binomial regression because the resulting overdispersion is not so high. 
 
 ### Model 1 Evaluation ###
 
 ```{r}
-list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
+data.frame(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
 ```
 
-In the model-fitting criterion, the chi-squared p-value is 1. This implies a failure to reject the null hypothesis. 
+In the model-fitting criterion, the chi-squared p-value is close to 0. This implies that the null hypothesis can be rejected.
 
 ### Model 2 ###
 
 ```{r}
 b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data=fwDfTr, link = log)
 summary(b2) # Label Appeal, Citric Acid, pH
+```
+
+```{r}
 b2r <- glm.nb(TARGET ~ LabelAppeal, data=fwDfTr, link = log)
 summary(b2r)
 ```
 
-In the second negative binomial regression model, all of the coefficients are positive except for that of pH. The only significant variable is the label appeal. Except for the score of 3, all of the other scores for label appeal, yield significant results. Most of the coefficients for label appeal are close to 1 or slightly greater than 1 (0.7 for Label Appeal = 0, 0.9 for Label Appeal = 1, 1.09 for Label Appeal = 2, and 0.7 for Label Appeal = 3). The only score that yeilds a coefficient that is less than 1 is -1. The coefficient for this is 0.4. The standard error is 3.5. The theta value is 23.46, guaranteeing a lower level of overdispersion. 
+In the second negative binomial regression model, all of the coefficients are positive except for that of pH. The only significant variable is the label appeal. Except for the score of 3, all of the other scores for label appeal, yield significant results. Most of the coefficients for label appeal are close to 1 or slightly greater than 1 (0.7 for Label Appeal = 0, 0.9 for Label Appeal = 1, 1.09 for Label Appeal = 2, and 0.7 for Label Appeal = 3). The only score that yeilds a coefficient that is less than 1 is -1. The coefficient for this is 0.4. The standard error is 3.5. The theta value is 23.46, guaranteeing a higher level of overdispersion. 
 
 ### Model 2 Evaluation ###
 
 ```{r}
-list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
+data.frame(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
 ```
 
-Unlike the previous model, the chi-squared p-value for this model is close to 0. This means that the null hypothesis can be rejected.  
+Like the previous model, the chi-squared p-value for this model is close to 0. This means that the null hypothesis can be rejected.  
