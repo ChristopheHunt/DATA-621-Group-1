@@ -27,7 +27,7 @@ output:
 options(xtable.comment = FALSE)
 
 library(pacman)
-p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2, lars, MASS, AER)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2, lars, MASS, AER, DAAG)
 ```
 
 \begin{center}
@@ -331,7 +331,7 @@ dfTrForPoissonReg <- imputedDfTr
 
 First, we investigate the unconditional variance is slightly > unconditional mean. Which we do see in the below table so there may be some over-dispersion.
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE , cache=TRUE}
 library(knitr)
 x <- mean(dfTrForPoissonReg$TARGET)
 y <- var(dfTrForPoissonReg$TARGET)
@@ -344,47 +344,55 @@ kable(z)
 
 We build out first Poisson Regression model but we need to verify the confidence levels are appropriate. After producing the Confidence level for ResidualSugar we see it runs through 1 and and its P(z) value is clearly not significant. Based on both items we can remove ResidualSugar from the model.
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE,cache=TRUE}
 model1 <- glm(data = dfTrForPoissonReg, formula = TARGET~STARS+Alcohol+ResidualSugar, family = "poisson") 
 stargazer(model1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 1")
 ```
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
-exp(cbind(coef(model1), confint(model1)))
+
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+x <- as.data.frame(exp(cbind(coef(model1), confint(model1))))
+colnames(x) <- c(" ", "2.5%", "97.5%")
+pandoc.table(x, caption = "Confidence intervals")
 ```
+
+\newpage
 
 We removed ResidualSugar and Model with the independent variables STARS and Alcohol. We can see how great the STARS variable has on our modele, 2 STARS is 2.28 times wine case sales when compared to one STAR. Furthermore, 3 Stars will have wiine case sales of 2.90 times more than one STAR, and four STARS  will be 3.42 times more than one STAR. Alcohol = For one unit increase in Alcohol, Wine sales will be 1.004 times more
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 model1 <- glm(data = dfTrForPoissonReg, formula = TARGET~STARS+Alcohol, family = "poisson") 
 stargazer(model1,  header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 1 without ResidualSugar")
 ```
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 x <- as.data.frame(exp(cbind(coef(model1), confint(model1))))
 colnames(x) <- c("", "2.5%", "97.5%")
-kable(x)
+pandoc.table(x, caption = "Confidence intervals")
 ```
-
 
 #### Poisson Regression Model 1 Metrics
 
 ##### Dispersion 
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 dt <- dispersiontest(model1)
 dt$estimate
 ```
 
-Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model1)$deviance/summary(model1)$df.residual` and since this result is not greater than 1.5, we can claim that the data is not over-dispersed.[^6]
+Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model1)$deviance/summary(model1)$df.residual` and since this result is not greater than 1.5, we can claim that the data is not over-dispersed.[^7]
 
-[^6] : ["Multiple Logistic Regression." R Companion: Multiple Logistic Regression.](http://rcompanion.org/rcompanion/e_07.html) N.p., n.d. Web. 04 Dec. 2016.
+[^7]: ["Multiple Logistic Regression." R Companion: Multiple Logistic Regression.](http://rcompanion.org/rcompanion/e_07.html) N.p., n.d. Web. 04 Dec. 2016.
+
+\newpage
 
 ##### Influential Points
 
 We further test for influential points in the data set. This test indicates that rows 10328, 9714, and 3891, have great influence on our model. It would be important to discuss these rows with the appropriate data steward to understand if these are accurate measurements and should be included in the analysis. Due to time limitations, we are not able to verify these rows and they have been included in this analysis.  
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r, echo = FALSE, results='markdown', warning = FALSE, message = FALSE, cache=TRUE}
 influencePlot(model1)
 ```
 
@@ -392,115 +400,121 @@ influencePlot(model1)
 
 We also verify predicted values for the training dataset, in order to verify the output of our model against the training data set. 
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 dfWithPredicted <- cbind(dfTrForPoissonReg[,c("TARGET","STARS","Alcohol")],Fitted=model1$fitted.values)
-head(dfWithPredicted)
+pandoc.table(head(dfWithPredicted))
 ```
 
 The predictions are close in value, we can further see the prediction quality of the model by reviewing the frequency table for observed vs predicted values. 
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 c1 <- as.data.frame(table(dfWithPredicted$TARGET))
 c2 <- sapply(sort(unique(dfWithPredicted$TARGET)),function(x) length(which(round(dfWithPredicted$Fitted,0)==x)))
 c2 <- as.data.frame(c2)
 dfObsVsPred <- cbind(c1,c2)
 colnames(dfObsVsPred) <- c("Target","Obs","Predicted")
-print(dfObsVsPred)
+pandoc.table(dfObsVsPred)
 ```
 
-Goodness of fit test
+Goodness of Fit Test
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
-round(pchisq(model1$deviance, df=model1$df.residual, lower.tail=FALSE),3)
-```
+Goodness of Fit Test using Pearson Chi square test gives us the result of `r round(pchisq(model1$deviance, df=model1$df.residual, lower.tail=FALSE),3)` shows that our model is good. 
 
-Goodness of test using Pearson Chi square test shows that our model is good 
+\newpage
 
 ### Poisson Regression Model 2 
 
-Again, we build out second Poisson Regression model and we need to verify the confidence levels are appropriate. After producing the Confidence level for Confidence level for CitricAcid and pH, we see that they run through 1 and and their P(z) values are clearly not significant. Based on both info we can remove CitricAcid and pH from the model.
+As in our first Poisson model, we build our second Poisson Regression model and we need to verify the confidence levels are appropriate. After producing the Confidence level for Confidence level for CitricAcid and pH, we see that they run through 1 and and their P(z) values are clearly not significant. Based on both info we can remove CitricAcid and pH from the model.
 
-
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE , cache=TRUE}
 dfTrForPoissonReg$LabelAppeal <- factor(dfTrForPoissonReg$LabelAppeal)
 model2 <- glm(data = dfTrForPoissonReg, formula = TARGET~LabelAppeal+CitricAcid+pH, family = "poisson") 
 stargazer(model2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 2")
-kable(exp(cbind(coef(model2), confint(model2))))
 ```
+
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE , cache=TRUE}
+pandoc.table(exp(cbind(coef(model2), confint(model2))),caption = "Confidence intervals")
+```
+
+\newpage
 
 We removed CitricAcid and pH then created a new Model with only LabelAppeal. The impact of LabelAppeal is very significant since this variable is explaining a great deal of variation in our dependent variable. A neutral LabelAppeal of 0 will have wine sales 1.98 times greater than a very negative LabelAppeal of -2. Also, a great LabelAppeal of 2 will have 2.98 times greater wine sales than a than a very negative LabelAppeal of -2.
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, cache=TRUE}
 model2 <- glm(data = dfTrForPoissonReg, formula = TARGET~LabelAppeal, family = "poisson") 
 stargazer(model2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 2 with LabelAppeal")
 ```
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 x <- as.data.frame(exp(cbind(coef(model2), confint(model2))))
 colnames(x) <- c("", "2.5%", "97.5%")
-kable(x)
+pandoc.table(x, caption = "Confidence intervals")
 ```
 
 #### Poisson Regression Model 2 Metrics
 
-```{r ,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r ,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 dt <- dispersiontest(model2)
 dt$estimate
 ```
 
-Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model2)$deviance/summary(model2)$df.residual` and since this result is not greater than 1.5, we can claim that the data is not over-dispersed.
+Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model2)$deviance/summary(model2)$df.residual` and since this result is greater than 1.5, we can claim that the data is over-dispersed.
+
+\newpage
 
 ##### Influential points
 
 We further test for influential points in the data set. This test indicates that rows 7140, 14, and 74, have great influence on our model. It would be important to discuss these rows with the appropriate data steward to understand if these are accurate measurements and should be included in the analysis. Due to time limitations, we are not able to verify these rows and they have been included in this analysis.  
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='markup', warning = FALSE, message = FALSE, cache=TRUE}
 influencePlot(model2)
 ```
+
+\newpage
 
 ##### Verifying Predictions
 
 We also verify predicted values for the training dataset, in order to verify the output of our model against the training data set. 
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 dfWithPredicted <- cbind(dfTrForPoissonReg[,c("TARGET","LabelAppeal","Alcohol")],Fitted=model2$fitted.values)
-head(dfWithPredicted)
+pandoc.table(head(dfWithPredicted))
 ```
 
 The predictions are close in value, we can further see the prediction quality of the model by reviewing the frequency table for observed vs predicted values. 
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 c1 <- as.data.frame(table(dfWithPredicted$TARGET))
 c2 <- sapply(sort(unique(dfWithPredicted$TARGET)),function(x) length(which(round(dfWithPredicted$Fitted,0)==x)))
 c2 <- as.data.frame(c2)
 dfObsVsPred <- cbind(c1,c2)
 colnames(dfObsVsPred) <- c("Target","Obs","Predicted")
-sort(unique(dfWithPredicted$TARGET))
+pandoc.table(dfObsVsPred)
 ```
 
 Goodness of fit test
 
-```{r}
-round(pchisq(model2$deviance, df=model2$df.residual, lower.tail=FALSE),3)
-```
+The goodness of fit test using pearson Chisquare test results are `r round(pchisq(model2$deviance, df=model2$df.residual, lower.tail=FALSE),3)` which shows that our model is good and statistically significant.
 
-The goodness of fit test using pearson Chisquare test shows that our model is good and statistically significant. 
+\newpage
 
 ## Binomial Regression Models
 
 ### Binomial Regression Model 1
 
-In the first negative binomial regression model, all of the coefficients are positive. The variable that had to be removed was residual sugar, due to the fact that it was the least significant variable. The categorical variable used (wine rating) guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4). The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. The standard error in this model was very high thus guaranteeing high variance. The theta value is also very high. This means that there is a high level of dispersion.
+In the first negative binomial regression model, all of the coefficients are positive. The variable that had to be removed was wine rating, due to the fact that it led to an error in the model, stating that the iteration limit was reached. Even though this categorical variable guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4), this variable would not be appropriate to use for negative binomial regression. The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. However, this variable and residual sugar can be used for negative binomial regression because the resulting overdispersion is not so high. 
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 options(xtable.comment = FALSE)
 library(MASS)
 library(stargazer)
 fwDfTr$STARS <- factor(fwDfTr$STARS, levels=c(1,2,3,4)) 
 fwDfTr$LabelAppeal <- factor(fwDfTr$LabelAppeal, levels=c(-2,-1,0,1,2,3))
 
-b1 <- glm.nb(TARGET ~ ResidualSugar + Alcohol + STARS, data=fwDfTr, link = log)
-b1r <- glm.nb(TARGET ~ Alcohol + STARS, data=fwDfTr, link = log)
+b1 <- glm.nb(data = fwDfTr, formula = TARGET~STARS + Alcohol + ResidualSugar)
+b1r <- glm.nb(TARGET ~ Alcohol + ResidualSugar, data=fwDfTr)
 stargazer(b1, b1r, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Binomial Regression Model 1")
 ```
 
@@ -508,8 +522,10 @@ stargazer(b1, b1r, header = FALSE, no.space = TRUE, style = "all2", font.size = 
 
 In the model-fitting criterion, the chi-squared p-value is 1. This implies a failure to reject the null hypothesis. 
 
-```{r binomial regression model 1 eval, echo = FALSE, results='asis', warning=FALSE, message=FALSE}
-list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
+```{r binomial regression model 1 eval, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
+x <- list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
+x <- as.data.frame(x)
+pandoc.table(x)
 ```
 
 \newpage
@@ -518,7 +534,7 @@ list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residua
 
 In the second negative binomial regression model, all of the coefficients are positive except for that of pH. The only significant variable is the label appeal. Except for the score of 3, all of the other scores for label appeal, yield significant results. Most of the coefficients for label appeal are close to 1 or slightly greater than 1 (0.7 for Label Appeal = 0, 0.9 for Label Appeal = 1, 1.09 for Label Appeal = 2, and 0.7 for Label Appeal = 3). The only score that yeilds a coefficient that is less than 1 is -1. The coefficient for this is 0.4. The standard error is 3.5. The theta value is 23.46, guaranteeing a lower level of overdispersion. 
 
-```{r binomial regression model 2, echo = FALSE, results='asis', warning=FALSE, message=FALSE}
+```{r binomial regression model 2, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
 b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data = fwDfTr, link = log)
 b2r <- glm.nb(TARGET ~ LabelAppeal, data = fwDfTr, link = log)
 stargazer(b2, b2r, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Binomial Regression Model 2") 
@@ -529,8 +545,10 @@ stargazer(b2, b2r, header = FALSE, no.space = TRUE, style = "all2", font.size = 
 
 Unlike the previous model, the chi-squared p-value for this model is close to 0. This means that the null hypothesis can be rejected.  
 
-```{r binomial regression model 2 evaluation, echo = FALSE, results='asis', warning=FALSE, message=FALSE}
-list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
+```{r binomial regression model 2 evaluation, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
+x <- list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
+x <- as.data.frame(x)
+pandoc.table(x)
 ```
 
 \newpage
@@ -561,6 +579,8 @@ lmfit <- setDT(as.data.frame(car::vif(lm)), keep.rownames = TRUE)[]
 lmfit$Adjusted_GVIF <- (lmfit$`GVIF^(1/(2*Df))`^2)
 kable(lmfit, align = c("l", "c", "c", "c", "c"))
 ```
+
+\newpage
 
 ##### Diagnositic Plots
 
@@ -596,22 +616,23 @@ We see slight variation in our intercept and some variable coefficients which is
 Additionally, we see that the adjusted $R^2$ has not changed which is expected since we removed variables that were not considered significant. 
 
 ```{r linear regression variable subset, echo=FALSE, results='asis', cache=TRUE}
-lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + I(ResidualSugar^1.25) + 
+lm2 <- lm(TARGET ~ FixedAcidity + VolatileAcidity + I(ResidualSugar^1.25) + 
     Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + 
     Density + Sulphates + Alcohol + LabelAppeal + STARS, data =  imputedDfTr)
 
-stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title="Linear Model with select variables")
+stargazer::stargazer(lm2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title="Linear Model with select variables")
 ```
 
 \newpage
 
 #### Linear Model Metrics with select Variables
 
+
 ##### Diagnositic Plots
 
-```{r linear regression model metrics with select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
+```{r linear regression model metrics with select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE,fig.height=4.5, fig.width=6}
 p <- par(mfrow=c(2,2))
-plot(lm)
+plot(lm2)
 par(p)
 ```
 
@@ -620,7 +641,7 @@ par(p)
 We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Fortunately, we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
 
 ```{r multicollinearity select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
-lmfit <- setDT(as.data.frame(car::vif(lm)), keep.rownames = TRUE)[]
+lmfit <- setDT(as.data.frame(car::vif(lm2)), keep.rownames = TRUE)[]
 lmfit$Adjusted_GVIF <- (lmfit$`GVIF^(1/(2*Df))`^2)
 kable(lmfit, align = c("l", "c", "c", "c", "c"))
 ```
@@ -629,7 +650,39 @@ kable(lmfit, align = c("l", "c", "c", "c", "c"))
 
 # Selected Model
 
-We reference AIC as per this paper blah blah blah
+In order to select our most appropriate model we will use the AIC as our selection criteria. This method was outlined by Snipes & Taylor for their similar research in selecting models from wine ratings and prices.[^8] As per Snipes & Taylor - "The best model is then the model with the lowest AICc (or AIC) score". 
+
+```{r, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
+HeteroModelValidation <- function(df, model, modelName)
+{
+  library(boot)
+  #cv.err <- cv.glm(df,model,K=10)$delta[1]  
+  #model$aic
+  dfOutput <- as.data.frame(cbind(model=modelName, AIC = round(model$aic,2)))
+  return(dfOutput)
+}
+
+HeteroModelValidationLinear <- function(df, model, modelName)
+{
+  library(boot)
+  #cv.err <- cv.glm(df,model,K=10)$delta[1]  
+  #model$aic
+  dfOutput <- as.data.frame(cbind(model=modelName, AIC = round(AIC(model),2)))
+  return(dfOutput)
+}
+```
+
+```{r, echo=FALSE, results='asis', cache=TRUE, eval=TRUE, messages = FALSE, warning=FALSE, error=FALSE }
+x <- HeteroModelValidation(wDfTr,model1,"Poisson Regression 1") %>%
+     rbind(HeteroModelValidation(wDfTr,model2,"Poisson Regression 2")) %>%
+     rbind(HeteroModelValidation(wDfTr, b1r, "Binomial Regression 1")) %>%
+     rbind(HeteroModelValidation(wDfTr, b2r, "Binomial Regression 2")) %>%
+     rbind(HeteroModelValidationLinear(wDfTr, lm, "Linear Regression 1")) %>%
+     rbind(HeteroModelValidationLinear(wDfTr, lm2, "Linear Regression 2"))
+pandoc.table(x)
+```
+
+[^8]: Snipes, & Taylor. (2014). Model selection and Akaike Information Criteria: An example from wine ratings and prices. Wine Economics and Policy, 3(1), 3-9.
 
 \newpage
 
