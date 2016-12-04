@@ -45,8 +45,6 @@ summary(model1)$deviance/summary(model1)$df.residual
 #Since this value is not greater than 1.5, we can claim that the data is not over-dispersed.
 #Reference http://rcompanion.org/rcompanion/e_07.html
 
-library(boot)
-(cv.err <- cv.glm(dfTrForPoissonReg,model1,K=10)$delta[1] )
 
 #Influential points in the dataset
 influencePlot(model1)
