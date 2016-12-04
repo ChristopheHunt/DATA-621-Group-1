@@ -1,51 +1,89 @@
 ---
-title: Capitalized Title Here
+title: Regional Liquor Sales in Iowa
 author:
-  - name: Author One
-    affiliation: Affiliation
-    address:
-    - line 1
-    - line 2
-    email:  author1@work
-  - name: Author Two
-    affiliation: Affiliation
-    address:
-    - line 1
-    - line 2
-    email:  author2@work
-abstract: >
-  An abstract of less than 150 words.
-preamble: >
-  % Any extra latex you need in the preamble
-output: rticles::rjournal_article
+  - name: Christophe Hunt
+    email: 
+    affiliation: CUNY School of Professional Studies
+    footnote: Author
+  - name: Bob Security
+    email: bob@example.com
+    affiliation: CUNY School of Professional Studies
+address:
+  - code: CUNY School of Professional Studies
+    address: Data Analytics, New York, NY
+abstract: |
+  This is the abstract.
+
+  It consists of two paragraphs.
+
+bibliography: mybibfile.bib
+output: rticles::elsevier_article
 ---
 
-## Introduction
+_Text based on elsarticle sample manuscript, see [http://www.elsevier.com/author-schemas/latex-instructions#elsarticle](http://www.elsevier.com/author-schemas/latex-instructions#elsarticle)_
 
-Introductory section which may include references in parentheses
-\citep{R}, or cite a reference such as \citet{R} in the text.
 
-## Section title in sentence case
+The Elsevier article class
+==========================
 
-This section may contain a figure such as Figure \ref{figure:rlogo}.
+#### Installation
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics{Rlogo}
-  \caption{The logo of R.}
-  \label{figure:rlogo}
-\end{figure}
+If the document class *elsarticle* is not available on your computer,
+you can download and install the system package *texlive-publishers*
+(Linux) or install the LaTeX package *elsarticle* using the package
+manager of your TeX installation, which is typically TeX Live or MikTeX.
 
-## Another section
+#### Usage
 
-There will likely be several sections, perhaps including code snippets, such as:
+Once the package is properly installed, you can use the document class
+*elsarticle* to create a manuscript. Please make sure that your
+manuscript follows the guidelines in the Guide for Authors of the
+relevant journal. It is not necessary to typeset your manuscript in
+exactly the same way as an article, unless you are submitting to a
+camera-ready copy (CRC) journal.
 
-```{r}
-x <- 1:10
-x
-```
+#### Functionality
 
-## Summary
+The Elsevier article class is based on the standard article class and
+supports almost all of the functionality of that class. In addition, it
+features commands and options to format the
 
-This file is only a basic article template. For full details of _The R Journal_ style and information on how to prepare your article for submission, see the [Instructions for Authors](https://journal.r-project.org/share/author-guide.pdf).
-\bibliography{RJreferences}
+-   document style
+
+-   baselineskip
+
+-   front matter
+
+-   keywords and MSC codes
+
+-   theorems, definitions and proofs
+
+-   lables of enumerations
+
+-   citation style and labeling.
+
+Front matter
+============
+
+The author names and affiliations could be formatted in two ways:
+
+(1) Group the authors per affiliation.
+
+(2) Use footnotes to indicate the affiliations.
+
+See the front matter of this document for examples. You are recommended
+to conform your choice to the journal you are submitting to.
+
+Bibliography styles
+===================
+
+There are various bibliography styles available. You can select the
+style of your choice in the preamble of this document. These styles are
+Elsevier styles based on standard styles like Harvard and Vancouver.
+Please use BibTeX to generate your bibliography and include DOIs
+whenever available.
+
+Here are two sample references: @Feynman1963118 [@Dirac1953888].
+
+References {#references .unnumbered}
+==========

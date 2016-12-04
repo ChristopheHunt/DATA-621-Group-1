@@ -520,7 +520,7 @@ stargazer(b1, b1r, header = FALSE, no.space = TRUE, style = "all2", font.size = 
 
 #### Binomial Regression Model 1 Evaluation
 
-In the model-fitting criterion, the chi-squared p-value is 1. This implies a failure to reject the null hypothesis. 
+In the model-fitting criterion, the chi-squared p-value is close to 0. This implies that the model is valid.
 
 ```{r binomial regression model 1 eval, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
 x <- list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
@@ -543,7 +543,7 @@ stargazer(b2, b2r, header = FALSE, no.space = TRUE, style = "all2", font.size = 
 
 #### Binomial Regression Model 2 Evaluation
 
-Unlike the previous model, the chi-squared p-value for this model is close to 0. This means that the null hypothesis can be rejected.  
+Like the previous model, the chi-squared p-value for this model is close to 0. This model is also valid. 
 
 ```{r binomial regression model 2 evaluation, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
 x <- list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
