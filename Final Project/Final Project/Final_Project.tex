@@ -101,18 +101,43 @@
 \section{Problem}\label{problem}
 
 Liquor sales are highly variable and the objective of this report is to
-create a statiscal model for the number of bottle sold by regional. This
-will help us predict inventory and assist wholesale distributors and the
-State of Iowa adjust inventory projections accordingly.
+create a statistical model for the value and number of bottles of liquor
+sold by region within the state of Iowa. This will help us predict
+inventory and assist wholesale distributors and the State of Iowa adjust
+inventory projections accordingly.
 
 \section{Introduction}\label{introduction}
 
-describe the background and motivation of your problem.
+In February, the Distilled Spirits Council (DISCUS), announced that
+spirits had an estimated retail sales of nearly \$72 billion in 2015.
+Additionally, DISCUS credits the continuous growth of the distilled
+spirits industry to several key factors - continuous fascination with
+American Whiskeys in the United States and abroad, innovations in
+flavors, permiumization across all spirits categories leading to
+consumer interest, improved regulatory and tax environment resulting in
+expanded market access and a relatively low number of state tax threats,
+and the growth of small distillers, which expanded grassroots and
+overall interest in the spirits category Del Buono (2016).
+
+This establishes that spirit sales in the Unites States is a valuable
+market worth exploring for a more detailed and statistical understanding
+of sales and volume. We hope to more throughly understand what impact
+regional and season impacts might have on liquor sales. We will limit
+the analysis to Iowa which has also reported sales at a record pace
+during the last half of 2000 Boshart (2001). While this older
+information we do have data up to 2016 to review.
 
 \section{Research Background (Literature
 Review)}\label{research-background-literature-review}
 
 \section{Methodology}\label{methodology}
+
+The dataset contains the spirits purchase information of Iowa Class
+``E'' liquor licensees by product and date of purchase from January 1,
+2012 to current. The data set is provided by the Iowa Department of
+Commerce, Alcoholic Beverages Division,
+\href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
+here} to view the data set at Data.Iowa.Gov.
 
 discuss the key aspects of your problem, data set and regression
 model(s). Given that you are working on real-world data, explain at a
@@ -129,14 +154,29 @@ discussion of the results, etc.).
 
 \section{Discussion and Conclusions}\label{discussion-and-conclusions}
 
+\section{In another study conducted in 2012 in Idaho, the monthly
+revenue generated was examined rather than the yearly revenue generated.
+The continued growth was rather owed to the number of weekends a month
+has (five instead of four) and to the higher prices in neighboring
+states. In Washington, the voters approved an initiative that led the
+state to sell its liquor stores and add new distributor and retail fees,
+making prices in the neighboring states (Idaho and Oregon) look better.
+There were no changes made in marketing or pricing in response to the
+regulatory shift in
+Washington.}\label{in-another-study-conducted-in-2012-in-idaho-the-monthly-revenue-generated-was-examined-rather-than-the-yearly-revenue-generated.-the-continued-growth-was-rather-owed-to-the-number-of-weekends-a-month-has-five-instead-of-four-and-to-the-higher-prices-in-neighboring-states.-in-washington-the-voters-approved-an-initiative-that-led-the-state-to-sell-its-liquor-stores-and-add-new-distributor-and-retail-fees-making-prices-in-the-neighboring-states-idaho-and-oregon-look-better.-there-were-no-changes-made-in-marketing-or-pricing-in-response-to-the-regulatory-shift-in-washington.}
+
+In 2011, Idaho lawmakers commissioned a report that found that the state
+could privatize liquor sales without a loss in the revenue. According to
+Jeff Anderson, leader of Idaho's liquor division, prices of liquor might
+also rise as a result of this.
+
 conclude your findings, limitations, and suggest areas for future work.
 
-\section*{References}\label{references}
-\addcontentsline{toc}{section}{References}
+\newpage
 
 \section{Appendices}\label{appendices}
 
-\subsection{Supplemental tables and/or
+\section{Supplemental tables and/or
 figures.}\label{supplemental-tables-andor-figures.}
 
 \section{Session Info}\label{session-info}
@@ -146,6 +186,7 @@ figures.}\label{supplemental-tables-andor-figures.}
   \item Locale: \verb|LC_COLLATE=English_United States.1252|, \verb|LC_CTYPE=English_United States.1252|, \verb|LC_MONETARY=English_United States.1252|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=English_United States.1252|
   \item Base packages: base, datasets, graphics, grDevices,
     methods, stats, utils
+  \item Other packages: pacman~0.4.1
   \item Loaded via a namespace (and not attached):
     backports~1.0.4, digest~0.6.10, evaluate~0.10,
     htmltools~0.3.5, knitr~1.15.1, magrittr~1.5, Rcpp~0.12.8,
@@ -153,16 +194,25 @@ figures.}\label{supplemental-tables-andor-figures.}
     stringr~1.1.0, tools~3.3.2, yaml~2.1.14
 \end{itemize}
 
-\subsection{R statistical programming
+\section{R statistical programming
 code.}\label{r-statistical-programming-code.}
 
-\subsection{R source code}\label{r-source-code}
-
 Please see
-\href{https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework\%205/Homework\%205.Rmd}{Final
+\href{https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final\%20Project/Final\%20Project.Rmd}{Final
 Project.rmd} on GitHub for source code.
 
-https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework\%205/Homework\%205.Rmd
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final\%20Project/Final\%20Project.Rmd
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\hypertarget{ref-IowaSetsRecord2}{}
+Boshart, Rod. 2001. ``Liquor Sales in Iowa Set Record.'' \emph{Gazette}.
+
+\hypertarget{ref-KeepingSpiritsHigh1}{}
+Del Buono, Amanda. 2016. ``Keeping Spirits High.'' \emph{Beverage
+Industry} 107.4: 14--16, 18.
 
 \end{document}
 

@@ -25,16 +25,33 @@ bibliography: mybibfile.bib
 output: rticles::elsevier_article
 ---
 
+```{r programming style guide, echo=FALSE, eval=FALSE}
+##Style guide
+##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
+##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
+##lower case for scalar/single value, ex. x <- 1
+##data frame start with df followed by description, ex. dfEval <- evaluation data frame
+##assignments use "<-" not "="
+```
+
+```{r options and library load, include = FALSE}
+options(xtable.comment = FALSE)
+library(pacman)
+#p_load()
+```
+
 Problem
 =================
 
-Liquor sales are highly variable and the objective of this report is to create a statiscal model for the number of bottle sold by regional. This will help us predict inventory and assist wholesale distributors and the State of Iowa adjust inventory projections accordingly. 
+Liquor sales are highly variable and the objective of this report is to create a statistical model for the value and number of bottles of liquor sold by region within the state of Iowa. This will help us predict inventory and assist wholesale distributors and the State of Iowa adjust inventory projections accordingly. 
 
 
 Introduction
 =================
-describe the background and motivation of your problem.
 
+In February, the Distilled Spirits Council (DISCUS), announced that spirits had an estimated retail sales of nearly $72 billion in 2015. Additionally, DISCUS credits the continuous growth of the distilled spirits industry to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permiumization across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category @KeepingSpiritsHigh1. 
+
+This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more throughly understand what impact regional and season impacts might have on liquor sales. We will limit the analysis to Iowa which has also reported sales at a record pace during the last half of 2000 @IowaSetsRecord2. While this older information we do have data up to 2016 to review.  
 
 Research Background (Literature Review)
 =================
@@ -43,30 +60,72 @@ Research Background (Literature Review)
 Methodology
 ================
 
-discuss the key aspects of your problem, data set and regression model(s). Given that you
-are working on real-world data, explain at a high-level your exploratory data analysis, how you prepared
-the data for regression modeling, your process for building regression models, and your model selection.
+The dataset contains the spirits purchase information of Iowa Class "E" liquor licensees by product and date of purchase from January 1, 2012 to current. The data set is provided by the Iowa Department of Commerce, Alcoholic Beverages Division, [click here](https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy) to view the data set at Data.Iowa.Gov.
+
+discuss the key aspects of your problem, data set and regression model(s). Given that you are working on real-world data, explain at a high-level your exploratory data analysis, how you prepared the data for regression modeling, your process for building regression models, and your model selection.
+
 
 Experimentation and Results
-==========================
+=============================
+
+```{r , echo = FALSE, results='asis', warning = FALSE, message = FALSE , cache=TRUE, eval=FALSE}
+library(data.table)
+library(tidyverse)
+
+iowa_data <- fread("~.\Iowa_Liquor_Sales.csv", header = T, sep = ',')
+
+removeDollars <- function(column){
+  as.numeric(gsub("\\,","",gsub("\\$","", column)))
+}
+
+iowa_data_reduced <- iowa_data %>%
+                     dplyr::select(Date, City, County, `Category Name`, 
+                            `Item Number`, `Item Description`, 
+                            `Bottles Sold`, `Sale (Dollars)`, `Volume Sold (Gallons)`) %>%
+                    mutate(Date = as.Date(Date, format = "%m/%d/%Y"),
+                           City = factor(City),
+                           County = factor(County),
+                           `Item Number` = factor(`Item Number`),
+                           `Item Description` = factor(`Item Description`),
+                           `Sale (Dollars)` = removeDollars(`Sale (Dollars)`)) %>%
+                    mutate(Month = format(Date, "%m"),
+                           Year = format(Date, "%Y")) %>%
+                    dplyr::select(-Date, -`Item Number`, -`Item Description`) %>%
+                    group_by(Month, Year, City, County, `Category Name`)  %>%
+                    summarize(`Bottles Sold` = sum(`Bottles Sold`), 
+                              `Sale (Dollars)` = sum(`Sale (Dollars)`), 
+                              `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
+                    as_tibble()
+
+iowa_data_reduced <- iowa_data_reduced %>%
+                    dplyr::ungroup() %>%
+                    mutate(Month = as.numeric(Month),
+                           Year = as.numeric(Year),
+                           `Category Name`= factor(`Category Name`)) %>%
+                    arrange(Year, Month, County, City)
+
+write.csv(iowa_data_reduced, "iowa_data_reduced.csv")
+```
+
+# Data Aquisition
 
 describe the specifics of what you did (data exploration, data preparation,
 model building, model selection, model evaluation, etc.), and what you found out (statistical analyses,
 interpretation and discussion of the results, etc.).
 
 Discussion and Conclusions
-==========================
+============================
+
+In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated. The continued growth was rather owed to the number of weekends a month has (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales3. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into sales and volume of liquor sold. Additionally, reviewing the data by identifying months that has 5 weekends instead of four could provide further insights. 
+
 conclude your findings, limitations, and suggest areas for future work.
 
-
-
-References {#references .unnumbered}
-==========
+\newpage
 
 Appendices
 =============
 
-## Supplemental tables and/or figures.
+# Supplemental tables and/or figures.
 
 # Session Info
 
@@ -74,10 +133,11 @@ Appendices
 toLatex(sessionInfo())
 ```
 
-## R statistical programming code.
+# R statistical programming code.
 
-## R source code
+Please see [Final Project.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final%20Project/Final%20Project.Rmd) on GitHub for source code.   
 
-Please see [Final Project.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd) on GitHub for source code.   
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final%20Project/Final%20Project.Rmd
 
-https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd
+References {#references .unnumbered}
+===============
