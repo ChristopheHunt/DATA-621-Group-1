@@ -50,3 +50,6 @@ pracma
 boot
 pander
 lars
+lmtest
+sandwich
+AER
