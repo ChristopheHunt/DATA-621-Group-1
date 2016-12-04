@@ -358,8 +358,14 @@ We removed ResidualSugar and Model with the independent variables STARS and Alco
 ```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
 model1 <- glm(data = dfTrForPoissonReg, formula = TARGET~STARS+Alcohol, family = "poisson") 
 stargazer(model1,  header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 1 without ResidualSugar")
-exp(cbind(coef(model1), confint(model1))
 ```
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+x <- as.data.frame(exp(cbind(coef(model1), confint(model1))))
+colnames(x) <- c("", "2.5%", "97.5%")
+kable(x)
+```
+
 
 #### Poisson Regression Model 1 Metrics
 
@@ -410,12 +416,12 @@ round(pchisq(model1$deviance, df=model1$df.residual, lower.tail=FALSE),3)
 
 Goodness of test using Pearson Chi square test shows that our model is good 
 
-
 ### Poisson Regression Model 2 
 
 Again, we build out second Poisson Regression model and we need to verify the confidence levels are appropriate. After producing the Confidence level for Confidence level for CitricAcid and pH, we see that they run through 1 and and their P(z) values are clearly not significant. Based on both info we can remove CitricAcid and pH from the model.
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 dfTrForPoissonReg$LabelAppeal <- factor(dfTrForPoissonReg$LabelAppeal)
 model2 <- glm(data = dfTrForPoissonReg, formula = TARGET~LabelAppeal+CitricAcid+pH, family = "poisson") 
 stargazer(model2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 2")
@@ -424,10 +430,15 @@ kable(exp(cbind(coef(model2), confint(model2))))
 
 We removed CitricAcid and pH then created a new Model with only LabelAppeal. The impact of LabelAppeal is very significant since this variable is explaining a great deal of variation in our dependent variable. A neutral LabelAppeal of 0 will have wine sales 1.98 times greater than a very negative LabelAppeal of -2. Also, a great LabelAppeal of 2 will have 2.98 times greater wine sales than a than a very negative LabelAppeal of -2.
 
-```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 model2 <- glm(data = dfTrForPoissonReg, formula = TARGET~LabelAppeal, family = "poisson") 
 stargazer(model2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 2 with LabelAppeal")
-kable(exp(cbind(coef(model2), confint(model2))))
+```
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+x <- as.data.frame(exp(cbind(coef(model2), confint(model2))))
+colnames(x) <- c("", "2.5%", "97.5%")
+kable(x)
 ```
 
 #### Poisson Regression Model 2 Metrics
