@@ -2,88 +2,82 @@
 title: Regional Liquor Sales in Iowa
 author:
   - name: Christophe Hunt
-    email: 
+    email: christophe.hunt@spsmail.cuny.edu
     affiliation: CUNY School of Professional Studies
     footnote: Author
-  - name: Bob Security
-    email: bob@example.com
+  - name: Senthil Dhanapal
+    email: senthil.dhanapal@spsmail.cuny.edu
+    affiliation: CUNY School of Professional Studies
+  - name: Yadu Chittampalli
+    email: yadu.chittampalli@spsmail.cuny.edu
     affiliation: CUNY School of Professional Studies
 address:
   - code: CUNY School of Professional Studies
-    address: Data Analytics, New York, NY
+    address: CUNY School of Professional Studies, Data Analytics, New York, NY
 abstract: |
   This is the abstract.
 
-  It consists of two paragraphs.
+  It consists of two paragraphs
+  
+  #Keywords: *Liquor, Liquor Sales.*
 
 bibliography: mybibfile.bib
 output: rticles::elsevier_article
 ---
 
-_Text based on elsarticle sample manuscript, see [http://www.elsevier.com/author-schemas/latex-instructions#elsarticle](http://www.elsevier.com/author-schemas/latex-instructions#elsarticle)_
+Problem
+=================
+
+Liquor sales are highly variable and the objective of this report is to create a statiscal model for the number of bottle sold by regional. This will help us predict inventory and assist wholesale distributors and the State of Iowa adjust inventory projections accordingly. 
 
 
-The Elsevier article class
+Introduction
+=================
+describe the background and motivation of your problem.
+
+
+Research Background (Literature Review)
+=================
+
+
+Methodology
+================
+
+discuss the key aspects of your problem, data set and regression model(s). Given that you
+are working on real-world data, explain at a high-level your exploratory data analysis, how you prepared
+the data for regression modeling, your process for building regression models, and your model selection.
+
+Experimentation and Results
 ==========================
 
-#### Installation
+describe the specifics of what you did (data exploration, data preparation,
+model building, model selection, model evaluation, etc.), and what you found out (statistical analyses,
+interpretation and discussion of the results, etc.).
 
-If the document class *elsarticle* is not available on your computer,
-you can download and install the system package *texlive-publishers*
-(Linux) or install the LaTeX package *elsarticle* using the package
-manager of your TeX installation, which is typically TeX Live or MikTeX.
+Discussion and Conclusions
+==========================
+conclude your findings, limitations, and suggest areas for future work.
 
-#### Usage
 
-Once the package is properly installed, you can use the document class
-*elsarticle* to create a manuscript. Please make sure that your
-manuscript follows the guidelines in the Guide for Authors of the
-relevant journal. It is not necessary to typeset your manuscript in
-exactly the same way as an article, unless you are submitting to a
-camera-ready copy (CRC) journal.
-
-#### Functionality
-
-The Elsevier article class is based on the standard article class and
-supports almost all of the functionality of that class. In addition, it
-features commands and options to format the
-
--   document style
-
--   baselineskip
-
--   front matter
-
--   keywords and MSC codes
-
--   theorems, definitions and proofs
-
--   lables of enumerations
-
--   citation style and labeling.
-
-Front matter
-============
-
-The author names and affiliations could be formatted in two ways:
-
-(1) Group the authors per affiliation.
-
-(2) Use footnotes to indicate the affiliations.
-
-See the front matter of this document for examples. You are recommended
-to conform your choice to the journal you are submitting to.
-
-Bibliography styles
-===================
-
-There are various bibliography styles available. You can select the
-style of your choice in the preamble of this document. These styles are
-Elsevier styles based on standard styles like Harvard and Vancouver.
-Please use BibTeX to generate your bibliography and include DOIs
-whenever available.
-
-Here are two sample references: @Feynman1963118 [@Dirac1953888].
 
 References {#references .unnumbered}
 ==========
+
+Appendices
+=============
+
+## Supplemental tables and/or figures.
+
+# Session Info
+
+```{r, results='asis', echo=FALSE, eval = TRUE}
+toLatex(sessionInfo())
+```
+
+## R statistical programming code.
+
+## R source code
+
+Please see [Final Project.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd) on GitHub for source code.   
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd

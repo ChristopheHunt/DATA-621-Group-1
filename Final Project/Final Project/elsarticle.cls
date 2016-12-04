@@ -23,6 +23,7 @@
 %%
 %% $Id: elsarticle.cls,v 1.18 2008-08-28 06:03:47 cvr Exp $
 %%
+\usepackage[sfdefault]{roboto}
  \def\RCSfile{elsarticle}%
  \def\RCSversion{1.0.1}%
  \def\RCSdate{2008/05/22}%
@@ -395,7 +396,7 @@
      \let\@oddhead\@empty
      \let\@evenhead\@empty
      \def\@oddfoot{\footnotesize\itshape
-       Preprint submitted to \ifx\@journal\@empty Elsevier
+       Submitted to \ifx\@journal\@empty CUNY School of Professoinal Studies
        \else\@journal\fi\hfill\today}%
      \let\@evenfoot\@oddfoot}
 
