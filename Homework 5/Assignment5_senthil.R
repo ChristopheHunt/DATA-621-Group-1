@@ -61,7 +61,7 @@ dfObsVsPred <- cbind(c1,c2)
 colnames(dfObsVsPred) <- c("Target","Obs","Predicted")
 print(dfObsVsPred)
 
-var(round(dfWithPredicted$Fitted,0))
+#var(round(dfWithPredicted$Fitted,0))
 
 #goodness of fit test
 round(pchisq(model1$deviance, df=model1$df.residual, lower.tail=FALSE),3)
