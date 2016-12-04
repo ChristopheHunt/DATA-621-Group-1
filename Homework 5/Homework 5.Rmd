@@ -320,6 +320,54 @@ FreeSulfurDioxide & $FreeSulfurDioxide^{1.25}$ \\
 
 # Models Built
 
+## Binomial Regression Models
+
+### Binomial Regression Model 1
+
+In the first negative binomial regression model, all of the coefficients are positive. The variable that had to be removed was residual sugar, due to the fact that it was the least significant variable. The categorical variable used (wine rating) guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4). The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. The standard error in this model was very high thus guaranteeing high variance. The theta value is also very high. This means that there is a high level of dispersion.
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+options(xtable.comment = FALSE)
+library(MASS)
+library(stargazer)
+fwDfTr$STARS <- factor(fwDfTr$STARS, levels=c(1,2,3,4)) 
+fwDfTr$LabelAppeal <- factor(fwDfTr$LabelAppeal, levels=c(-2,-1,0,1,2,3))
+
+b1 <- glm.nb(TARGET ~ ResidualSugar + Alcohol + STARS, data=fwDfTr, link = log)
+b1r <- glm.nb(TARGET ~ Alcohol + STARS, data=fwDfTr, link = log)
+stargazer(b1, b1r, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Binomial Regression Model 1")
+```
+
+#### Binomial Regression Model 1 Evaluation
+
+In the model-fitting criterion, the chi-squared p-value is 1. This implies a failure to reject the null hypothesis. 
+
+```{r binomial regression model 1 eval, echo = FALSE, results='asis', warning=FALSE, message=FALSE}
+list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
+```
+
+\newpage
+
+### Binomial Regression Model 2
+
+In the second negative binomial regression model, all of the coefficients are positive except for that of pH. The only significant variable is the label appeal. Except for the score of 3, all of the other scores for label appeal, yield significant results. Most of the coefficients for label appeal are close to 1 or slightly greater than 1 (0.7 for Label Appeal = 0, 0.9 for Label Appeal = 1, 1.09 for Label Appeal = 2, and 0.7 for Label Appeal = 3). The only score that yeilds a coefficient that is less than 1 is -1. The coefficient for this is 0.4. The standard error is 3.5. The theta value is 23.46, guaranteeing a lower level of overdispersion. 
+
+```{r binomial regression model 2, echo = FALSE, results='asis', warning=FALSE, message=FALSE}
+b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data = fwDfTr, link = log)
+b2r <- glm.nb(TARGET ~ LabelAppeal, data = fwDfTr, link = log)
+stargazer(b2, b2r, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Binomial Regression Model 2") 
+```
+
+
+#### Binomial Regression Model 2 Evaluation
+
+Unlike the previous model, the chi-squared p-value for this model is close to 0. This means that the null hypothesis can be rejected.  
+
+```{r binomial regression model 2 evaluation, echo = FALSE, results='asis', warning=FALSE, message=FALSE}
+list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
+```
+
+
 ## Multiple Linear Regression
 
 ### Linear Regression with All Variables
