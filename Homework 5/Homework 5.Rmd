@@ -359,7 +359,7 @@ pandoc.table(x, caption = "Confidence intervals")
 
 \newpage
 
-We removed ResidualSugar and Model with the independent variables STARS and Alcohol. We can see how great the STARS variable has on our model, 2 STARS is 2.28 times wine case sales when compared to one STAR. Furthermore, 3 Stars will have wiine case sales of 2.90 times more than one STAR, and four STARS  will be 3.42 times more than one STAR. Alcohol = For one unit increase in Alcohol, Wine sales will be 1.004 times more
+We removed ResidualSugar and Model with the independent variables STARS and Alcohol. We can see how great the STARS variable has on our model, 2 STARS is 2.28 times wine case sales when compared to one STAR. Furthermore, 3 Stars will have wine case sales of 2.90 times more than one STAR, and four STARS  will be 3.42 times more than one STAR. Alcohol = For one unit increase in Alcohol, Wine sales will be 1.004 times more
 
 ```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 model1 <- glm(data = dfTrForPoissonReg, formula = TARGET~STARS+Alcohol, family = "poisson") 
@@ -369,8 +369,8 @@ stargazer(model1,  header = FALSE, no.space = TRUE, style = "all2", font.size = 
 
 ```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 x <- as.data.frame(exp(cbind(coef(model1), confint(model1))))
-colnames(x) <- c("", "2.5%", "97.5%")
-pandoc.table(x, caption = "Confidence intervals")
+colnames(x) <- c("Exponentiated Coefficient", "Exponentiated 2.5%", "Exponentiated 97.5%")
+pandoc.table(x, caption = "Confidence intervals", split.table = Inf)
 ```
 
 #### Poisson Regression Model 1 Metrics
@@ -382,7 +382,7 @@ dt <- dispersiontest(model1)
 dt$estimate
 ```
 
-Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model1)$deviance/summary(model1)$df.residual` and since this result is not greater than 1.5, we can claim that the data is not over-dispersed.[^7]
+Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for over dispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model1)$deviance/summary(model1)$df.residual` and since this result is not greater than 1.5, we can claim that the data is not over-dispersed.[^7]
 
 [^7]: ["Multiple Logistic Regression." R Companion: Multiple Logistic Regression.](http://rcompanion.org/rcompanion/e_07.html) N.p., n.d. Web. 04 Dec. 2016.
 
@@ -398,7 +398,7 @@ influencePlot(model1)
 
 ##### Verifying Predictions
 
-We also verify predicted values for the training dataset, in order to verify the output of our model against the training data set. 
+We also verify predicted values for the training data set, in order to verify the output of our model against the training data set. 
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 dfWithPredicted <- cbind(dfTrForPoissonReg[,c("TARGET","STARS","Alcohol")],Fitted=model1$fitted.values)
@@ -449,8 +449,8 @@ stargazer(model2, header = FALSE, no.space = TRUE, style = "all2", font.size = "
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 x <- as.data.frame(exp(cbind(coef(model2), confint(model2))))
-colnames(x) <- c("", "2.5%", "97.5%")
-pandoc.table(x, caption = "Confidence intervals")
+colnames(x) <- c("Exponentiated Coefficient", "Exponentiated 2.5%", "Exponentiated 97.5%")
+pandoc.table(x, caption = "Confidence intervals", split.table = Inf)
 ```
 
 #### Poisson Regression Model 2 Metrics
@@ -460,7 +460,7 @@ dt <- dispersiontest(model2)
 dt$estimate
 ```
 
-Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model2)$deviance/summary(model2)$df.residual` and since this result is greater than 1.5, we can claim that the data is over-dispersed.
+Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for over dispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model2)$deviance/summary(model2)$df.residual` and since this result is greater than 1.5, we can claim that the data is over-dispersed.
 
 \newpage
 
@@ -476,7 +476,7 @@ influencePlot(model2)
 
 ##### Verifying Predictions
 
-We also verify predicted values for the training dataset, in order to verify the output of our model against the training data set. 
+We also verify predicted values for the training data set, in order to verify the output of our model against the training data set. 
 
 ```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 dfWithPredicted <- cbind(dfTrForPoissonReg[,c("TARGET","LabelAppeal","Alcohol")],Fitted=model2$fitted.values)
@@ -496,7 +496,7 @@ pandoc.table(dfObsVsPred)
 
 Goodness of fit test
 
-The goodness of fit test using pearson Chisquare test results are `r round(pchisq(model2$deviance, df=model2$df.residual, lower.tail=FALSE),3)` which shows that our model is good and statistically significant.
+The goodness of fit test using Pearson Chi-square test results are `r round(pchisq(model2$deviance, df=model2$df.residual, lower.tail=FALSE),3)` which shows that our model is good and statistically significant.
 
 \newpage
 
@@ -504,7 +504,7 @@ The goodness of fit test using pearson Chisquare test results are `r round(pchis
 
 ### Negative Binomial Regression Model 1
 
-In the first negative binomial regression model, all of the coefficients are positive. The variable that had to be removed was wine rating, due to the fact that it led to an error in the model, stating that the iteration limit was reached. Even though this categorical variable guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4), this variable would not be appropriate to use for negative negative binomial regression. The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. However, this variable and residual sugar can be used for negative binomial regression because the resulting overdispersion is not so high. 
+In the first negative binomial regression model, all of the coefficients are positive. The variable that had to be removed was wine rating, due to the fact that it led to an error in the model, stating that the iteration limit was reached. Even though this categorical variable guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4), this variable would not be appropriate to use for negative negative binomial regression. The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. However, this variable and residual sugar can be used for negative binomial regression because the resulting over dispersion is not so high. 
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 options(xtable.comment = FALSE)
@@ -527,12 +527,21 @@ x <- list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.re
 x <- as.data.frame(x)
 pandoc.table(x)
 ```
+##### Diagnostic Plots for Negative Binomial Regression Model 1
+
+The normal q-q plot shows a non-linear relationship.
+
+```{r,echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
+p <- par(mfrow=c(2,2))
+plot(b1r)
+par(p)
+```
 
 \newpage
 
 ### Negative Binomial Regression Model 2
 
-In the second negative binomial regression model, all of the coefficients are positive except for that of pH. The only significant variable is the label appeal. Except for the score of 3, all of the other scores for label appeal, yield significant results. Most of the coefficients for label appeal are close to 1 or slightly greater than 1 (0.7 for Label Appeal = 0, 0.9 for Label Appeal = 1, 1.09 for Label Appeal = 2, and 0.7 for Label Appeal = 3). The only score that yeilds a coefficient that is less than 1 is -1. The coefficient for this is 0.4. The standard error is 3.5. The theta value is 23.46, guaranteeing a lower level of overdispersion. 
+In the second negative binomial regression model, all of the coefficients are positive except for that of pH. The only significant variable is the label appeal. Except for the score of 3, all of the other scores for label appeal, yield significant results. Most of the coefficients for label appeal are close to 1 or slightly greater than 1 (0.7 for Label Appeal = 0, 0.9 for Label Appeal = 1, 1.09 for Label Appeal = 2, and 0.7 for Label Appeal = 3). The only score that yields a coefficient that is less than 1 is -1. The coefficient for this is 0.4. The standard error is 3.5. The theta value is 23.46, guaranteeing a lower level of over dispersion. 
 
 ```{r negative binomial regression model 2, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
 b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data = fwDfTr, link = log)
@@ -550,6 +559,17 @@ x <- list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.re
 x <- as.data.frame(x)
 pandoc.table(x)
 ```
+
+##### Diagnostic Plots for Negative Binomial Regression Model 2 
+
+Like the previous model, the normal q-q plot shows a non-linear relationship.
+
+```{r,echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
+p <- par(mfrow=c(2,2))
+plot(b2r)
+par(p)
+```
+
 
 \newpage
 
@@ -602,7 +622,7 @@ par(p)
 
 Using the R package `MASS` we can utilize the `stepAIC` function with the parameter of `direction` set to `both` to select our best subset of variables for a new model. 
 
-The method effectively removed `pH` and `CitricAcid` which were both shown to be not significiant in the previous linear model using all variables. 
+The method effectively removed `pH` and `CitricAcid` which were both shown to be not significant in the previous linear model using all variables. 
 
 ```{r random forest variable selection, echo=FALSE, results='markup', cache=TRUE}
 lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + CitricAcid + I(ResidualSugar^1.25) + Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + Density + pH +  Sulphates + Alcohol + LabelAppeal + STARS, data = imputedDfTr)
@@ -730,7 +750,7 @@ imputedDfEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA
 \tiny
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
-TARGET <- predict(model1, imputedDfEval)
+TARGET <- predict.glm(model1, type = "response", newdata = imputedDfEval)
 dfWithPredicted <- cbind(round(TARGET,0), imputedDfEval) 
 colnames(dfWithPredicted)[1] <- c("TARGET")
 pandoc.table(dfWithPredicted, split.table = Inf)
