@@ -527,6 +527,8 @@ x <- list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.re
 x <- as.data.frame(x)
 pandoc.table(x)
 ```
+\newpage
+
 ##### Diagnostic Plots for Negative Binomial Regression Model 1
 
 The normal q-q plot shows a non-linear relationship.
@@ -559,6 +561,7 @@ x <- list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.re
 x <- as.data.frame(x)
 pandoc.table(x)
 ```
+\newpage
 
 ##### Diagnostic Plots for Negative Binomial Regression Model 2 
 
