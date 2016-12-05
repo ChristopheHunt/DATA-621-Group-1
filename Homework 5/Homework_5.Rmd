@@ -1,0 +1,767 @@
+---
+title: "Homework 5"
+author: "Group 1"
+date: ''
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+```{r programming style guide, echo=FALSE, eval=FALSE}
+##Style guide
+##USE CAMEL CASING!! https://en.wikipedia.org/wiki/Camel_case, start with lowercase then each word after start with upper case
+##upper case for vector, lists, etc. ex. X <- c("yes","no","true","false")
+##lower case for scalar/single value, ex. x <- 1
+##data frame start with df followed by description, ex. dfEval <- evaluation data frame
+##assignments use "<-" not "="
+```
+
+```{r options and library load, include = FALSE}
+options(xtable.comment = FALSE)
+
+library(pacman)
+p_load(Hmisc, xlsx, xtable, knitr, scales, magrittr, magrittr, tidyverse, stringr, e1071, corrplot, knitcitations, bibtex, missForest, abc, foreach, doParallel, stargazer, forecast, matrixStats, glmulti, leaps, data.table, highlight, car, pracma, boot, pander, ggplot2, lars, MASS, AER, DAAG)
+```
+
+\begin{center}
+\bigskip
+\bigskip
+\bigskip
+Prepared for:\\
+\medskip
+Dr. Nathan Bastian\\
+\smallskip
+City University of New York, School of Professional Studies - Data 621\\
+\bigskip
+Prepared by:\\
+\medskip
+Group 1\\ 
+\medskip
+Senthil Dhanapal\\ 
+\smallskip
+Yadu Chittampalli\\
+\smallskip
+Christophe Hunt\\  
+
+\end{center}
+
+\newpage
+
+# Introduction
+
+The wine industry was valued at \$257.5 billion in 2012 and is predicted to be valued at \$303.6 billion by 2016.[^1] As wine is a consumer product, accommodating consumer preference is critical to maintaining a competitive advantage. By understanding the factors involved in wine sales we can better understand consumer behavior and adjust our strategies accordingly. 
+
+
+[^1]: "Research and Markets: Wine: 2012 Global Industry Almanac - The Global Wine Market Grew by 3.1% in 2011 to Reach a Value of \$257.5 Billion." Research and Markets: Wine: 2012 Global Industry Almanac - The Global Wine Market Grew by 3.1% in 2011 to Reach a Value of $257.5 Billion | Business Wire. N.p., 21 May 2012. Web. 20 Nov. 2016.
+
+# Statement of the Problem
+
+The purpose of this report is to develop statistical models to make inference into the factors associated with the number of cases of wine sold.
+
+# Data Exploration  
+
+## Variables Explained
+
+The variables provided in the `Wine Training Data Set` are explained below:
+
+```{r data dictionary load, include=FALSE, cache=TRUE}
+download.file("https://github.com/ChristopheHunt/DATA-621-Group-1/raw/master/Homework%205/Data%20Dictionary.xlsx?raw=true", destfile = "Data Dictionary HW5 - Group 1.xlsx", mode = 'wb')
+daDict <- read.xlsx("Data Dictionary HW5 - Group 1.xlsx", sheetIndex = 1)
+file.remove(dir(getwd(), pattern = "Data Dictionary HW5 - Group 1", full.names = TRUE))
+```
+
+```{r data dictionary table, eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
+pandoc.table(daDict %>% 
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
+      justify = c("center","left"), emphasize.strong.rows = seq(from = 1, to = nrow(daDict), by = 2),
+      table.alignment.rownames = 'centre',style="multiline")
+```
+
+
+```{r data prep, echo=FALSE, results='asis', cache=TRUE}
+dfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/wine-training-data.csv") %>%
+        dplyr::select(-dplyr::contains("INDEX")) %>%
+        map_if(is.integer, as.numeric) %>%
+        as.data.frame() %>%
+        mutate(LabelAppeal = factor(LabelAppeal, levels = c(-2, -1, 0, 1, 2)),
+               STARS = factor(STARS, levels = c(1,2,3,4)),
+               TARGET = as.integer(TARGET)) 
+```
+
+\newpage
+
+## Variables Summary Statistics
+
+### Discrete Variables
+
+Interestingly, we can see some general sense of the make up of our data set. In this set, most wines sell between 3 and 5 cases, have no label appeal, and very few received 4 stars with most wines receiving 2 or 1 stars. Additionally, we should note that `21.4%` of our wines had no case sales. 
+
+```{r nominal variables, echo=FALSE, results='asis', cache=TRUE}
+options(xtable.comment = FALSE)
+
+reporttools::tableNominal(dfTr %>% dplyr::select(TARGET, LabelAppeal, STARS), 
+                        cap = "Wine Training Data Table of Discrete Variables", 
+                        lab = "tab: nominal", 
+                        print.pval = "fisher",
+                        caption.placement = "top", longtable = TRUE, 
+                        add.to.row = list(pos = list(0), command = "\\hline \\endhead "))
+```
+
+
+### Continous Variables
+
+We see that Density is a very narrow measurement, the minimum value is 0.9 and the maximum is 1.1. The remaining continuous variables appear to have a larger range of variability, with the largest being `TotalSulfurDioxide` which has a range from -823 to 1057. In our models, this variability will provide some insights to our coefficients and the impact to the dependent variable. 
+
+```{r continous variables, echo=FALSE, results='asis', cache=TRUE}
+options(xtable.comment = FALSE)
+reporttools::tableContinuous(dfTr %>% dplyr::select(-TARGET, -LabelAppeal, -STARS) , 
+                             longtable = TRUE, 
+                             cap = "Wine Training Data Table of Continuous Variables",
+                             caption.placement = "top")
+```
+
+\newpage
+
+## Imputting Missing Values
+
+In order to address the missing values in our variables we used a non-parametric imputation method (Random Forest) using the `missForest` package. The function is particularly useful in that it can handle any type of input data and it will make as few assumptions about the structure of the data as possible.[^2]
+
+[^2]: Stekhoven, Daniel J., and Peter B?hlmann. ["MissForest-non-parametric missing value imputation for mixed-type data." Bioinformatics 28.1 (2012): 112-118](http://bioinformatics.oxfordjournals.org/content/28/1/112.short).
+
+```{r missForest imputation of data, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+registerDoParallel(cl = makeCluster(10), cores = 2)
+
+set.seed(1234)
+
+imputed_data <- dfTr %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately 30 minutes to process, resource intensive
+
+write.csv(imputed_data$ximp,"imputed_wine-training-data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest and random results. 
+```
+
+```{r imputed data frame load from github, echo = FALSE, include=FALSE, cache=TRUE, eval=TRUE}
+imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv") %>% mutate(STARS = factor(round(STARS, 0), levels = c(1,2,3,4)))
+```
+
+```{r, results='asis', echo = FALSE, cache=TRUE, eval=TRUE}
+digits = 1
+
+descriptive <- describe(imputedDfTr %>% dplyr::select(-TARGET),
+                        descript = "Table 4 : Imputed Descriptive Statistics", 
+                        digits = digits)
+
+latex(descriptive, file = '')
+```
+\newpage
+## Correlation of Variables
+
+### Correlation Matrix
+
+If we modify our data frame to a matrix in our evaluation data set we can further plot a correlation matrix. There are surprisingly few interesting correlations in the data, but the lack of correlation in the data set is in itself interesting. 
+
+* `STARS` has the most positive correlation and strongest correlation with our dependent variable `TARGET`. It is intuitive that the greater the `STARS` value the more cases our wine would sell.
+
+* `LabelAppeal` is the second most correlated with our dependent variable to our dependent variable. It is interesting that the two most correlated variables have less to do with wine quality and more to do with the appearance of a sophisticated wine. 
+
+* The lack of strong correlations is interesting in itself. It is concerning that most variables have nearly no correlation with our dependent variable but represent the actual quality of the wine. We see that public perception of wine is more important than the actual quality of the wine as measured by these variables.    
+
+```{r correlation matrix, fig.cap= "Correlation Plot of Training Data Set", echo = FALSE, fig.height = 7, fig.width= 12, cache=TRUE, eval=TRUE}
+imputedDfTrMx <- imputedDfTr                       %>% 
+                    map_if(is.integer, as.numeric) %>%
+                    map_if(is.factor, as.numeric)  %>%
+                    as.data.frame()                %>%
+                    as.matrix()
+
+corMx <- cor(imputedDfTrMx , use = "everything",  method = c("spearman"))
+corrplot(corMx, order = "hclust", addrect = 10, method = "circle", tl.col = "black", na.label = " ", bg = "gray80")
+```
+\newpage
+
+# Data Transformation
+
+## Outliers Treatment
+
+### Box Plots of Variables for Winsorizing
+
+Box Plots provide a visualization of the quartiles and outliers of our data set.[^3] Using the box plots, we are can conclude that the variables to be winsorized are Free Sulfur Dioxide, Residual Sugar, and Total Sulfur Dioxide. 
+
+[^3]: "Box Plot." Wikipedia. Wikimedia Foundation, n.d. Web. 24 Nov. 2016.
+
+```{r boxplots, echo = FALSE, cache=TRUE, fig.height=10, fig.width=10}
+plotDf <- imputedDfTr %>% 
+          dplyr::select(-TARGET) %>% 
+          mutate(STARS = as.numeric(STARS)) %>% 
+          stack()
+
+plot <- ggplot(plotDf, aes(x = ind, y = values)) + 
+          geom_boxplot() +
+          facet_wrap(~ind, scales = "free", ncol = 3) +
+          theme_minimal() +
+          theme(axis.text.x = element_blank()) + 
+          ylab(label = "") +
+          xlab(label = "") + 
+          stat_summary(fun.y = mean, geom = "point", shape = 5, size = 4)
+plot
+```
+
+
+### Winsorizing
+
+We chose winsorizing as the method to address outliers. Instead of trimming values, winsorizing uses the interquantile range to replace values that are above or below the interquantile range multiplied by a factor. Those values above or below the range multiplied by the factor are then replaced with max and min value of the interquantile range. Using the factor 2.2 for winsorizing outliers is a method developed my Hoaglin and Iglewicz and published Journal of American Statistical Association in 1987[^4].  
+
+[^4]:Hoaglin, D. C., and Iglewicz, B. (1987), Fine tuning some resistant rules for outlier labeling, Journal of American Statistical Association, 82, 1147-1149.
+
+The below table is the summary results of the winsorizing of the data. 
+
+```{r winsorize dataframe, echo=FALSE, results='asis', cache=TRUE, warning=FALSE}
+winsorize <- function(x, multiple=2.2)
+{
+  q <- quantile(x)
+  iqr <- IQR(x)
+  iqrAdjusted <- iqr*multiple
+
+  rangeLow <- q['25%']-iqrAdjusted
+  rangeHigh <- q['75%']+iqrAdjusted
+
+  x[x<rangeLow] <- min(x[x>rangeLow])
+  x[x>rangeHigh] <- max(x[x<rangeHigh])
+
+  return(x)  
+
+}
+
+wDfTr <- cbind(sapply(c('FreeSulfurDioxide', 'TotalSulfurDioxide', 'ResidualSugar'), 
+                      function(x) winsorize(imputedDfTr[,x], multiple=2.2)), 
+               subset(imputedDfTr, select = -c(FreeSulfurDioxide, TotalSulfurDioxide, ResidualSugar)))
+
+fwDfTr <- rbind(wDfTr, imputedDfTr$TARGET)
+
+stargazer(fwDfTr, header = FALSE)
+```
+
+\newpage
+
+## BoxCox Transformations 
+
+Even after Winsorization we see non-constant variance in the Pearson Residuals for `FreeSulferDioxide`, `TotalSulfurDioxide`, and `ResidualSugar`. The Box-Cox evaluation was completed on these variables, based on the residual plots. In the residual plots, these three variables showed a great deal of non-constant variance because the plots were hyperbolic-shaped. 
+
+```{r residual plots, echo=FALSE, results='markup', fig.width=7, fig.height=5, cache=TRUE, eval=TRUE}
+library(car)
+fit <- lm(TARGET ~ FreeSulfurDioxide + TotalSulfurDioxide + ResidualSugar + FixedAcidity + VolatileAcidity + CitricAcid + Chlorides + Density + pH + Sulphates + Alcohol + LabelAppeal + STARS, data = fwDfTr)
+residualPlots(fit, layout = NULL, ask = FALSE, main = "", fitted = TRUE, AsIs=TRUE, plot = TRUE,
+tests = TRUE)
+```
+
+\newpage
+
+### Determing BoxCox Transformations 
+
+Using the `BoxCox.lambda` function from the `forecast` package we are able to determine our necessary transformations to our independent variables. 
+
+```{r box cox table, echo=FALSE, cache=TRUE, eval=TRUE, warning=FALSE ,message=FALSE}
+l1 <- BoxCox.lambda(as.numeric(fwDfTr$FreeSulfurDioxide))
+l2 <- BoxCox.lambda(as.numeric(fwDfTr$TotalSulfurDioxide))
+l3 <- BoxCox.lambda(as.numeric(fwDfTr$ResidualSugar))
+
+lamdas <- c(l1, l2, l3)
+Variables <- c("Free Sulfur Dioxide", "Total Sulfur Dioxide", "Residual Sugar")
+
+dfBoxCox <- as.data.frame(cbind(lamdas, Variables))
+
+colnames(dfBoxCox) <- c("$\\lambda$", "Variables")
+
+kable(dfBoxCox, align = c("c", "c"))
+```
+
+Utilizing transformations based on the lambda value of the BoxCox and rounding to the nearest tenth we further transform our independent variables for our regression models. We see that the `TotalSulfurDioxide` variable does not require further transformation
+
+\centering
+
+Box-Cox Transformations [^5]
+
+\setlength{\tabcolsep}{12pt}
+
+\begin{tabular}{ c c }
+\hline
+$\lambda$ & Y' \\ \hline
+0	& $\log(Y)$ \\
+.25  & $\sqrt[4]{Y}$\\  
+0.5	& $Y^{0.5}~=~\sqrt{(Y)}$ \\
+1	& $Y^{1}~=~Y$ \\
+1.25 & $Y^{1.25}$ \\
+
+\end{tabular}
+
+\justifying
+
+\centering
+
+\begin{tabular}{ c c }
+\hline
+variable & variable transformation \\ \hline
+ResidualSugar & $ResidualSugar^{1.25}$ \\
+FreeSulfurDioxide & $FreeSulfurDioxide^{1.25}$ \\
+\end{tabular}
+
+\justifying
+
+\setlength{\tabcolsep}{6pt}
+
+[^5]: Osborne, Jason W. "Improving your data transformations: Applying the Box-Cox transformation." Practical Assessment, Research & Evaluation 15.12 (2010): 1-9.
+
+\newpage
+
+# Models Built
+
+## Poisson Regression Models
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE}
+library(magrittr)
+library(tidyverse)
+imputedDfTr <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-training-data.csv") %>% mutate(STARS = factor(round(STARS, 0), levels = c(1,2,3,4)))
+dfTrForPoissonReg <- imputedDfTr
+```
+
+First, we investigate the unconditional variance is slightly > unconditional mean. Which we do see in the below table so there may be some over-dispersion.
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE , cache=TRUE}
+library(knitr)
+x <- mean(dfTrForPoissonReg$TARGET)
+y <- var(dfTrForPoissonReg$TARGET)
+z <- as.data.frame(cbind(x,y))
+colnames(z) <- c("mean", "var")
+kable(z)
+```
+
+### Poisson Regression Model 1
+
+We build out first Poisson Regression model but we need to verify the confidence levels are appropriate. After producing the Confidence level for ResidualSugar we see it runs through 1 and and its P(z) value is clearly not significant. Based on both items we can remove ResidualSugar from the model.
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE,cache=TRUE}
+model1 <- glm(data = dfTrForPoissonReg, formula = TARGET~STARS+Alcohol+ResidualSugar, family = "poisson") 
+stargazer(model1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 1")
+```
+
+
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+x <- as.data.frame(exp(cbind(coef(model1), confint(model1))))
+colnames(x) <- c(" ", "2.5%", "97.5%")
+pandoc.table(x, caption = "Confidence intervals")
+```
+
+\newpage
+
+We removed ResidualSugar and Model with the independent variables STARS and Alcohol. We can see how great the STARS variable has on our model, 2 STARS is 2.28 times wine case sales when compared to one STAR. Furthermore, 3 Stars will have wiine case sales of 2.90 times more than one STAR, and four STARS  will be 3.42 times more than one STAR. Alcohol = For one unit increase in Alcohol, Wine sales will be 1.004 times more
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+model1 <- glm(data = dfTrForPoissonReg, formula = TARGET~STARS+Alcohol, family = "poisson") 
+stargazer(model1,  header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 1 without ResidualSugar")
+```
+
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+x <- as.data.frame(exp(cbind(coef(model1), confint(model1))))
+colnames(x) <- c("", "2.5%", "97.5%")
+pandoc.table(x, caption = "Confidence intervals")
+```
+
+#### Poisson Regression Model 1 Metrics
+
+##### Dispersion 
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+dt <- dispersiontest(model1)
+dt$estimate
+```
+
+Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model1)$deviance/summary(model1)$df.residual` and since this result is not greater than 1.5, we can claim that the data is not over-dispersed.[^7]
+
+[^7]: ["Multiple Logistic Regression." R Companion: Multiple Logistic Regression.](http://rcompanion.org/rcompanion/e_07.html) N.p., n.d. Web. 04 Dec. 2016.
+
+\newpage
+
+##### Influential Points
+
+We further test for influential points in the data set. This test indicates that rows 10328, 9714, and 3891, have great influence on our model. It would be important to discuss these rows with the appropriate data steward to understand if these are accurate measurements and should be included in the analysis. Due to time limitations, we are not able to verify these rows and they have been included in this analysis.  
+
+```{r, echo = FALSE, results='markdown', warning = FALSE, message = FALSE, cache=TRUE}
+influencePlot(model1)
+```
+
+##### Verifying Predictions
+
+We also verify predicted values for the training dataset, in order to verify the output of our model against the training data set. 
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+dfWithPredicted <- cbind(dfTrForPoissonReg[,c("TARGET","STARS","Alcohol")],Fitted=model1$fitted.values)
+pandoc.table(head(dfWithPredicted))
+```
+
+The predictions are close in value, we can further see the prediction quality of the model by reviewing the frequency table for observed vs predicted values. 
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+c1 <- as.data.frame(table(dfWithPredicted$TARGET))
+c2 <- sapply(sort(unique(dfWithPredicted$TARGET)),function(x) length(which(round(dfWithPredicted$Fitted,0)==x)))
+c2 <- as.data.frame(c2)
+dfObsVsPred <- cbind(c1,c2)
+colnames(dfObsVsPred) <- c("Target","Obs","Predicted")
+pandoc.table(dfObsVsPred)
+```
+
+Goodness of Fit Test
+
+Goodness of Fit Test using Pearson Chi square test gives us the result of `r round(pchisq(model1$deviance, df=model1$df.residual, lower.tail=FALSE),3)` shows that our model is good. 
+
+\newpage
+
+### Poisson Regression Model 2 
+
+As in our first Poisson model, we build our second Poisson Regression model and we need to verify the confidence levels are appropriate. After producing the Confidence level for Confidence level for CitricAcid and pH, we see that they run through 1 and and their P(z) values are clearly not significant. Based on both info we can remove CitricAcid and pH from the model.
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE , cache=TRUE}
+dfTrForPoissonReg$LabelAppeal <- factor(dfTrForPoissonReg$LabelAppeal)
+model2 <- glm(data = dfTrForPoissonReg, formula = TARGET~LabelAppeal+CitricAcid+pH, family = "poisson") 
+stargazer(model2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 2")
+```
+
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE , cache=TRUE}
+pandoc.table(exp(cbind(coef(model2), confint(model2))),caption = "Confidence intervals")
+```
+
+\newpage
+
+We removed CitricAcid and pH then created a new Model with only LabelAppeal. The impact of LabelAppeal is very significant since this variable is explaining a great deal of variation in our dependent variable. A neutral LabelAppeal of 0 will have wine sales 1.98 times greater than a very negative LabelAppeal of -2. Also, a great LabelAppeal of 2 will have 2.98 times greater wine sales than a than a very negative LabelAppeal of -2.
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, cache=TRUE}
+model2 <- glm(data = dfTrForPoissonReg, formula = TARGET~LabelAppeal, family = "poisson") 
+stargazer(model2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Poisson Regression Model 2 with LabelAppeal")
+```
+
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+x <- as.data.frame(exp(cbind(coef(model2), confint(model2))))
+colnames(x) <- c("", "2.5%", "97.5%")
+pandoc.table(x, caption = "Confidence intervals")
+```
+
+#### Poisson Regression Model 2 Metrics
+
+```{r ,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+dt <- dispersiontest(model2)
+dt$estimate
+```
+
+Our dispersion results are very close to 1. So, we can say it is not over or under dispersed. However, we can further test for overdispersion by dividing the deviance of our model by the residuals. The result of this test is `r summary(model2)$deviance/summary(model2)$df.residual` and since this result is greater than 1.5, we can claim that the data is over-dispersed.
+
+\newpage
+
+##### Influential points
+
+We further test for influential points in the data set. This test indicates that rows 7140, 14, and 74, have great influence on our model. It would be important to discuss these rows with the appropriate data steward to understand if these are accurate measurements and should be included in the analysis. Due to time limitations, we are not able to verify these rows and they have been included in this analysis.  
+
+```{r,echo = FALSE, results='markup', warning = FALSE, message = FALSE, cache=TRUE}
+influencePlot(model2)
+```
+
+\newpage
+
+##### Verifying Predictions
+
+We also verify predicted values for the training dataset, in order to verify the output of our model against the training data set. 
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+dfWithPredicted <- cbind(dfTrForPoissonReg[,c("TARGET","LabelAppeal","Alcohol")],Fitted=model2$fitted.values)
+pandoc.table(head(dfWithPredicted))
+```
+
+The predictions are close in value, we can further see the prediction quality of the model by reviewing the frequency table for observed vs predicted values. 
+
+```{r,echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+c1 <- as.data.frame(table(dfWithPredicted$TARGET))
+c2 <- sapply(sort(unique(dfWithPredicted$TARGET)),function(x) length(which(round(dfWithPredicted$Fitted,0)==x)))
+c2 <- as.data.frame(c2)
+dfObsVsPred <- cbind(c1,c2)
+colnames(dfObsVsPred) <- c("Target","Obs","Predicted")
+pandoc.table(dfObsVsPred)
+```
+
+Goodness of fit test
+
+The goodness of fit test using pearson Chisquare test results are `r round(pchisq(model2$deviance, df=model2$df.residual, lower.tail=FALSE),3)` which shows that our model is good and statistically significant.
+
+\newpage
+
+## Binomial Regression Models
+
+### Binomial Regression Model 1
+
+In the first binomial regression model, all of the coefficients are positive. The variable that had to be removed was wine rating, due to the fact that it led to an error in the model, stating that the iteration limit was reached. Even though this categorical variable guarantees high significance and also higher coefficients (0.4 for STARS = 2, 0.6 for STARS = 3, and 0.7 for STARS = 4), this variable would not be appropriate to use for negative binomial regression. The alcohol content is also an equally significant variable but does not have a coefficient as high as those of the wine rating. However, this variable and residual sugar can be used for negative binomial regression because the resulting overdispersion is not so high. 
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+options(xtable.comment = FALSE)
+library(MASS)
+library(stargazer)
+fwDfTr$STARS <- factor(fwDfTr$STARS, levels=c(1,2,3,4)) 
+fwDfTr$LabelAppeal <- factor(fwDfTr$LabelAppeal, levels=c(-2,-1,0,1,2,3))
+
+b1 <- glm.nb(data = fwDfTr, formula = TARGET~STARS + Alcohol + ResidualSugar)
+b1r <- glm.nb(TARGET ~ Alcohol + ResidualSugar, data=fwDfTr)
+stargazer(b1, b1r, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Binomial Regression Model 1")
+```
+
+#### Binomial Regression Model 1 Evaluation
+
+In the model-fitting criterion, the chi-squared p-value is close to 0. This implies that the model is valid.
+
+```{r binomial regression model 1 eval, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
+x <- list(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
+x <- as.data.frame(x)
+pandoc.table(x)
+```
+
+\newpage
+
+### Binomial Regression Model 2
+
+In the second negative binomial regression model, all of the coefficients are positive except for that of pH. The only significant variable is the label appeal. Except for the score of 3, all of the other scores for label appeal, yield significant results. Most of the coefficients for label appeal are close to 1 or slightly greater than 1 (0.7 for Label Appeal = 0, 0.9 for Label Appeal = 1, 1.09 for Label Appeal = 2, and 0.7 for Label Appeal = 3). The only score that yeilds a coefficient that is less than 1 is -1. The coefficient for this is 0.4. The standard error is 3.5. The theta value is 23.46, guaranteeing a lower level of overdispersion. 
+
+```{r binomial regression model 2, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
+b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data = fwDfTr, link = log)
+b2r <- glm.nb(TARGET ~ LabelAppeal, data = fwDfTr, link = log)
+stargazer(b2, b2r, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Binomial Regression Model 2") 
+```
+
+
+#### Binomial Regression Model 2 Evaluation
+
+Like the previous model, the chi-squared p-value for this model is close to 0. This model is also valid. 
+
+```{r binomial regression model 2 evaluation, echo = FALSE, results='asis', warning=FALSE, message=FALSE, cache=TRUE}
+x <- list(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
+x <- as.data.frame(x)
+pandoc.table(x)
+```
+
+\newpage
+
+## Multiple Linear Regression
+
+### Linear Regression with All Variables
+
+The first linear regression we generate includes all variables from our data set. The intercept is at `3.139` cases and `Density` shows a large negative impact on cases sold but with its narrow range its difficult to tell how meaningful this variable is in cases sold. The `STARS` variable shows an expected impact on cases sold, the difference between 1 Star and 4 Stars is an added `3.36` cases in sales.
+
+```{r linear regression variable all variables, echo=FALSE, results='asis', cache=TRUE}
+options(xtable.comment = FALSE)
+lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + CitricAcid + I(ResidualSugar^1.25) + Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + Density + pH +  Sulphates + Alcohol + LabelAppeal + STARS, data =  imputedDfTr)
+
+stargazer::stargazer(lm, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Linear Model with all variables")
+```
+
+\newpage
+
+#### Linear Model Metrics with all Variables
+
+##### Multicollinearity
+
+We square `GVIF^(1/(2*Df))` [^6] in order to use the VIF threshold of 5 for multicollinearity. Fortunately, we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r multicollinearity all variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
+lmfit <- setDT(as.data.frame(car::vif(lm)), keep.rownames = TRUE)[]
+lmfit$Adjusted_GVIF <- (lmfit$`GVIF^(1/(2*Df))`^2)
+kable(lmfit, align = c("l", "c", "c", "c", "c"))
+```
+
+\newpage
+
+##### Diagnositic Plots
+
+The Normal Q-Q plots show a linear relationship so the data suggest that the data is normally distributed.
+
+```{r linear regression model metrics, echo=FALSE, results='asis', cache=TRUE, eval=TRUE, fig.height=4.5, fig.width=6}
+p <- par(mfrow=c(2,2))
+plot(lm)
+par(p)
+```
+
+[^6]: ["Which Variance Inflation Factor Should I Be Using: $GVIF$ or $text{GVIF}^{1/(2cdottext{df})}$?"](http://stats.stackexchange.com/a/96584) R. N.p., n.d. Web. 13 Nov. 2016.
+
+\newpage
+
+### Linear Regression Selection using AIC
+
+#### Variable Selection 
+
+Using the R package `MASS` we can utilize the `stepAIC` function with the parameter of `direction` set to `both` to select our best subset of variables for a new model. 
+
+The method effectively removed `pH` and `CitricAcid` which were both shown to be not significiant in the previous linear model using all variables. 
+
+```{r random forest variable selection, echo=FALSE, results='markup', cache=TRUE}
+lm <- lm(TARGET ~ FixedAcidity + VolatileAcidity + CitricAcid + I(ResidualSugar^1.25) + Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + Density + pH +  Sulphates + Alcohol + LabelAppeal + STARS, data = imputedDfTr)
+bothlm <- stepAIC(lm, direction = "both", trace = FALSE)
+bothlm$anova
+```
+\newpage
+
+#### Model using Variable Selection
+
+We see slight variation in our intercept and some variable coefficients which is expected with the reduced number of variables. However, we don't see any large changes, one benefit with the reduced variables is our model interpretability is improved and our F Statistic has increased with the reduced degrees of freedom. 
+
+Additionally, we see that the adjusted $R^2$ has not changed which is expected since we removed variables that were not considered significant. 
+
+```{r linear regression variable subset, echo=FALSE, results='asis', cache=TRUE}
+lm2 <- lm(TARGET ~ FixedAcidity + VolatileAcidity + I(ResidualSugar^1.25) + 
+    Chlorides + I(FreeSulfurDioxide^1.25) + TotalSulfurDioxide + 
+    Density + Sulphates + Alcohol + LabelAppeal + STARS, data =  imputedDfTr)
+
+stargazer::stargazer(lm2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title="Linear Model with select variables")
+```
+
+\newpage
+
+#### Linear Model Metrics with select Variables
+
+
+##### Diagnositic Plots
+
+The Normal Q-Q plots show a linear relationship so the data suggest that the data is normally distributed.
+
+```{r linear regression model metrics with select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE,fig.height=4.5, fig.width=6}
+p <- par(mfrow=c(2,2))
+plot(lm2)
+par(p)
+```
+
+##### Multicollinearity
+
+We square `GVIF^(1/(2*Df))` in order to use the VIF threshold of 5 for multicollinearity. Fortunately, we find that no variable exceeds our pre-established threshold of 5 for multicollinearity.
+
+```{r multicollinearity select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
+lmfit <- setDT(as.data.frame(car::vif(lm2)), keep.rownames = TRUE)[]
+lmfit$Adjusted_GVIF <- (lmfit$`GVIF^(1/(2*Df))`^2)
+kable(lmfit, align = c("l", "c", "c", "c", "c"))
+```
+
+\newpage
+
+# Selected Model
+
+In order to select our most appropriate model we will use the AIC as our selection criteria. This method was outlined by Snipes & Taylor for their similar research in selecting models from wine ratings and prices.[^8] As per Snipes & Taylor - "The best model is then the model with the lowest AICc (or AIC) score". Therefore, based on the results of our AIC table below, Linear Regression 2 is our best model. However, for deployment we will need to use one of the count regressions. Therefore, the count regression with the lowest AIC is Poisson Regression 1 which we will use for our predictions.
+
+```{r, echo=FALSE, results='asis', cache=TRUE, eval=TRUE}
+HeteroModelValidation <- function(df, model, modelName)
+{
+  library(boot)
+  #cv.err <- cv.glm(df,model,K=10)$delta[1]  
+  #model$aic
+  dfOutput <- as.data.frame(cbind(model=modelName, AIC = round(model$aic,2)))
+  return(dfOutput)
+}
+
+HeteroModelValidationLinear <- function(df, model, modelName)
+{
+  library(boot)
+  #cv.err <- cv.glm(df,model,K=10)$delta[1]  
+  #model$aic
+  dfOutput <- as.data.frame(cbind(model=modelName, AIC = round(AIC(model),2)))
+  return(dfOutput)
+}
+```
+
+```{r, echo=FALSE, results='asis', cache=TRUE, eval=TRUE, messages = FALSE, warning=FALSE, error=FALSE }
+x <- HeteroModelValidation(wDfTr,model1,"Poisson Regression 1") %>%
+     rbind(HeteroModelValidation(wDfTr,model2,"Poisson Regression 2")) %>%
+     rbind(HeteroModelValidation(wDfTr, b1r, "Binomial Regression 1")) %>%
+     rbind(HeteroModelValidation(wDfTr, b2r, "Binomial Regression 2")) %>%
+     rbind(HeteroModelValidationLinear(wDfTr, lm, "Linear Regression 1")) %>%
+     rbind(HeteroModelValidationLinear(wDfTr, lm2, "Linear Regression 2"))
+pandoc.table(x)
+```
+
+Model for Deployment - Poisson Model 1: 
+$$
+\begin{aligned}
+TARGET = &2.28*(STARS="2") + 2.9*(STARS="3") + 3.42*(STARS="4") + 1.004*Alcohol + 1.50
+\end{aligned}
+$$
+
+[^8]: Snipes, & Taylor. (2014). Model selection and Akaike Information Criteria: An example from wine ratings and prices. Wine Economics and Policy, 3(1), 3-9.
+
+\newpage
+
+## Predictions
+
+Due to several missing values in the evaluation data set we will use the missForest package again to impute the missing values before predictions. 
+
+```{r missForest imputation of eval data, results='asis', echo = FALSE, include=FALSE, cache=TRUE, eval=FALSE}
+dfEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/wine-evaluation-data.csv") %>% 
+       dplyr::select(-dplyr::contains("TARGET")) %>%
+        map_if(is.integer, as.numeric) %>%
+        as.data.frame() %>%
+        mutate(LabelAppeal = factor(LabelAppeal, levels = c(-2, -1, 0, 1, 2)),
+               STARS = factor(STARS, levels = c(1,2,3,4))) 
+
+registerDoParallel(cl = makeCluster(10), cores = 2)
+
+set.seed(1234)
+
+imputed_data <- dfEval %>% missForest(maxiter = 10, ntree = 100, replace = TRUE, parallelize = 'forests', verbose = TRUE) #Takes approximately 10 minutes to process
+
+write.csv(imputed_data$ximp,"imputed_wine-evaluation-data.csv", row.names = FALSE) #wrote imputed_data to csv file due to processing time taken by missForest and random results.
+```
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+imputedDfEval <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Homework%205/imputed_wine-evaluation-data.csv") %>%
+                  dplyr::select(-dplyr::contains("TARGET")) %>%
+                    map_if(is.integer, as.numeric) %>%
+                    as.data.frame() %>%
+                    mutate(LabelAppeal = factor(LabelAppeal, levels = c(-2, -1, 0, 1, 2)),
+                           STARS = factor(STARS, levels = c(1,2,3,4))) 
+```
+
+\tiny
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+TARGET <- predict(model1, imputedDfEval)
+dfWithPredicted <- cbind(round(TARGET,0), imputedDfEval) 
+colnames(dfWithPredicted)[1] <- c("TARGET")
+pandoc.table(dfWithPredicted, split.table = Inf)
+```
+
+\normalsize
+
+\newpage
+
+# Appendix A
+
+## Session Info
+
+```{r, results='asis', echo=FALSE, eval = TRUE}
+toLatex(sessionInfo())
+```
+
+## Data Dictionary
+
+\footnotesize
+```{r data dictionary appendix, eval=TRUE, results='asis', echo=FALSE, cache=TRUE}
+pandoc.table(daDict %>% 
+      mutate(`Variable Code` = VARIABLE.NAME, Definition = DEFINITION)  %>%
+      dplyr::select(`Variable Code`, Definition),
+      justify = c("center","left"), emphasize.strong.rows = seq(from = 1, to = nrow(daDict), by = 2),
+      table.alignment.rownames = 'centre',style="multiline")
+```
+
+## R source code
+
+Please see [Homework 5.rmd](https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd) on GitHub for source code.   
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Homework%205/Homework%205.Rmd
+

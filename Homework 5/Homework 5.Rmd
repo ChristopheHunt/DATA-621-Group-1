@@ -584,6 +584,8 @@ kable(lmfit, align = c("l", "c", "c", "c", "c"))
 
 ##### Diagnositic Plots
 
+The Normal Q-Q plots show a linear relationship so the data suggest that the data is normally distributed.
+
 ```{r linear regression model metrics, echo=FALSE, results='asis', cache=TRUE, eval=TRUE, fig.height=4.5, fig.width=6}
 p <- par(mfrow=c(2,2))
 plot(lm)
@@ -629,6 +631,8 @@ stargazer::stargazer(lm2, header = FALSE, no.space = TRUE, style = "all2", font.
 
 
 ##### Diagnositic Plots
+
+The Normal Q-Q plots show a linear relationship so the data suggest that the data is normally distributed.
 
 ```{r linear regression model metrics with select variables, echo=FALSE, results='asis', cache=TRUE, eval=TRUE,fig.height=4.5, fig.width=6}
 p <- par(mfrow=c(2,2))
