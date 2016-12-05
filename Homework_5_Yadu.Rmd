@@ -63,21 +63,27 @@ In the first negative binomial regression model, all of the coefficients are pos
 
 ### Model 1 Evaluation ###
 
+In the model-fitting criterion, the chi-squared p-value is close to 0. This implies that the model is valid.
+
 ```{r}
 data.frame(residual.deviance = deviance(b1r), residual.degrees.of.freedom = df.residual(b1r), chisq.p.value = pchisq(deviance(b1r), df.residual(b1r), lower = F))
 ```
 
-In the model-fitting criterion, the chi-squared p-value is close to 0. This implies that the model is valid.
+The normal q-q plot shows a non-linear relationship.
+
+```{r}
+plot(b1r)
+```
 
 ### Model 2 ###
 
 ```{r}
-b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data=fwDfTr, link = log)
+b2 <- glm.nb(TARGET ~  CitricAcid + pH + LabelAppeal, data=fwDfTr)
 summary(b2) # Label Appeal, Citric Acid, pH
 ```
 
 ```{r}
-b2r <- glm.nb(TARGET ~ LabelAppeal, data=fwDfTr, link = log)
+b2r <- glm.nb(TARGET ~ LabelAppeal, data=fwDfTr)
 summary(b2r)
 ```
 
@@ -85,8 +91,15 @@ In the second negative binomial regression model, all of the coefficients are po
 
 ### Model 2 Evaluation ###
 
+Like the previous model, the chi-squared p-value for this model is close to 0. This model is also valid.
+
 ```{r}
 data.frame(residual.deviance = deviance(b2r), residual.degrees.of.freedom = df.residual(b2r), chisq.p.value = pchisq(deviance(b2r), df.residual(b2r), lower = F))
 ```
 
-Like the previous model, the chi-squared p-value for this model is close to 0. This model is also valid.
+Like the previous model, the normal q-q plot shows a non-linear relationship.
+
+```{r}
+plot(b2r)
+```
+
