@@ -1,9 +1,5 @@
 base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 pacman
 ggplot2
+magrittr
+dplyr

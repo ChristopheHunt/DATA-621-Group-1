@@ -101,10 +101,10 @@
 \section{Problem}\label{problem}
 
 Liquor sales are highly variable and the objective of this report is to
-create a statistical model for the value and number of bottles of liquor
-sold by region within the state of Iowa. This will help us predict
-inventory and assist wholesale distributors and the State of Iowa adjust
-inventory projections accordingly.
+create a statistical model for the volume sold of liquor in gallons by
+region within the state of Iowa. This will help us predict inventory and
+assist wholesale distributors to plan for predicted volume of
+distribution.
 
 \section{Introduction}\label{introduction}
 
@@ -130,14 +130,25 @@ information we do have data up to 2016 to review.
 \section{Research Background (Literature
 Review)}\label{research-background-literature-review}
 
+Our goal is inventory prediction.
+
 \section{Methodology}\label{methodology}
 
-The dataset contains the spirits purchase information of Iowa Class
-``E'' liquor licensees by product and date of purchase from January 1,
-2012 to current. The data set is provided by the Iowa Department of
-Commerce, Alcoholic Beverages Division,
-\href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
-here} to view the data set at Data.Iowa.Gov.
+The data set contains \texttt{5} number of variables,\texttt{County},
+\texttt{Category\ name}, \texttt{Bottles\ Sold}, \texttt{Sale\ Dollars},
+and the dependent variable is \texttt{Volume\ Sold\ in\ Gallons}. The
+initial data set is very large as it includes sales by location and is
+very granular. The size of the initial data set has every liquor
+transaction from 2012 to present so it approaches \textasciitilde{}2gb.
+For the purposes of this report, to analyze a data set this large is not
+feasible. Therefore, we reduced the number of varibles and summarized to
+a higher level regional aggregate.
+
+We first looked at the top 5 liquor categories for each year by number
+of bottles sold. In 2015, the top categories were ``X'' and
+interestingly straight burbon appears to have more sales in 2015 than
+2014 which coincides with the literature of growing whiskey sales ``ADD
+REFERENCE''.
 
 discuss the key aspects of your problem, data set and regression
 model(s). Given that you are working on real-world data, explain at a
@@ -147,6 +158,15 @@ your model selection.
 
 \section{Experimentation and Results}\label{experimentation-and-results}
 
+\section{Data Aquisition}\label{data-aquisition}
+
+The dataset contains the spirits purchase information of Iowa Class
+``E'' liquor licensees by product and date of purchase from January 1,
+2012 to current. The data set is provided by the Iowa Department of
+Commerce, Alcoholic Beverages Division,
+\href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
+here} to view the data set at Data.Iowa.Gov.
+
 describe the specifics of what you did (data exploration, data
 preparation, model building, model selection, model evaluation, etc.),
 and what you found out (statistical analyses, interpretation and
@@ -154,21 +174,19 @@ discussion of the results, etc.).
 
 \section{Discussion and Conclusions}\label{discussion-and-conclusions}
 
-\section{In another study conducted in 2012 in Idaho, the monthly
-revenue generated was examined rather than the yearly revenue generated.
-The continued growth was rather owed to the number of weekends a month
-has (five instead of four) and to the higher prices in neighboring
-states. In Washington, the voters approved an initiative that led the
-state to sell its liquor stores and add new distributor and retail fees,
-making prices in the neighboring states (Idaho and Oregon) look better.
-There were no changes made in marketing or pricing in response to the
-regulatory shift in
-Washington.}\label{in-another-study-conducted-in-2012-in-idaho-the-monthly-revenue-generated-was-examined-rather-than-the-yearly-revenue-generated.-the-continued-growth-was-rather-owed-to-the-number-of-weekends-a-month-has-five-instead-of-four-and-to-the-higher-prices-in-neighboring-states.-in-washington-the-voters-approved-an-initiative-that-led-the-state-to-sell-its-liquor-stores-and-add-new-distributor-and-retail-fees-making-prices-in-the-neighboring-states-idaho-and-oregon-look-better.-there-were-no-changes-made-in-marketing-or-pricing-in-response-to-the-regulatory-shift-in-washington.}
-
-In 2011, Idaho lawmakers commissioned a report that found that the state
-could privatize liquor sales without a loss in the revenue. According to
-Jeff Anderson, leader of Idaho's liquor division, prices of liquor might
-also rise as a result of this.
+In another study conducted in 2012 in Idaho, the monthly revenue
+generated was examined rather than the yearly revenue generated. The
+continued growth was rather owed to the number of weekends a month has
+(five instead of four) and to the higher prices in neighboring states.
+In Washington, the voters approved an initiative that led the state to
+sell its liquor stores and add new distributor and retail fees, making
+prices in the neighboring states (Idaho and Oregon) look better. There
+were no changes made in marketing or pricing in response to the
+regulatory shift in Washington ({\textbf{???}}). Further research into
+the proximity of our counties to states and towns with higher prices and
+regulation may provide more insight into sales and volume of liquor
+sold. Additionally, reviewing the data by identifying months that has 5
+weekends instead of four could provide further insights.
 
 conclude your findings, limitations, and suggest areas for future work.
 
@@ -186,12 +204,15 @@ figures.}\label{supplemental-tables-andor-figures.}
   \item Locale: \verb|LC_COLLATE=English_United States.1252|, \verb|LC_CTYPE=English_United States.1252|, \verb|LC_MONETARY=English_United States.1252|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=English_United States.1252|
   \item Base packages: base, datasets, graphics, grDevices,
     methods, stats, utils
-  \item Other packages: pacman~0.4.1
-  \item Loaded via a namespace (and not attached):
-    backports~1.0.4, digest~0.6.10, evaluate~0.10,
-    htmltools~0.3.5, knitr~1.15.1, magrittr~1.5, Rcpp~0.12.8,
-    rmarkdown~1.2, rprojroot~1.1, rticles~0.2, stringi~1.1.2,
-    stringr~1.1.0, tools~3.3.2, yaml~2.1.14
+  \item Other packages: dplyr~0.5.0, ggplot2~2.2.0, magrittr~1.5,
+    pacman~0.4.1
+  \item Loaded via a namespace (and not attached): assertthat~0.1,
+    backports~1.0.4, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
+    evaluate~0.10, grid~3.3.2, gtable~0.2.0, htmltools~0.3.5,
+    knitr~1.15.1, lazyeval~0.2.0, munsell~0.4.3, plyr~1.8.4,
+    R6~2.2.0, Rcpp~0.12.8, rmarkdown~1.2, rprojroot~1.1,
+    rticles~0.2, scales~0.4.1, stringi~1.1.2, stringr~1.1.0,
+    tibble~1.2, tools~3.3.2, yaml~2.1.14
 \end{itemize}
 
 \section{R statistical programming

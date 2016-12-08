@@ -123,25 +123,28 @@ iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DA
 ```
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+library(magrittr)
+library(dplyr)
 iowaDataReducedTop <- iowaDataReduced %>%
-                      group_by(Year, Category.Name) %>%
-                      select(Year, Category.Name, Volume.Sold..Gallons. ) %>%
+                      dplyr::group_by(Year, Category.Name) %>%
+                      dplyr::select(Year, Category.Name, Volume.Sold..Gallons. ) %>%
                       dplyr::summarize(Volume.Sold..Gallons. = sum(Volume.Sold..Gallons.)) %>%
-                      top_n(n = 10, wt = Volume.Sold..Gallons.)
+                      dplyr::top_n(n = 10, wt = Volume.Sold..Gallons.)
 
 top10in2015 <- iowaDataReducedTop %>%
-               filter(Year == 2015)
+               dplyr::filter(Year == 2015)
 
 top20counties <- iowaDataReduced %>%
-                  filter(Year == 2015) %>% 
-                      group_by(Year, County) %>%
-                      select(Year, Category.Name, Volume.Sold..Gallons. ) %>%
+                  dplyr::filter(Year == 2015) %>% 
+                      dplyr::group_by(Year, County) %>%
+                      dplyr::select(Year, Category.Name, Volume.Sold..Gallons. ) %>%
                       dplyr::summarize(Volume.Sold..Gallons. = sum(Volume.Sold..Gallons.)) %>%
                       top_n(n = 20, wt = Volume.Sold..Gallons.)
 ```
 
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
+library(magrittr)
 iowaDataReduced <-   iowaDataReduced %>%
                    filter(Year == 2015) %>%
                    dplyr::select(County, Category.Name, 
@@ -161,7 +164,7 @@ write.csv(iowaDataReduced, "iowa_data_reduced.csv")
 
 
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=FALSE}
 ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Bottles.Sold, fill = factor(Year))) + 
       scale_y_continuous(labels = scales::comma) + 
       geom_bar(stat = "identity") +
