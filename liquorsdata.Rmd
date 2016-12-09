@@ -1,0 +1,19 @@
+---
+title: "Untitled"
+author: "Yadu"
+date: "December 6, 2016"
+output: html_document
+---
+
+```{r}
+library(RCurl)
+library(lme4)
+x <- getURL('https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/Final%20Project/iowa_data_reduced.csv')
+liquorsdata <- read.csv(text = x)
+```
+
+```{r}
+library(MASS)
+b1 <- glm.nb(data = liquorsdata, formula = Volume.Sold.by.Gallons ~ Category.Name + County + Avg.Price.Per.Bottle)
+summary(b1)
+```
