@@ -136,13 +136,13 @@ Our goal is inventory prediction.
 
 The data set contains \texttt{5} number of variables,\texttt{County},
 \texttt{Category\ name}, \texttt{Bottles\ Sold}, \texttt{Sale\ Dollars},
-and the dependent variable is \texttt{Volume\ Sold\ in\ Gallons}. The
-initial data set is very large as it includes sales by location and is
-very granular. The size of the initial data set has every liquor
-transaction from 2012 to present so it approaches \textasciitilde{}2gb.
-For the purposes of this report, to analyze a data set this large is not
-feasible. Therefore, we reduced the number of varibles and summarized to
-a higher level regional aggregate.
+\texttt{Average\ Price\ Per\ Bottle} and the dependent variable is
+\texttt{Volume\ Sold\ in\ Gallons}. The initial data set is very large
+as it includes sales by location and is very granular. The size of the
+initial data set has every liquor transaction from 2012 to present so it
+approaches \textasciitilde{}2gb. For the purposes of this report, to
+analyze a data set this large is not feasible. Therefore, we reduced the
+number of varibles and summarized to a higher level regional aggregate.
 
 We first looked at the top 5 liquor categories for each year by number
 of bottles sold. In 2015, the top categories were ``X'' and
@@ -204,13 +204,12 @@ figures.}\label{supplemental-tables-andor-figures.}
   \item Locale: \verb|LC_COLLATE=English_United States.1252|, \verb|LC_CTYPE=English_United States.1252|, \verb|LC_MONETARY=English_United States.1252|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=English_United States.1252|
   \item Base packages: base, datasets, graphics, grDevices,
     methods, stats, utils
-  \item Other packages: dplyr~0.5.0, ggplot2~2.2.0, magrittr~1.5,
-    pacman~0.4.1
+  \item Other packages: ggplot2~2.2.0, pacman~0.4.1
   \item Loaded via a namespace (and not attached): assertthat~0.1,
-    backports~1.0.4, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
+    backports~1.0.4, colorspace~1.3-1, digest~0.6.10,
     evaluate~0.10, grid~3.3.2, gtable~0.2.0, htmltools~0.3.5,
-    knitr~1.15.1, lazyeval~0.2.0, munsell~0.4.3, plyr~1.8.4,
-    R6~2.2.0, Rcpp~0.12.8, rmarkdown~1.2, rprojroot~1.1,
+    knitr~1.15.1, lazyeval~0.2.0, magrittr~1.5, munsell~0.4.3,
+    plyr~1.8.4, Rcpp~0.12.8, rmarkdown~1.2, rprojroot~1.1,
     rticles~0.2, scales~0.4.1, stringi~1.1.2, stringr~1.1.0,
     tibble~1.2, tools~3.3.2, yaml~2.1.14
 \end{itemize}
