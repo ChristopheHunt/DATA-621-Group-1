@@ -45,6 +45,16 @@
 \fi
 % use microtype if available
 \IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{graphicx}
+% We will generate all images so they have a width \maxwidth. This means
+% that they will get their normal width if they fit onto the page, but
+% are scaled down if they would overflow the margins.
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
+\else\Gin@nat@width\fi}
+\makeatother
+\let\Oldincludegraphics\includegraphics
+\renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=\maxwidth]{#1}}
 \ifxetex
   \usepackage[setpagesize=false, % page size defined by xetex
               unicode=false, % unicode breaks when used with xetex
@@ -113,15 +123,15 @@ spirits had an estimated retail sales of nearly \$72 billion in 2015.
 Additionally, DISCUS credits the continuous growth of the distilled
 spirits industry to several key factors - continuous fascination with
 American Whiskeys in the United States and abroad, innovations in
-flavors, permiumization across all spirits categories leading to
-consumer interest, improved regulatory and tax environment resulting in
-expanded market access and a relatively low number of state tax threats,
-and the growth of small distillers, which expanded grassroots and
-overall interest in the spirits category Del Buono (2016).
+flavors, permutation across all spirits categories leading to consumer
+interest, improved regulatory and tax environment resulting in expanded
+market access and a relatively low number of state tax threats, and the
+growth of small distillers, which expanded grassroots and overall
+interest in the spirits category Del Buono (2016).
 
 This establishes that spirit sales in the Unites States is a valuable
 market worth exploring for a more detailed and statistical understanding
-of sales and volume. We hope to more throughly understand what impact
+of sales and volume. We hope to more thoroughly understand what impact
 regional and season impacts might have on liquor sales. We will limit
 the analysis to Iowa which has also reported sales at a record pace
 during the last half of 2000 Boshart (2001). While this older
@@ -134,21 +144,36 @@ Our goal is inventory prediction.
 
 \section{Methodology}\label{methodology}
 
-The data set contains \texttt{5} number of variables,\texttt{County},
-\texttt{Category\ name}, \texttt{Bottles\ Sold}, \texttt{Sale\ Dollars},
-\texttt{Average\ Price\ Per\ Bottle} and the dependent variable is
-\texttt{Volume\ Sold\ in\ Gallons}. The initial data set is very large
+The initial data set contained many variables and is sufficiently large
 as it includes sales by location and is very granular. The size of the
 initial data set has every liquor transaction from 2012 to present so it
-approaches \textasciitilde{}2gb. For the purposes of this report, to
+approaches \textasciitilde{}2GB. For the purposes of this analysis, to
 analyze a data set this large is not feasible. Therefore, we reduced the
-number of varibles and summarized to a higher level regional aggregate.
+number of variables and summarized to a higher level regional aggregate.
 
-We first looked at the top 5 liquor categories for each year by number
-of bottles sold. In 2015, the top categories were ``X'' and
-interestingly straight burbon appears to have more sales in 2015 than
-2014 which coincides with the literature of growing whiskey sales ``ADD
-REFERENCE''.
+We reduced the data set to \texttt{5} independent variables;
+\texttt{County}, \texttt{Category\ name}, \texttt{Bottles\ Sold},
+\texttt{Sale\ Dollars}, \texttt{Volume\ Sold\ in\ Gallons}, and our
+dependent variable of \texttt{Average\ Price\ Per\ Bottle}.
+
+Additionally, we looked into the top 10 liquor categories for each year
+by number of bottles sold. In 2015, the top categories were AMERICAN
+COCKTAILS, BLENDED WHISKIES, CANADIAN WHISKIES, IMPORTED VODKA, PUERTO
+RICO \& VIRGIN ISLANDS RUM, SPICED RUM, STRAIGHT BOURBON WHISKIES,
+TEQUILA, VODKA 80 PROOF, and WHISKEY LIQUEUR. Interestingly straight
+bourbon appears to have more sales in 2015 than 2014 which coincides
+with the literature of strong growing whiskey sales for every whiskey
+segment (Anonymous (2016)).
+
+We initially attempted to model for a dependent variable of
+\texttt{Volume\ Sold\ in\ Gallons}, however, the distribution of this
+variable becomes over-dispersed and negatively skewed when aggregating
+the data set to a manageable size and therefore we were unsuccessful in
+modeling this variable. Our hope was that if we could model for the
+gallons sold by region we could more accurately predict our planned
+inventory and anticipate production goals. We then sought to model the
+mean price per bottle, by modeling the price per bottle we can make
+pricing decisions based on region and the volume we plan to sell.
 
 discuss the key aspects of your problem, data set and regression
 model(s). Given that you are working on real-world data, explain at a
@@ -158,14 +183,33 @@ your model selection.
 
 \section{Experimentation and Results}\label{experimentation-and-results}
 
-\section{Data Aquisition}\label{data-aquisition}
+\section{Data Acquisition}\label{data-acquisition}
 
-The dataset contains the spirits purchase information of Iowa Class
+The data set contains the spirits purchase information of Iowa Class
 ``E'' liquor licensees by product and date of purchase from January 1,
 2012 to current. The data set is provided by the Iowa Department of
 Commerce, Alcoholic Beverages Division,
 \href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
 here} to view the data set at Data.Iowa.Gov.
+
+We reviewed the liquor sales by gallons sold per year by Liquor
+Category. Initially, we viewed the top 5 Liquor Categories by volume
+sold but there were large disparate between years, suggesting that the
+top 5 change often and likely due to changing consumer tastes. See as
+the same liquor categories appear consistently for in the top 10
+category we chose this level for our model.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+Our first attempt was to use a Poisson regression due to the
+over-dispersion.
+
+\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-1.pdf}
+summary statistics}{ summary statistics}}\label{summary-statistics}
+
+min: 6.834324 max: 22.80474 median: 13.21952 mean: 13.31821 estimated
+sd: 3.604091 estimated skewness: 0.3534382 estimated kurtosis: 2.604675
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-2.pdf}
 
 describe the specifics of what you did (data exploration, data
 preparation, model building, model selection, model evaluation, etc.),
@@ -204,14 +248,16 @@ figures.}\label{supplemental-tables-andor-figures.}
   \item Locale: \verb|LC_COLLATE=English_United States.1252|, \verb|LC_CTYPE=English_United States.1252|, \verb|LC_MONETARY=English_United States.1252|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=English_United States.1252|
   \item Base packages: base, datasets, graphics, grDevices,
     methods, stats, utils
-  \item Other packages: ggplot2~2.2.0, pacman~0.4.1
+  \item Other packages: fitdistrplus~1.0-7, ggplot2~2.2.0,
+    logspline~2.1.9, MASS~7.3-45, pacman~0.4.1, survival~2.40-1
   \item Loaded via a namespace (and not attached): assertthat~0.1,
     backports~1.0.4, colorspace~1.3-1, digest~0.6.10,
     evaluate~0.10, grid~3.3.2, gtable~0.2.0, htmltools~0.3.5,
-    knitr~1.15.1, lazyeval~0.2.0, magrittr~1.5, munsell~0.4.3,
-    plyr~1.8.4, Rcpp~0.12.8, rmarkdown~1.2, rprojroot~1.1,
-    rticles~0.2, scales~0.4.1, stringi~1.1.2, stringr~1.1.0,
-    tibble~1.2, tools~3.3.2, yaml~2.1.14
+    knitr~1.15.1, lattice~0.20-34, lazyeval~0.2.0, magrittr~1.5,
+    Matrix~1.2-7.1, munsell~0.4.3, plyr~1.8.4, Rcpp~0.12.8,
+    rmarkdown~1.2, rprojroot~1.1, rticles~0.2, scales~0.4.1,
+    splines~3.3.2, stringi~1.1.2, stringr~1.1.0, tibble~1.2,
+    tools~3.3.2, yaml~2.1.14
 \end{itemize}
 
 \section{R statistical programming
@@ -227,6 +273,10 @@ https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final\%20Project/
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
+\hypertarget{ref-SpecialityGrow3}{}
+Anonymous. 2016. ``Specialty Products Grow in Wine, Spirits.''
+\emph{Beverage Industry} 107(7).
+
 \hypertarget{ref-IowaSetsRecord2}{}
 Boshart, Rod. 2001. ``Liquor Sales in Iowa Set Record.'' \emph{Gazette}.
 

@@ -37,7 +37,7 @@ output: rticles::elsevier_article
 ```{r options and library load, include = FALSE}
 options(xtable.comment = FALSE)
 library(pacman)
-p_load(ggplot2)
+p_load(ggplot2, fitdistrplus, logspline)
 ```
 
 Problem
@@ -49,9 +49,9 @@ Liquor sales are highly variable and the objective of this report is to create a
 Introduction
 =================
 
-In February, the Distilled Spirits Council (DISCUS), announced that spirits had an estimated retail sales of nearly $72 billion in 2015. Additionally, DISCUS credits the continuous growth of the distilled spirits industry to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permiumization across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category @KeepingSpiritsHigh1. 
+In February, the Distilled Spirits Council (DISCUS), announced that spirits had an estimated retail sales of nearly $72 billion in 2015. Additionally, DISCUS credits the continuous growth of the distilled spirits industry to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permutation across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category @KeepingSpiritsHigh1. 
 
-This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more throughly understand what impact regional and season impacts might have on liquor sales. We will limit the analysis to Iowa which has also reported sales at a record pace during the last half of 2000 @IowaSetsRecord2. While this older information we do have data up to 2016 to review.
+This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more thoroughly understand what impact regional and season impacts might have on liquor sales. We will limit the analysis to Iowa which has also reported sales at a record pace during the last half of 2000 @IowaSetsRecord2. While this older information we do have data up to 2016 to review.
 
 Research Background (Literature Review)
 =================
@@ -61,11 +61,13 @@ Our goal is inventory prediction.
 Methodology
 ================
 
-The data set contains `5` number of variables,`County`, `Category name`, `Bottles Sold`, `Sale Dollars`, `Average Price Per Bottle` and the dependent variable is `Volume Sold in Gallons`. The initial data set is very large as it includes sales by location and is very granular. The size of the initial data set has every liquor transaction from 2012 to present so it approaches ~2gb. For the purposes of this report, to analyze a data set this large is not feasible. Therefore, we reduced the number of varibles and summarized to a higher level regional aggregate.
+The initial data set contained many variables and is sufficiently large as it includes sales by location and is very granular. The size of the initial data set has every liquor transaction from 2012 to present so it approaches ~2GB. For the purposes of this analysis, to analyze a data set this large is not feasible. Therefore, we reduced the number of variables and summarized to a higher level regional aggregate.
 
-We first looked at the top 5 liquor categories for each year by number of bottles sold. In 2015, the top categories were "X" and interestingly straight burbon appears to have more sales in 2015 than 2014 which coincides with the literature of growing whiskey sales "ADD REFERENCE". 
+We reduced the data set to `5` independent variables; `County`, `Category name`, `Bottles Sold`, `Sale Dollars`, `Volume Sold in Gallons`, and our dependent variable of `Average Price Per Bottle`. 
 
+Additionally, we looked into the top 10 liquor categories for each year by number of bottles sold. In 2015, the top categories were AMERICAN COCKTAILS, BLENDED WHISKIES, CANADIAN WHISKIES, IMPORTED VODKA, PUERTO RICO & VIRGIN ISLANDS RUM, SPICED RUM, STRAIGHT BOURBON WHISKIES, TEQUILA, VODKA 80 PROOF,  and WHISKEY LIQUEUR. Interestingly straight bourbon appears to have more sales in 2015 than 2014 which coincides with the literature of strong growing whiskey sales for every whiskey segment (@SpecialityGrow3).  
 
+We initially attempted to model for a dependent variable of `Volume Sold in Gallons`, however, the distribution of this variable becomes over-dispersed and negatively skewed when aggregating the data set to a manageable size and therefore we were unsuccessful in modeling this variable. Our hope was that if we could model for the gallons sold by region we could more accurately predict our planned inventory and anticipate production goals. We then sought to model the mean price per bottle, by modeling the price per bottle we can make pricing decisions based on region and the volume we plan to sell. 
 
 discuss the key aspects of your problem, data set and regression model(s). Given that you are working on real-world data, explain at a high-level your exploratory data analysis, how you prepared the data for regression modeling, your process for building regression models, and your model selection.
 
@@ -112,10 +114,10 @@ iowa_data_reduced <- iowa_data_reduced %>%
 write.csv(iowa_data_reduced, "iowa_data_reduced.csv")
 ```
 
-Data Aquisition
+Data Acquisition
 ============================
 
-The dataset contains the spirits purchase information of Iowa Class "E" liquor licensees by product and date of purchase from January 1, 2012 to current. The data set is provided by the Iowa Department of Commerce, Alcoholic Beverages Division, [click here](https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy) to view the data set at Data.Iowa.Gov.
+The data set contains the spirits purchase information of Iowa Class "E" liquor licensees by product and date of purchase from January 1, 2012 to current. The data set is provided by the Iowa Department of Commerce, Alcoholic Beverages Division, [click here](https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy) to view the data set at Data.Iowa.Gov.
 
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
@@ -145,7 +147,7 @@ top20counties <- iowaDataReduced %>%
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 library(magrittr)
-iowaDataReduced <-   iowaDataReduced %>%
+iowaDataReduced <- iowaDataReduced %>%
                    filter(Year == 2015) %>%
                    dplyr::select(County, Category.Name, 
                                  Bottles.Sold, Sale..Dollars., Volume.Sold..Gallons.) %>%
@@ -162,16 +164,25 @@ iowaDataReduced <-   iowaDataReduced %>%
 write.csv(iowaDataReduced, "iowa_data_reduced.csv")
 ```
 
+We reviewed the liquor sales by gallons sold per year by Liquor Category. Initially, we viewed the top 5 Liquor Categories by volume sold but there were large disparate between years, suggesting that the top 5 change often and likely due to changing consumer tastes. See as the same liquor categories appear consistently for in the top 10 category we chose this level for our model. 
 
-
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=FALSE}
-ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Bottles.Sold, fill = factor(Year))) + 
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=TRUE}
+ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Volume.Sold..Gallons., fill = factor(Year))) + 
       scale_y_continuous(labels = scales::comma) + 
       geom_bar(stat = "identity") +
       facet_grid(~Year) +
-      theme(axis.text.x = element_text(angle = 70, hjust = 1), legend.position="none") +
+      theme(axis.text.x = element_text(angle = 70, hjust = 1), legend.position = "none") +
       xlab("Liquor Category") + 
-      ylab("Bottles Sold\n")
+      ylab("Volumne Sold by Gallons\n") +
+      ggtitle("                                        Volume of Liquor Category Sales by Gallons Sold")
+```
+
+Our first attempt was to  use a Poisson regression due to the over-dispersion. 
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=TRUE}
+descdist(iowaDataReduced$`Avg Price Per Bottle`, discrete = FALSE)
+fit.norm <- fitdist(iowaDataReduced$`Avg Price Per Bottle`, "norm")
+plot(fit.norm)
 ```
 
 
@@ -182,7 +193,7 @@ interpretation and discussion of the results, etc.).
 Discussion and Conclusions
 ============================
 
-In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated. The continued growth was rather owed to the number of weekends a month has (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales3. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into sales and volume of liquor sold. Additionally, reviewing the data by identifying months that has 5 weekends instead of four could provide further insights. 
+In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated. The continued growth was rather owed to the number of weekends a month has (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales4. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into sales and volume of liquor sold. Additionally, reviewing the data by identifying months that has 5 weekends instead of four could provide further insights. 
 
 conclude your findings, limitations, and suggest areas for future work.
 
