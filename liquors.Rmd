@@ -27,10 +27,6 @@ On the other hand, the control state system is a system where each state partici
 
 http://www.alcoholpolicymd.com/pdf/AMA_Final_web_1.pdf
 
-### Methodology ###
-
-It was decided that negative binomial regression and multiple linear regression were the only regression methods that could be used. 
-
 ### Inventory Prediction ###
 
 The main goal that has to be achieved in inventory prediction is increasing the efficiency without decreasing the service value offered to the customers.
