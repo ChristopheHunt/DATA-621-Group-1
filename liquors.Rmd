@@ -26,3 +26,35 @@ The license-to-sell system is a system requiring state-issued licensure to sell 
 On the other hand, the control state system is a system where each state participates in a unique way as part of the alcohol industry, aiming to generate high levels of revenue as well as giving consideration to public health and safety concerns and obligations. Following the Prohibition era, several states would take control of many facets of alcohol sales and distribution. But due to constant pressure from the alcohol industry and from other industries demanding a share of the sales market, there has been a decline in the number of such states. 
 
 http://www.alcoholpolicymd.com/pdf/AMA_Final_web_1.pdf
+
+### Methodology ###
+
+It was decided that negative binomial regression and multiple linear regression were the only regression methods that could be used. 
+
+### Inventory Prediction ###
+
+The main goal that has to be achieved in inventory prediction is increasing the efficiency without decreasing the service value offered to the customers.
+
+When managing the levels of inventory, it is important to maintain moderate level(s) - not too high and not too low. If the inventory level is excessive, business funds can get wasted. These funds would not be able to be used for any other purpose, thus involving an opportunity cost. The costs of shortage, handling insurance, recording and inspection would proportionately increase along with inventory volume, thus impairing profitability. 
+
+On the other hand, low level(s) of inventory may result in frequent interruptions in the production schedule resulting in under-utilization of capacity and lower sales. 
+
+When making predictions about orders that should be placed, assumptions are made as follows - uncertainty always exists regardless of the method(s) used, new technologies cannot always be forecasted for which paradigms do not exist, and social policy will be formulated where the future would be affected, changing the accuracy of the forecast. 
+
+One useful method for predicting inventories is the extrapolation of trends. In this method, trends and cycles in the historical data are examined and mathematical techniques are used to extrapolate to the future. The model chosen for forecasting would depend on the historical data. 
+
+One of the most common models used in this method is decomposition, where historical data is separated into trend, seasonal, and random components. As a result, forecasts are produced using "turning point analysis". Other examples of models used are adaptive filtering, Box-Jenkins analysis, simple linear regression, curve fitting, and weighted smoothing. 
+
+According to Makridakis, "Judgmental forecasting is superior to mathematical models, although there are several forecasting applications where computer-generated models would be more feasible." When inventory levels for bulk-quantity items would need to be forecasted monthly by large manufacturing companies, generating models through computer software would be more efficient. 
+
+http://www.statpac.org/research-library/forecasting.htm
+
+Forecasting the demand of a product is very essential in predicting the order quantity. As a result, a data bank is created, helping the decision makers settle targets, create plans, and demonstrate changes in the business setting. 
+
+Two different methods are utilized in the investigation of the future demand - quantitative and qualitative. In quantitative methods, mathematical consistencies in the history are searched for. Two subcategories exist in quantitative methods - time series models and correlation models. 
+
+On the other hand, qualitative methods are based on the opinions that people have had about the product in the past based on their experiences, premonitions, and emotions. 
+
+However, when the most suitable forecast model gets selected, it is not necessarily based solely on quantitative or qualitative variables. The forecast model can even combine several models. 
+
+http://www.slideshare.net/AbhishekKumar159/demand-forecast-process-and-inventory-management
