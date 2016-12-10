@@ -45,6 +45,7 @@
 \fi
 % use microtype if available
 \IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{longtable}
 \usepackage{graphicx}
 % We will generate all images so they have a width \maxwidth. This means
 % that they will get their normal width if they fit onto the page, but
@@ -147,9 +148,9 @@ Our goal is inventory prediction.
 The initial data set contained many variables and is sufficiently large
 as it includes sales by location and is very granular. The size of the
 initial data set has every liquor transaction from 2012 to present so it
-approaches \textasciitilde{}2GB. For the purposes of this analysis, to
-analyze a data set this large is not feasible. Therefore, we reduced the
-number of variables and summarized to a higher level regional aggregate.
+approaches 2.68 GB. For the purposes of this analysis, to analyze a data
+set this large is not feasible. Therefore, we reduced the number of
+variables and summarized to a higher level regional aggregate.
 
 We reduced the data set to \texttt{5} independent variables;
 \texttt{County}, \texttt{Category\ name}, \texttt{Bottles\ Sold},
@@ -157,10 +158,10 @@ We reduced the data set to \texttt{5} independent variables;
 dependent variable of \texttt{Average\ Price\ Per\ Bottle}.
 
 Additionally, we looked into the top 10 liquor categories for each year
-by number of bottles sold. In 2015, the top categories were AMERICAN
-COCKTAILS, BLENDED WHISKIES, CANADIAN WHISKIES, IMPORTED VODKA, PUERTO
-RICO \& VIRGIN ISLANDS RUM, SPICED RUM, STRAIGHT BOURBON WHISKIES,
-TEQUILA, VODKA 80 PROOF, and WHISKEY LIQUEUR. Interestingly straight
+by number of bottles sold. In 2015, the top categories were American
+Cocktails, Blended Whiskies, Canadian Whiskies, Imported Vodka, Puerto
+Rico \& Virgin Islands Rum, Spiced Rum, Straight Bourbon Whiskies,
+Tequila, Vodka 80 Proof, and Whiskey Liqueur. Interestingly straight
 bourbon appears to have more sales in 2015 than 2014 which coincides
 with the literature of strong growing whiskey sales for every whiskey
 segment (Anonymous (2016)).
@@ -192,6 +193,10 @@ Commerce, Alcoholic Beverages Division,
 \href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
 here} to view the data set at Data.Iowa.Gov.
 
+As discussed in our methodogly section, the data set is 2.68 GB in total
+size and much to large to process with our current techiniques. A
+greater understanding of working with data sets of this size with R w
+
 We reviewed the liquor sales by gallons sold per year by Liquor
 Category. Initially, we viewed the top 5 Liquor Categories by volume
 sold but there were large disparate between years, suggesting that the
@@ -202,14 +207,24 @@ category we chose this level for our model.
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-5-1.pdf}
 
 Our first attempt was to use a Poisson regression due to the
-over-dispersion.
+over-dispersion created by aggregating the data set. However, the
+distribution was far to negatively skewed to fit a poission
+distribution. We therefore chose
 
-\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-1.pdf}
-summary statistics}{ summary statistics}}\label{summary-statistics}
+\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-1.pdf}}{}}\label{section}
 
-min: 6.834324 max: 22.80474 median: 13.21952 mean: 13.31821 estimated
-sd: 3.604091 estimated skewness: 0.3534382 estimated kurtosis: 2.604675
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-2.pdf}
+\begin{longtable}[]{@{}cccccccc@{}}
+\toprule
+min & max & median & mean & sd & skewness & kurtosis &
+method\tabularnewline
+\midrule
+\endhead
+6.834324 & 22.80474 & 13.21952 & 13.31821 & 3.604091 & 0.3534382 &
+2.604675 & unbiased\tabularnewline
+\bottomrule
+\end{longtable}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-7-1.pdf}
 
 describe the specifics of what you did (data exploration, data
 preparation, model building, model selection, model evaluation, etc.),
@@ -249,7 +264,8 @@ figures.}\label{supplemental-tables-andor-figures.}
   \item Base packages: base, datasets, graphics, grDevices,
     methods, stats, utils
   \item Other packages: fitdistrplus~1.0-7, ggplot2~2.2.0,
-    logspline~2.1.9, MASS~7.3-45, pacman~0.4.1, survival~2.40-1
+    logspline~2.1.9, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
+    survival~2.40-1
   \item Loaded via a namespace (and not attached): assertthat~0.1,
     backports~1.0.4, colorspace~1.3-1, digest~0.6.10,
     evaluate~0.10, grid~3.3.2, gtable~0.2.0, htmltools~0.3.5,

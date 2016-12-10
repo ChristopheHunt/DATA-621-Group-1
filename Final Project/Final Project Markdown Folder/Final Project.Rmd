@@ -37,7 +37,7 @@ output: rticles::elsevier_article
 ```{r options and library load, include = FALSE}
 options(xtable.comment = FALSE)
 library(pacman)
-p_load(ggplot2, fitdistrplus, logspline)
+p_load(ggplot2, fitdistrplus, logspline, pander)
 ```
 
 Problem
@@ -61,16 +61,16 @@ Our goal is inventory prediction.
 Methodology
 ================
 
-The initial data set contained many variables and is sufficiently large as it includes sales by location and is very granular. The size of the initial data set has every liquor transaction from 2012 to present so it approaches ~2GB. For the purposes of this analysis, to analyze a data set this large is not feasible. Therefore, we reduced the number of variables and summarized to a higher level regional aggregate.
+The initial data set contained many variables and is sufficiently large as it includes sales by location and is very granular. The size of the initial data set has every liquor transaction from 2012 to present so it approaches 2.68 GB. For the purposes of this analysis, to analyze a data set this large is not feasible. Therefore, we reduced the number of variables and summarized to a higher level regional aggregate.
 
 We reduced the data set to `5` independent variables; `County`, `Category name`, `Bottles Sold`, `Sale Dollars`, `Volume Sold in Gallons`, and our dependent variable of `Average Price Per Bottle`. 
 
-Additionally, we looked into the top 10 liquor categories for each year by number of bottles sold. In 2015, the top categories were AMERICAN COCKTAILS, BLENDED WHISKIES, CANADIAN WHISKIES, IMPORTED VODKA, PUERTO RICO & VIRGIN ISLANDS RUM, SPICED RUM, STRAIGHT BOURBON WHISKIES, TEQUILA, VODKA 80 PROOF,  and WHISKEY LIQUEUR. Interestingly straight bourbon appears to have more sales in 2015 than 2014 which coincides with the literature of strong growing whiskey sales for every whiskey segment (@SpecialityGrow3).  
+Additionally, we looked into the top 10 liquor categories for each year by number of bottles sold. In 2015, the top categories were American Cocktails, Blended Whiskies, Canadian Whiskies, Imported Vodka, Puerto Rico & Virgin Islands Rum, Spiced Rum, Straight Bourbon Whiskies, Tequila, Vodka 80 Proof, and Whiskey Liqueur. Interestingly straight bourbon appears to have more sales in 2015 than 2014 which coincides with the literature of strong growing whiskey sales for every whiskey segment (@SpecialityGrow3).  
 
 We initially attempted to model for a dependent variable of `Volume Sold in Gallons`, however, the distribution of this variable becomes over-dispersed and negatively skewed when aggregating the data set to a manageable size and therefore we were unsuccessful in modeling this variable. Our hope was that if we could model for the gallons sold by region we could more accurately predict our planned inventory and anticipate production goals. We then sought to model the mean price per bottle, by modeling the price per bottle we can make pricing decisions based on region and the volume we plan to sell. 
 
-discuss the key aspects of your problem, data set and regression model(s). Given that you are working on real-world data, explain at a high-level your exploratory data analysis, how you prepared the data for regression modeling, your process for building regression models, and your model selection.
 
+discuss the key aspects of your problem, data set and regression model(s). Given that you are working on real-world data, explain at a high-level your exploratory data analysis, how you prepared the data for regression modeling, your process for building regression models, and your model selection.
 
 Experimentation and Results
 =============================
@@ -119,6 +119,7 @@ Data Acquisition
 
 The data set contains the spirits purchase information of Iowa Class "E" liquor licensees by product and date of purchase from January 1, 2012 to current. The data set is provided by the Iowa Department of Commerce, Alcoholic Beverages Division, [click here](https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy) to view the data set at Data.Iowa.Gov.
 
+As discussed in our methodogly section, the data set is 2.68 GB in total size and much to large to process with our current techiniques. A greater understanding of working with data sets of this size with R w
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced.csv") 
@@ -130,7 +131,7 @@ library(dplyr)
 iowaDataReducedTop <- iowaDataReduced %>%
                       dplyr::group_by(Year, Category.Name) %>%
                       dplyr::select(Year, Category.Name, Volume.Sold..Gallons. ) %>%
-                      dplyr::summarize(Volume.Sold..Gallons. = sum(Volume.Sold..Gallons.)) %>%
+                      dplyr::summarize(Volume.Sold..Gallons. = round(sum(Volume.Sold..Gallons.))) %>%
                       dplyr::top_n(n = 10, wt = Volume.Sold..Gallons.)
 
 top10in2015 <- iowaDataReducedTop %>%
@@ -177,14 +178,17 @@ ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Volume.Sold..Gallons., fil
       ggtitle("                                        Volume of Liquor Category Sales by Gallons Sold")
 ```
 
-Our first attempt was to  use a Poisson regression due to the over-dispersion. 
+Our first attempt was to  use a Poisson regression due to the over-dispersion created by aggregating the data set. However, the distribution was far to negatively skewed to fit a poission distribution. We therefore chose  
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=TRUE}
-descdist(iowaDataReduced$`Avg Price Per Bottle`, discrete = FALSE)
+x <- descdist(iowaDataReduced$`Avg Price Per Bottle`, discrete = FALSE, boot = 100)
+pandoc.table(x)
+```
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=TRUE}
 fit.norm <- fitdist(iowaDataReduced$`Avg Price Per Bottle`, "norm")
 plot(fit.norm)
 ```
-
 
 describe the specifics of what you did (data exploration, data preparation,
 model building, model selection, model evaluation, etc.), and what you found out (statistical analyses,
