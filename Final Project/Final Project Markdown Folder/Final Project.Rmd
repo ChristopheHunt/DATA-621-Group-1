@@ -86,22 +86,38 @@ removeDollars <- function(column){
 }
 
 iowa_data_reduced <- iowa_data %>%
-                     dplyr::select(Date, City, County, `Category Name`, 
-                            `Item Number`, `Item Description`, 
-                            `Bottles Sold`, `Sale (Dollars)`, `Volume Sold (Gallons)`) %>%
+                     dplyr::select(Date, City, `Category Name`, `Store Number`, `Store Name`, `Pack`, 
+                            `Item Number`, `Item Description`, `Bottle Volume (ml)`, 
+                            `State Bottle Cost`, `State Bottle Retail`, `Sale (Dollars)`,
+                             `Volume Sold (Gallons)`, `Bottles Sold`) %>%
                     mutate(Date = as.Date(Date, format = "%m/%d/%Y"),
-                           City = factor(City),
-                           County = factor(County),
-                           `Item Number` = factor(`Item Number`),
-                           `Item Description` = factor(`Item Description`),
-                           `Sale (Dollars)` = removeDollars(`Sale (Dollars)`)) %>%
+                           City = factor(toupper(City)),
+                           `Category Name` = factor( toupper(`Category Name`)),
+                           `Store Number` = factor(`Store Number`),
+                           `Store Name` = factor(`Store Name`), 
+                           `Pack` = as.integer(`Pack`),
+                           `Bottle Volume (ml)` = as.numeric(`Bottle Volume (ml)`), 
+                           `State Bottle Cost` = removeDollars(`State Bottle Cost`), 
+                           `State Bottle Retail` = removeDollars(`State Bottle Retail`), 
+                           `Sale (Dollars)` = removeDollars(`Sale (Dollars)`),
+                           `Volume Sold (Gallons)` = as.numeric(`Volume Sold (Gallons)`), 
+                           `Bottles Sold` = as.integer(`Bottles Sold`)) %>%
                     mutate(Month = format(Date, "%m"),
                            Year = format(Date, "%Y")) %>%
-                    dplyr::select(-Date, -`Item Number`, -`Item Description`) %>%
-                    group_by(Month, Year, City, County, `Category Name`)  %>%
-                    summarize(`Bottles Sold` = sum(`Bottles Sold`), 
-                              `Sale (Dollars)` = sum(`Sale (Dollars)`), 
-                              `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
+                    dplyr::filter(Month == "11") %>%
+                    dplyr::filter(Year == "2015") %>% 
+                    dplyr::filter(City == "DES MOINES") %>% 
+                    dplyr::filter(grepl("WHISKIES", `Category Name`)) %>%
+                    dplyr::select(-Date) %>%
+                    group_by(Month, Year, City, `Category Name`, `Store Number`, `Store Name`)  %>%
+                    summarize( `Pack` = mean(`Pack`),
+                               `Bottles Sold` = sum(`Bottles Sold`), 
+                               `Sale (Dollars)` = sum(`Sale (Dollars)`), 
+                               `Bottle Volume (ml)` = mean(`Bottle Volume (ml)`),
+                               `State Bottle Cost` = sum(`State Bottle Cost`),
+                               `State Bottle Retail` = sum(`State Bottle Retail`),
+                               `Sale (Dollars)` = sum(`Sale (Dollars)`),
+                               `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
                     as_tibble()
 
 iowa_data_reduced <- iowa_data_reduced %>%
