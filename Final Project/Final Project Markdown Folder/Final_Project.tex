@@ -304,6 +304,63 @@ your model selection.
 
 \section{Experimentation and Results}\label{experimentation-and-results}
 
+\subsubsection{Data Acquisition}\label{data-acquisition}
+
+The data set contains the spirits purchase information of Iowa Class
+``E'' liquor licensees by product and date of purchase from January 1,
+2012 to current. The data set is provided by the Iowa Department of
+Commerce, Alcoholic Beverages Division,
+\href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
+here} to view the data set at Data.Iowa.Gov.
+
+As previously discussed, the data set is 2.68 GB in total size and much
+to large to use in a meaningful model.
+
+We reviewed the liquor sales by gallons sold per year by Liquor
+Category. Initially, we viewed the top 5 Liquor Categories by volume
+sold but there were large disparaties between years, suggesting that the
+top 5 change often and is likely due to changing consumer tastes. We do
+see a more stable set of liquor categories for the top 10 category which
+suggests that while tastes may change we don't see large movements in
+liquor categories at this level. We focused our attention on the whiskey
+categories.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+We can further see that Des Moines accounts for a significant portion of
+the liquor sales in Polk County. Polk County is the most populous county
+in Iowa so we will limit our analysis to this city.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+Our first attempt was to use a Poisson regression due to the
+over-dispersion created by aggregating the data set. However, the
+distribution was far to negatively skewed to fit a poission
+distribution.
+
+\subsection{Distributions of Dependent
+Variables}\label{distributions-of-dependent-variables}
+
+\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-9-1.pdf}}{}}\label{section}
+
+\begin{longtable}[]{@{}cccccccc@{}}
+\toprule
+min & max & median & mean & sd & skewness & kurtosis &
+method\tabularnewline
+\midrule
+\endhead
+2814 & 962072 & 24111.5 & 53022.46 & 92140.34 & 5.928606 & 52.56773 &
+unbiased\tabularnewline
+\bottomrule
+\end{longtable}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+describe the specifics of what you did (data exploration, data
+preparation, model building, model selection, model evaluation, etc.),
+and what you found out (statistical analyses, interpretation and
+discussion of the results, etc.).
+
 \section{Model 1}\label{model-1}
 
 \section{Forward step}\label{forward-step}
@@ -374,68 +431,6 @@ WHISKIES'' )
 
 \section{7.133 * (State.Bottle.Retail) + 7.521 * (Pack) - 2.189 *
 Sale..Dollars.}\label{state.bottle.retail-7.521-pack---2.189-sale..dollars.}
-
-\newpage
-
-\section{Data Acquisition}\label{data-acquisition}
-
-The data set contains the spirits purchase information of Iowa Class
-``E'' liquor licensees by product and date of purchase from January 1,
-2012 to current. The data set is provided by the Iowa Department of
-Commerce, Alcoholic Beverages Division,
-\href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
-here} to view the data set at Data.Iowa.Gov.
-
-As previously discussed, the data set is 2.68 GB in total size and much
-to large to use in a meaningful model.
-
-We reviewed the liquor sales by gallons sold per year by Liquor
-Category. Initially, we viewed the top 5 Liquor Categories by volume
-sold but there were large disparaties between years, suggesting that the
-top 5 change often and is likely due to changing consumer tastes. We do
-see a more stable set of liquor categories for the top 10 category which
-suggests that while tastes may change we don't see large movements in
-liquor categories at this level. We focused our attention on the whiskey
-categories.
-
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-1.pdf}
-
-We can further see that Des Moines accounts for a significant portion of
-the liquor sales in Polk County. Polk County is the most populous county
-in Iowa so we will limit our analysis to this city.
-
-Read 72.7\% of 343718 rows Read 343718 rows and 15 (of 15) columns from
-0.045 GB file in 00:00:03
-
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-9-1.pdf}
-
-Our first attempt was to use a Poisson regression due to the
-over-dispersion created by aggregating the data set. However, the
-distribution was far to negatively skewed to fit a poission
-distribution. We therefore chose
-
-\subsection{Distributions of Dependent
-Variables}\label{distributions-of-dependent-variables}
-
-\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-10-1.pdf}}{}}\label{section}
-
-\begin{longtable}[]{@{}cccccccc@{}}
-\toprule
-min & max & median & mean & sd & skewness & kurtosis &
-method\tabularnewline
-\midrule
-\endhead
-2814 & 962072 & 24111.5 & 53022.46 & 92140.34 & 5.928606 & 52.56773 &
-unbiased\tabularnewline
-\bottomrule
-\end{longtable}
-
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-11-1.pdf}
-
-describe the specifics of what you did (data exploration, data
-preparation, model building, model selection, model evaluation, etc.),
-and what you found out (statistical analyses, interpretation and
-discussion of the results, etc.).
 
 \section{Discussion and Conclusions}\label{discussion-and-conclusions}
 
@@ -1238,21 +1233,20 @@ lowest :   0.13   0.20   0.30   0.32   0.39, highest: 383.96 417.74 483.05 623.5
     methods, stats, utils
   \item Other packages: data.table~1.10.0, dplyr~0.5.0,
     fitdistrplus~1.0-7, Formula~1.2-1, ggplot2~2.2.0, Hmisc~4.0-1,
-    lattice~0.20-34, logspline~2.1.9, magrittr~1.5, MASS~7.3-45,
-    pacman~0.4.1, pander~0.6.0, purrr~0.2.2, readr~1.0.0,
-    stargazer~5.2, survival~2.40-1, tibble~1.2, tidyr~0.6.0,
-    tidyverse~1.0.0
+    lattice~0.20-34, logspline~2.1.9, MASS~7.3-45, pacman~0.4.1,
+    pander~0.6.0, purrr~0.2.2, readr~1.0.0, stargazer~5.2,
+    survival~2.40-1, tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    codetools~0.2-15, colorspace~1.3-1, curl~2.3, DBI~0.5-1,
-    digest~0.6.10, evaluate~0.10, foreign~0.8-67, grid~3.3.2,
-    gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
-    knitr~1.15.1, labeling~0.3, latticeExtra~0.6-28,
-    lazyeval~0.2.0, Matrix~1.2-7.1, munsell~0.4.3, nnet~7.3-12,
-    openssl~0.9.5, plyr~1.8.4, R6~2.2.0, RColorBrewer~1.1-2,
-    Rcpp~0.12.8, reshape2~1.4.2, rmarkdown~1.2, rpart~4.1-10,
-    rprojroot~1.1, rticles~0.2, scales~0.4.1, splines~3.3.2,
-    stringi~1.1.2, stringr~1.1.0, tools~3.3.2, yaml~2.1.14
+    colorspace~1.3-1, DBI~0.5-1, digest~0.6.10, evaluate~0.10,
+    foreign~0.8-67, grid~3.3.2, gridExtra~2.2.1, gtable~0.2.0,
+    htmlTable~1.7, htmltools~0.3.5, knitr~1.15.1,
+    latticeExtra~0.6-28, lazyeval~0.2.0, magrittr~1.5,
+    Matrix~1.2-7.1, munsell~0.4.3, nnet~7.3-12, openssl~0.9.5,
+    plyr~1.8.4, R6~2.2.0, RColorBrewer~1.1-2, Rcpp~0.12.8,
+    rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1, rticles~0.2,
+    scales~0.4.1, splines~3.3.2, stringi~1.1.2, stringr~1.1.0,
+    tools~3.3.2, yaml~2.1.14
 \end{itemize}
 
 \section{R statistical programming

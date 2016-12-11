@@ -98,98 +98,7 @@ discuss the key aspects of your problem, data set and regression model(s). Given
 Experimentation and Results
 =============================
 
-```{r , echo = FALSE, results='asis', warning = FALSE, message = FALSE , cache=TRUE, eval=FALSE}
-library(data.table)
-library(tidyverse)
-
-iowa_data <- fread("~./Iowa_Liquor_Sales.csv", header = T, sep = ',')
-
-removeDollars <- function(column){
-  as.numeric(gsub("\\,","",gsub("\\$","", column)))
-}
-
-iowa_data_reduced <- iowa_data %>%
-                     dplyr::select(Date, City, `Category Name`, `Store Number`, `Store Name`, `Pack`, 
-                            `Item Number`, `Item Description`, `Bottle Volume (ml)`, 
-                            `State Bottle Cost`, `State Bottle Retail`, `Sale (Dollars)`,
-                             `Volume Sold (Gallons)`, `Bottles Sold`) %>%
-                    mutate(Date = as.Date(Date, format = "%m/%d/%Y"),
-                           City = factor(toupper(City)),
-                           `Category Name` = factor( toupper(`Category Name`)),
-                           `Store Number` = factor(`Store Number`),
-                           `Store Name` = factor(`Store Name`), 
-                           `Pack` = as.integer(`Pack`),
-                           `Bottle Volume (ml)` = as.numeric(`Bottle Volume (ml)`), 
-                           `State Bottle Cost` = removeDollars(`State Bottle Cost`), 
-                           `State Bottle Retail` = removeDollars(`State Bottle Retail`), 
-                           `Sale (Dollars)` = removeDollars(`Sale (Dollars)`),
-                           `Volume Sold (Gallons)` = as.numeric(`Volume Sold (Gallons)`), 
-                           `Bottles Sold` = as.integer(`Bottles Sold`)) %>%
-                    mutate(Month = format(Date, "%m"),
-                           Year = format(Date, "%Y")) %>%
-                    dplyr::filter(Month == "11") %>%
-                    dplyr::filter(Year == "2015") %>% 
-                    dplyr::filter(City == "DES MOINES") %>% 
-                    dplyr::filter(grepl("WHISKIES", `Category Name`)) %>%
-                    dplyr::select(-Date) %>%
-                    group_by(Month, Year, City, `Category Name`, `Store Number`, `Store Name`)  %>%
-                    summarize( `Pack` = mean(`Pack`),
-                               `Bottles Sold` = sum(`Bottles Sold`), 
-                               `Sale (Dollars)` = sum(`Sale (Dollars)`), 
-                               `Bottle Volume (ml)` = mean(`Bottle Volume (ml)`),
-                               `State Bottle Cost` = sum(`State Bottle Cost`),
-                               `State Bottle Retail` = sum(`State Bottle Retail`),
-                               `Sale (Dollars)` = sum(`Sale (Dollars)`),
-                               `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
-                    as_tibble()
-
-iowa_data_reduced <- iowa_data_reduced %>%
-                    dplyr::ungroup() %>%
-                    mutate(Month = as.numeric(Month),
-                           Year = as.numeric(Year),
-                           `Category Name`= factor(`Category Name`)) %>%
-                    arrange(Year, Month, County, City)
-
-write.csv(iowa_data_reduced, "iowa_data_reduced.csv")
-```
-
-
-# Model 1 
-
-```{r data read for model, echo = FALSE, cache=TRUE}
-dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
-```
-
-
-#Forward step 
-
-```{r forward step selection for model, echo = FALSE, cache=TRUE, include=FALSE} 
-step( lm(Bottles.Sold~1, data = dfLiquorSales), direction = "forward", scope=~Category.Name + Store.Number + Pack + Sale..Dollars. + Bottle.Volume..ml. + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons., trace = FALSE)
-```
-
-```{r model 1, echo = FALSE, cache=TRUE, results = 'asis'}
-fit1 <- lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name +  State.Bottle.Retail + Pack + Sale..Dollars., data = dfLiquorSales)
-stargazer(fit1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model 1")
-```
-
-
-#Volume.Sold..Gallons=One unit of increase in volume sold will increase the bottles sold by 4.10 units
-
-#Category.Name
-# CANADIAN WHISKIES is the only one that is significant. 
-# CANDIAN WHISKIES vs BLENDED WHISKIES coefficient is 5.492
-
-#State.Bottle.Retail=One unit of increase in State.Bottle.Retail will increase the bottles sold by 7.133 units
-#Pack=One unit of increase in Pack will increase the bottles sold by 7.133 units
-#Sale..Dollars.=It is slightly significant. One unit of increase in Sale..Dollars. will decrease the bottles sold by 2.189 units
-
-#Formula = -4.196 + 25.314*Volume.Sold..Gallons. + 5.492 * (Category.Name="CANADIAN WHISKIES" ) + 
-#       7.133 * (State.Bottle.Retail) + 7.521 * (Pack) - 2.189 * Sale..Dollars. 
-
-
-\newpage
-Data Acquisition
-============================
+### Data Acquisition
 
 The data set contains the spirits purchase information of Iowa Class "E" liquor licensees by product and date of purchase from January 1, 2012 to current. The data set is provided by the Iowa Department of Commerce, Alcoholic Beverages Division, [click here](https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy) to view the data set at Data.Iowa.Gov.
 
@@ -298,7 +207,7 @@ write.csv(iowaCounties, "iowaCounties.csv")
 ```
 
 ```{r echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
-iowaCounties <- fread("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/Final%20Project%20Markdown%20Folder/iowaCounties.csv", verbose = F)
+iowaCounties <- fread("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/Final%20Project%20Markdown%20Folder/iowaCounties.csv", showProgress = FALSE)
 
 iowaCounties <- iowaCounties %>% 
                 ungroup() %>%
@@ -310,19 +219,20 @@ iowaCounties <- iowaCounties %>%
                 summarize(`Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`))
 ```
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=5, fig.width=10, eval=TRUE}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4.05, fig.width=10, eval=TRUE}
 ggplot(iowaCounties %>% filter(County == "POLK"), aes(x = County, y = `Volume Sold (Gallons)`, fill = City)) + 
       scale_y_continuous(labels = scales::comma) + 
       geom_bar(stat = "identity") +
       facet_grid(~Year) +
       theme_minimal() + 
       theme(axis.text.x = element_text(angle = 70, hjust = 1)) + 
+      guides(fill = guide_legend(keywidth = 2, keyheight = .75)) + 
       xlab("County") + 
       ylab("Volume Sold by Gallons\n") +
-      ggtitle("Gallons Sold by County and City for Whiskey Categories")
+      ggtitle("Gallons Sold by Polk County and City for Whiskey Categories")
 ```
 
-Our first attempt was to  use a Poisson regression due to the over-dispersion created by aggregating the data set. However, the distribution was far to negatively skewed to fit a poission distribution. We therefore chose  
+Our first attempt was to  use a Poisson regression due to the over-dispersion created by aggregating the data set. However, the distribution was far to negatively skewed to fit a poission distribution. 
 
 ## Distributions of Dependent Variables
 
@@ -340,6 +250,98 @@ plot(fit.norm)
 describe the specifics of what you did (data exploration, data preparation,
 model building, model selection, model evaluation, etc.), and what you found out (statistical analyses,
 interpretation and discussion of the results, etc.).
+
+
+```{r , echo = FALSE, results='asis', warning = FALSE, message = FALSE , cache=TRUE, eval=FALSE}
+library(data.table)
+library(tidyverse)
+
+iowa_data <- fread("~./Iowa_Liquor_Sales.csv", header = T, sep = ',')
+
+removeDollars <- function(column){
+  as.numeric(gsub("\\,","",gsub("\\$","", column)))
+}
+
+iowa_data_reduced <- iowa_data %>%
+                     dplyr::select(Date, City, `Category Name`, `Store Number`, `Store Name`, `Pack`, 
+                            `Item Number`, `Item Description`, `Bottle Volume (ml)`, 
+                            `State Bottle Cost`, `State Bottle Retail`, `Sale (Dollars)`,
+                             `Volume Sold (Gallons)`, `Bottles Sold`) %>%
+                    mutate(Date = as.Date(Date, format = "%m/%d/%Y"),
+                           City = factor(toupper(City)),
+                           `Category Name` = factor( toupper(`Category Name`)),
+                           `Store Number` = factor(`Store Number`),
+                           `Store Name` = factor(`Store Name`), 
+                           `Pack` = as.integer(`Pack`),
+                           `Bottle Volume (ml)` = as.numeric(`Bottle Volume (ml)`), 
+                           `State Bottle Cost` = removeDollars(`State Bottle Cost`), 
+                           `State Bottle Retail` = removeDollars(`State Bottle Retail`), 
+                           `Sale (Dollars)` = removeDollars(`Sale (Dollars)`),
+                           `Volume Sold (Gallons)` = as.numeric(`Volume Sold (Gallons)`), 
+                           `Bottles Sold` = as.integer(`Bottles Sold`)) %>%
+                    mutate(Month = format(Date, "%m"),
+                           Year = format(Date, "%Y")) %>%
+                    dplyr::filter(Month == "11") %>%
+                    dplyr::filter(Year == "2015") %>% 
+                    dplyr::filter(City == "DES MOINES") %>% 
+                    dplyr::filter(grepl("WHISKIES", `Category Name`)) %>%
+                    dplyr::select(-Date) %>%
+                    group_by(Month, Year, City, `Category Name`, `Store Number`, `Store Name`)  %>%
+                    summarize( `Pack` = mean(`Pack`),
+                               `Bottles Sold` = sum(`Bottles Sold`), 
+                               `Sale (Dollars)` = sum(`Sale (Dollars)`), 
+                               `Bottle Volume (ml)` = mean(`Bottle Volume (ml)`),
+                               `State Bottle Cost` = sum(`State Bottle Cost`),
+                               `State Bottle Retail` = sum(`State Bottle Retail`),
+                               `Sale (Dollars)` = sum(`Sale (Dollars)`),
+                               `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
+                    as_tibble()
+
+iowa_data_reduced <- iowa_data_reduced %>%
+                    dplyr::ungroup() %>%
+                    mutate(Month = as.numeric(Month),
+                           Year = as.numeric(Year),
+                           `Category Name`= factor(`Category Name`)) %>%
+                    arrange(Year, Month, County, City)
+
+write.csv(iowa_data_reduced, "iowa_data_reduced.csv")
+```
+
+
+# Model 1 
+
+```{r data read for model, echo = FALSE, cache=TRUE}
+dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
+```
+
+
+#Forward step 
+
+```{r forward step selection for model, echo = FALSE, cache=TRUE, include=FALSE} 
+step( lm(Bottles.Sold~1, data = dfLiquorSales), direction = "forward", scope=~Category.Name + Store.Number + Pack + Sale..Dollars. + Bottle.Volume..ml. + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons., trace = FALSE)
+```
+
+```{r model 1, echo = FALSE, cache=TRUE, results = 'asis'}
+fit1 <- lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name +  State.Bottle.Retail + Pack + Sale..Dollars., data = dfLiquorSales)
+stargazer(fit1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model 1")
+```
+
+
+#Volume.Sold..Gallons=One unit of increase in volume sold will increase the bottles sold by 4.10 units
+
+#Category.Name
+# CANADIAN WHISKIES is the only one that is significant. 
+# CANDIAN WHISKIES vs BLENDED WHISKIES coefficient is 5.492
+
+#State.Bottle.Retail=One unit of increase in State.Bottle.Retail will increase the bottles sold by 7.133 units
+#Pack=One unit of increase in Pack will increase the bottles sold by 7.133 units
+#Sale..Dollars.=It is slightly significant. One unit of increase in Sale..Dollars. will decrease the bottles sold by 2.189 units
+
+#Formula = -4.196 + 25.314*Volume.Sold..Gallons. + 5.492 * (Category.Name="CANADIAN WHISKIES" ) + 
+#       7.133 * (State.Bottle.Retail) + 7.521 * (Pack) - 2.189 * Sale..Dollars. 
+
+
+
 
 Discussion and Conclusions
 ============================
