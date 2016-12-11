@@ -54,3 +54,37 @@ On the other hand, qualitative methods are based on the opinions that people hav
 However, when the most suitable forecast model gets selected, it is not necessarily based solely on quantitative or qualitative variables. The forecast model can even combine several models. 
 
 http://www.slideshare.net/AbhishekKumar159/demand-forecast-process-and-inventory-management
+
+In two studies that were conducted, the statistical data from the previous time interval was used to predict what would happen in the next time interval. One study was for pharmaceutical distribution companies. The other study involved data mining models.  
+
+In one study involving pharmaceutical distribution companies, the purpose was to propose a novel method to forecast the sales of the companies. Network-based analysis was conducted to find clique sets and group members and to use the sales data of comembers. The reason for this was the lack of sufficient historic sales records of each drug. 
+
+Three methods were used to build time series models forecasting sales - ARIMA methodology, neural network, and an advanced hybrid neural network approach. The performance of the proposed method was evaluated using a real dataset provided by one of the leading pharmacy distribution companies in Iran. The results of the evaluation indicated that the proposed method can cope with the low number of past records while accurately forecasting medicine sales.
+
+After exploratory analysis was done on the data, it was concluded that most medicines had different and specific characteristics and sales behavior, it was impractical to make a single prediction model for all medicines, and most sales records had nonlinear relationships. 
+
+The reason why the hybrid neural network method was carried out was due to the fact that it is not acceptable to apply a fully linear or nonlinear model on sales data. 
+
+The two forecast error measures that were used to evaluate and compare model performance were mean squared error and mean absoute error. The performance of the predicted data was significantly improved when the past records of comembers were used. 
+
+http://onesearch.cuny.edu/primo_library/libweb/action/display.do?tabs=detailsTab&ct=display&fn=search&doc=TN_gale_ofa425455991&indx=3&recIds=TN_gale_ofa425455991&recIdxs=2&elementId=2&renderMode=poppedOut&displayMode=full&frbrVersion=2&frbg=&&dscnt=0&scp.scps=scope%3A%28CUNY_BEPRESS%29%2Cscope%3A%28BB%29%2Cscope%3A%28BB_LIBGUIDES%29%2Cscope%3A%28AL%29%2Cprimo_central_multiple_fe&tb=t&mode=Basic&vid=bb&srt=rank&tab=default_tab&dum=true&vl(freeText0)=inventory%20prediction%20sales&dstmp=1481346949259
+
+The other study that examined prediction-based inventory optimization using data mining models, the Back propagation neural network was used for training the prediction model. The idea that gave rise to this method of inventory prediction was the idea that the demand of marketing is viewed as the foundation of inventory management.   
+
+On the basis of the prediction result, a simple and concise inventory policy was established. Following this, the historic sales data was used to estimate a normal distribution of demand and to calculate the inventory cost with inventory strategy. 
+
+Two models (Back Propagation Neural Network and Support Vector Regression) were established using three input variables (historical sales data, the frequency of searching the commodity, and the click volume of the commodity page).
+
+When the back-propagation neural network method was used, there was more accuracy shown in the performance because the predicted values almost matched the actual values in the graphs.
+
+The mean absolute percentage error calculated for this model is 0.06. 
+
+http://onesearch.cuny.edu/primo_library/libweb/action/display.do?frbrVersion=2&tabs=detailsTab&ct=display&fn=search&doc=TN_ieee10.1109%2fCSO.2014.118&indx=10&recIds=TN_ieee10.1109%2fCSO.2014.118&recIdxs=9&elementId=9&renderMode=poppedOut&displayMode=full&frbrVersion=2&frbg=&&dscnt=0&scp.scps=scope%3A%28CUNY_BEPRESS%29%2Cscope%3A%28BB%29%2Cscope%3A%28BB_LIBGUIDES%29%2Cscope%3A%28AL%29%2Cprimo_central_multiple_fe&tb=t&mode=Basic&vid=bb&srt=rank&tab=default_tab&dum=true&vl(freeText0)=inventory%20prediction%20sales&dstmp=1481412549638
+
+There was a study conducted by the Beer Industry Electronic Commerce Coalition. The purpose of this study was to highlight, explain, and create future considerations for the advancement of forecasting future beer sales and the process around how distributors and suppliers can collaborate to achieve this goal. 
+
+Weekly forecasts can be created by supplier, brand, package, etc. for up to fifteen weeks into the future if necessary. It is important to be aware of the product trends so that specific situations can be explained to various employees of the company at any time.
+
+https://www.nbwa.org/sites/default/files/hitting_the_mark.pdf
+
+http://support.sas.com/resources/papers/proceedings13/157-2013.pdf
