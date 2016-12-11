@@ -26,10 +26,11 @@
 \usepackage[sfdefault]{noto}
 \usepackage{relsize}
 \usepackage{setspace}
-\usepackage[sfdefault]{roboto}
+
 \usepackage[T1]{fontenc}
 
-
+\usepackage{longtable}
+\usepackage{afterpage}
 
  \def\RCSfile{elsarticle}%
  \def\RCSversion{1.0.1}%

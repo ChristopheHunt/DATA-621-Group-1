@@ -48,28 +48,28 @@ The objective of this report is to create a statistical model for the volume sol
 Introduction
 =================
 
-In February, the Distilled Spirits Council (DISCUS), announced that spirits had an estimated retail sales of nearly $72 billion in 2015. Additionally, DISCUS credits the continuous growth of the distilled spirits industry to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permutation across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category @KeepingSpiritsHigh1. 
+In February, the Distilled Spirits Council (DISCUS), announced that spirits had an estimated retail sales of nearly $72 billion in 2015. Additionally, DISCUS credits the continuous growth of the distilled spirits industry to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permutation across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category (@KeepingSpiritsHigh1). 
 
-This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more thoroughly understand what impact specific store sights may have accounting for the seasonal impact in November that might effect liquor sales. We will limit the analysis to the City of Des Moines for only whiskey sales in the month of November. In 2000 the State of Iowa reported sales at a record pace during the last half of 2000 @IowaSetsRecord2. The later part of the year has an increase in sales so planning to meet capacity is a suitable goal for any company. Our years of interest for this analysis will be the month of November for 2015 and 2016.
+This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more thoroughly understand what impact specific store sights may have accounting for the seasonal impact in November that might effect liquor sales. We will limit the analysis to the City of Des Moines for only whiskey sales in the month of November. In 2000 the State of Iowa reported sales at a record pace during the last half of 2000 (@IowaSetsRecord2). The later part of the year has an increase in sales so planning to meet capacity is a suitable goal for any company. Our years of interest for this analysis will be the month of November for 2015 and 2016.
 
 Research Background
 =================
 
 The main goal that has to be achieved in inventory prediction is increasing the efficiency without decreasing the service value offered to the customers. When managing the levels of inventory, it is important to maintain moderate level(s) - not too high and not too low. If the inventory level is excessive, business funds can get wasted. These funds would not be able to be used for any other purpose, thus involving an opportunity cost. The costs of shortage, handling insurance, recording and inspection would proportionately increase along with inventory volume, thus impairing profitability. 
 
-On the other hand, low level(s) of inventory may result in frequent interruptions in the production schedule resulting in under-utilization of capacity and lower sales.  When making predictions about orders that should be placed, assumptions are made as follows - uncertainty always exists regardless of the method(s) used, new technologies cannot always be forecasted for which paradigms do not exist, and social policy will be formulated where the future would be affected, changing the accuracy of the forecast@Forecast1. 
+On the other hand, low level(s) of inventory may result in frequent interruptions in the production schedule resulting in under-utilization of capacity and lower sales.  When making predictions about orders that should be placed, assumptions are made as follows - uncertainty always exists regardless of the method(s) used, new technologies cannot always be forecasted for which paradigms do not exist, and social policy will be formulated where the future would be affected, changing the accuracy of the forecast (@Forecast1). 
 
-One useful method for predicting inventories is the extrapolation of trends. In this method, trends and cycles in the historical data are examined and mathematical techniques are used to extrapolate to the future. The model chosen for forecasting would depend on the historical data @Forecast1. 
+One useful method for predicting inventories is the extrapolation of trends. In this method, trends and cycles in the historical data are examined and mathematical techniques are used to extrapolate to the future. The model chosen for forecasting would depend on the historical data (@Forecast1). 
 
-One of the most common models used in this method is decomposition, where historical data is separated into trend, seasonal, and random components. As a result, forecasts are produced using "turning point analysis". Other examples of models used are adaptive filtering, Box-Jenkins analysis, simple linear regression, curve fitting, and weighted smoothing @Forecast1. 
+One of the most common models used in this method is decomposition, where historical data is separated into trend, seasonal, and random components. As a result, forecasts are produced using "turning point analysis". Other examples of models used are adaptive filtering, Box-Jenkins analysis, simple linear regression, curve fitting, and weighted smoothing (@Forecast1). 
 
-According to Makridakis, "Judgmental forecasting is superior to mathematical models, although there are several forecasting applications where computer-generated models would be more feasible." When inventory levels for bulk-quantity items would need to be forecasted monthly by large manufacturing companies, generating models through computer software would be more efficient @Forecast1. 
+According to Makridakis, "Judgmental forecasting is superior to mathematical models, although there are several forecasting applications where computer-generated models would be more feasible." When inventory levels for bulk-quantity items would need to be forecasted monthly by large manufacturing companies, generating models through computer software would be more efficient (@Forecast1). 
 
 Forecasting the demand of a product is very essential in predicting the order quantity. As a result, a data bank is created, helping the decision makers settle targets, create plans, and demonstrate changes in the business setting. 
 
-Two different methods are utilized in the investigation of the future demand - quantitative and qualitative. In quantitative methods, mathematical consistencies in the history are searched for. Two subcategories exist in quantitative methods - time series models and correlation models. On the other hand, qualitative methods are based on the opinions that people have had about the product in the past based on their experiences, premonitions, and emotions. 
+Two different methods are utilized in the investigation of the future demand - quantitative and qualitative. In quantitative methods, mathematical consistencies in the history are searched for. Two subcategories exist in quantitative methods - time series models and correlation models. On the other hand, qualitative methods are based on the opinions that people have had about the product in the past based on their experiences, premonitions, and emotions (@Demand1). 
 
-However, when the most suitable forecast model gets selected, it is not necessarily based solely on quantitative or qualitative variables. The forecast model can even combine several models. 
+However, when the most suitable forecast model gets selected, it is not necessarily based solely on quantitative or qualitative variables. The forecast model can even combine several models (@Demand1). 
 
 Methodology
 ================
@@ -153,7 +153,7 @@ write.csv(iowa_data_reduced, "iowa_data_reduced.csv")
 ```
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
-iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced.csv") 
+iowaDataReduced <- fread("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced.csv", showProgress = FALSE) 
 ```
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
@@ -293,13 +293,13 @@ Our first attempt was to  use a Poisson regression due to the over-dispersion cr
 We see that the dependent variable of Bottles Sold has a non-normal distribution as illustrated in the Cullen and Frey graph @CullenFrey4 from the `fitdistrplus` package and the non normal distribution is further highlighted in the diagnostic plots.   
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
-iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") 
-x <- descdist(iowaDataReduced$Bottles.Sold, discrete = FALSE, boot = 200)
-pandoc.table(x)
+iowaDataReduced <- fread("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv", showProgress = FALSE) 
+x <- descdist(iowaDataReduced$`Bottles Sold`, discrete = FALSE, boot = 200)
+pandoc.table(x, caption = "Summary Statistics of Bottles Sold")
 ```
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=10, eval=TRUE}
-fit.norm <- fitdist(iowaDataReduced$Bottles.Sold, "norm")
+fit.norm <- fitdist(iowaDataReduced$`Bottles Sold`, "norm")
 plot(fit.norm)
 ```
 
@@ -308,7 +308,7 @@ The lambda value of the BoxCox transformation of the Bottles Sold is `r round(Bo
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
 iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") 
 x <- descdist(log(iowaDataReduced$Bottles.Sold), discrete = FALSE, boot = 200)
-pandoc.table(x)
+pandoc.table(x, caption = "Summary Statistics of Bottles Sold after LOG transformation" )
 ```
 \newpage
 
@@ -322,42 +322,52 @@ plot(fit.norm)
 
 ### Model Development  
 
-Our first model uses the forward selection method and Bottles Sold as our dependent variable. By using this selection method the final model excludes the Sales Dollars variable. 
+Our first model uses the forward selection method and Bottles Sold as our dependent variable. By using this selection method, the final model excludes the Sales Dollars variable. 
 
 ```{r data read, echo = FALSE, cache=TRUE}
 dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
 ```
 
-
-```{r forward, echo = FALSE, cache=TRUE}
+```{r forward, echo = FALSE, cache=TRUE, results='asis'}
 
 forward <- step(lm(log(Bottles.Sold)~1,data=dfLiquorSales),direction = "forward",
                  scope=~Category.Name + Pack + Sale..Dollars. + Bottle.Volume..ml.
-                 + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons.,trace = TRUE)
+                 + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons.,trace = FALSE)
 
 fit2 <- lm(formula = log(Bottles.Sold) ~ State.Bottle.Cost + Category.Name + 
              State.Bottle.Retail + Pack + Volume.Sold..Gallons. + Bottle.Volume..ml., 
            data = dfLiquorSales)
 
-stargazer(fit2)
+stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model 1 with Influencial Points")
 ```
 
+However, several values may have undue influence on the final form of our model. Using the `influencePlot` function from the `car` package and Cooks Distance, we can see which values that have the greatest impact on our model.
 
-```{r}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10, eval=TRUE}
 #Removal of influence points based on two methods
+#
+par(mfrow=c(1,2))
 #1. influence points
-influencePlot(fit2)
-
+influence <- influencePlot(fit2)
 #2. Cooks distance plot
-plot(fit2,4)
+cook <- plot(fit2,4)
+```
 
+By excluding the values `70`, `115`, and `229` from our evaluation data set we are able to fit a more appropriate model. Below is the values in question we chose to exclude. 
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10, eval=TRUE}
+pandoc.table(dfLiquorSales[c(70,115,229),] %>% 
+        select(Category.Name, Store.Name, Pack, Bottles.Sold, Sale..Dollars., 
+               Bottle.Volume..ml., State.Bottle.Cost, State.Bottle.Retail, Volume.Sold..Gallons.))
+```
+
+```{r, echo = FALSE, cache=TRUE, results='asis'}
 #Remove the influential points and update the model
 fit2 <- update(fit2,data=dfLiquorSales[c(-70,-115,-229),])
 
-
 plot(fit2)
 #Plots look better than fit1's plot but some of the predicted values are very high
-coefficients(fit2)
+
 
 #State.Bottle.Cost=One unit of increase in State.Bottle.Cost will increase 
 #the log of bottles sold by 1.06 units
@@ -376,10 +386,6 @@ coefficients(fit2)
 #Pack=One unit of increase in Pack will increase the log of bottles sold by 0.06  units 
 #Volume.Sold..Gallons.=One unit of increase in Volume.Sold..Gallons. will increase the log of bottles sold by 0.013 units
 #Bottle.Volume..ml=One unit of increase in Bottle.Volume..ml will increase the log of bottles sold by 0.0005 units
-
-
-
-
 
 plot(fit2$model$`log(Bottles.Sold)`,fit2$fitted.values)
 
