@@ -8,3 +8,11 @@ survival
 fitdistrplus
 logspline
 pander
+lattice
+Formula
+Hmisc
+tidyverse
+tibble
+tidyr
+readr
+purrr
