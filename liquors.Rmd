@@ -31,7 +31,7 @@ http://www.alcoholpolicymd.com/pdf/AMA_Final_web_1.pdf
 
 The main goal that has to be achieved in inventory prediction is increasing the efficiency without decreasing the service value offered to the customers.
 
-When managing the levels of inventory, it is important to maintain moderate level(s) - not too high and not too low. If the inventory level is excessive, business funds can get wasted. These funds would not be able to be used for any other purpose, thus involving an opportunity cost. The costs of shortage, handling insurance, recording and inspection would proportionately increase along with inventory volume, thus impairing profitability. 
+When managing the levels of inventory, it is important to maintain moderate level(s) - not too high and not too low. If the inventory level is excessive, business funds can get wasted. These funds would not be able to be used for any other purpose, thus involving an opportunity cost. The costs of shortage, handling insurance, recording and inspection would proportionately increase along with inventory volume, thus impairing profitability @article{author = "Kumar, Abhishek", (2012), title = "Demand forecast process and inventory management", Retrieved from http://www.slideshare.net/AbhishekKumar159/demand-forecast-process-and-inventory-management}. 
 
 On the other hand, low level(s) of inventory may result in frequent interruptions in the production schedule resulting in under-utilization of capacity and lower sales. 
 
@@ -87,4 +87,16 @@ Weekly forecasts can be created by supplier, brand, package, etc. for up to fift
 
 https://www.nbwa.org/sites/default/files/hitting_the_mark.pdf
 
-http://support.sas.com/resources/papers/proceedings13/157-2013.pdf
+### References ###
+
+Walonick, David S. (1993). "An Overview of Forecasting Methodology"
+
+Kumar, Abhishek. (2012). "Demand forecast process and inventory management"
+
+Guo, Xiaoxiao; Liu, Chang; Xu, Wei; Yuan, Hui; Wang, Mingming. (2014). "A Prediction-Based Inventory Optimization Using Data Mining Models". IEEE Conference Publications. 611-615
+
+Zadeh, Neda Khalil; Sepehri, Mohammad Mehdi; Farvaresh, Hamid. (2014). "Intelligent sales prediction for pharmaceutical distribution companies: a data mining based approach". Cengage Learning, Inc.  
+
+
+
+
