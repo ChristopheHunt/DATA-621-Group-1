@@ -17,3 +17,4 @@ tidyr
 readr
 purrr
 stargazer
+data.table

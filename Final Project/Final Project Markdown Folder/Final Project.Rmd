@@ -37,7 +37,7 @@ output: rticles::elsevier_article
 ```{r options and library load, include = FALSE}
 options(xtable.comment = FALSE)
 library(pacman)
-p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer)
+p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table)
 ```
 
 Problem
@@ -259,7 +259,7 @@ ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Volume.Sold..Gallons., fil
 
 We can further see that Des Moines accounts for a significant portion of the liquor sales in Polk County. Polk County is the most populous county in Iowa so we will limit our analysis to this city.
 
-```{r}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=FALSE}
 
 iowaCounties   <- iowa_data %>%
                      dplyr::select(Date, City, County, `Category Name`, `Store Number`, `Store Name`, `Pack`, 
@@ -293,6 +293,12 @@ iowaCounties   <- iowa_data %>%
                                `Sale (Dollars)` = sum(`Sale (Dollars)`),
                                `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
                     as_tibble()
+
+write.csv(iowaCounties, "iowaCounties.csv")
+```
+
+```{r echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
+iowaCounties <- fread("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/Final%20Project%20Markdown%20Folder/iowaCounties.csv", verbose = F)
 
 iowaCounties <- iowaCounties %>% 
                 ungroup() %>%
