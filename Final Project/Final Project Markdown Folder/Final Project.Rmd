@@ -50,7 +50,7 @@ Introduction
 
 In February, the Distilled Spirits Council (DISCUS), announced that spirits had an estimated retail sales of nearly $72 billion in 2015. Additionally, DISCUS credits the continuous growth of the distilled spirits industry to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permutation across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category @KeepingSpiritsHigh1. 
 
-This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more thoroughly understand what impact specific store sights may have accounting for the seasonal impact in November that might effect liquor sales. We will limit the analysis to the City of Des Moines for only whisky sales in the month of November. In 2000 the State of Iowa reported sales at a record pace during the last half of 2000 @IowaSetsRecord2. The later part of the year has an increase in sales so planning to meet capacity is a suitable goal for any company. Our years of interest for this analysis will be the month of November for 2015 and 2016.
+This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more thoroughly understand what impact specific store sights may have accounting for the seasonal impact in November that might effect liquor sales. We will limit the analysis to the City of Des Moines for only whiskey sales in the month of November. In 2000 the State of Iowa reported sales at a record pace during the last half of 2000 @IowaSetsRecord2. The later part of the year has an increase in sales so planning to meet capacity is a suitable goal for any company. Our years of interest for this analysis will be the month of November for 2015 and 2016.
 
 Research Background
 =================
@@ -82,13 +82,11 @@ We initially attempted to model for a dependent variable of `Volume Sold in Gall
 
 We accomplished this by looking into volume of sales by the largest `County` for Iowa which is Polk county. The City of Des Moines has the largest volume of whiskey sales in Polk county so we limited our analysis to this city. 
 
-Therefore, our final evaluation data set is the following subset of variables for largest city in Iowa of Des Moines as follows; `Vendor Name`, `Pack` (pack size of bottles sold) `Bottle Volume`, `State Bottle Cost`, `State Bottle Retail`, `Sales Dollars` (Total sales), and our dependent variables are `Volume sold in Gallons` and `Profit Dollars`.
+Therefore, our final evaluation data set is the following subset of variables for largest city in Iowa of Des Moines as follows; `Vendor Name`, `Pack` (pack size of bottles sold) `Bottle Volume`, `State Bottle Cost`, `State Bottle Retail`, `Sales Dollars` (Total sales), and our dependent variables are `Volume sold in Gallons` and `Profit Dollars`. 
 
+By modeling `Volume sold in Gallons` and `Profit Dollars` we aim to predict the volume of production needed and the possible profit dollars when producing at the predicted volume. We first began by using linear regression to model the Volume Sold in Gallons, however, the distribution was initially non-normal so we used the BoxCox method to transform our dependent variable to a more normal distribution. We then used forward selection method to determine the final form for the model of Volume Sold in Gallons. We further removed points that had unusually high influence on the model. 
 
-We then sought to model the mean price per bottle, by modeling the price per bottle we can make pricing decisions based on region and the volume we plan to sell. 
-
-
-discuss the key aspects of your problem, data set and regression model(s). Given that you are working on real-world data, explain at a high-level your exploratory data analysis, how you prepared the data for regression modeling, your process for building regression models, and your model selection.
+We then modeled our second dependent variable of `Profit Dollars`, which is the difference between the sale price and retail price, by using linear regression. After using forward selection and removing highly influence points in the second model we were able more accurately model the data set. 
 
 Experimentation and Results
 =============================
@@ -201,7 +199,7 @@ iowaDataReduced <- iowaDataReduced %>%
 write.csv(iowaDataReduced, "iowa_data_reduced.csv")
 ```
 
-We reviewed the liquor sales by gallons sold per year by Liquor Category. Initially, we viewed the top 5 Liquor Categories by volume sold but there were large disparaties between years, suggesting that the top 5 change often and is likely due to changing consumer tastes. We do see a more stable set of liquor categories for the top 10 category which suggests that while tastes may change we don't see large movements in liquor categories at this level. We focused our attention on the whiskey categories.  
+We reviewed the liquor sales by gallons sold per year by Liquor Category. Initially, we viewed the top 5 Liquor Categories by volume sold but there were large disparities between years, suggesting that the top 5 change often and is likely due to changing consumer tastes. We do see a more stable set of liquor categories for the top 10 category which suggests that while tastes may change we don't see large movements in liquor categories at this level. We focused our attention on the whiskey categories.  
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.75, fig.width=10, eval=TRUE}
 ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Volume.Sold..Gallons., fill = factor(Year))) + 
@@ -288,11 +286,11 @@ ggplot(iowaCounties %>% filter(County == "POLK"), aes(x = County, y = `Volume So
       ggtitle("Gallons Sold by Polk County and City for Whiskey Categories")
 ```
 
-Our first attempt was to  use a Poisson regression due to the over-dispersion created by aggregating the data set. However, the distribution was far to negatively skewed to fit a poission distribution. 
+Our first attempt was to  use a Poisson regression due to the over-dispersion created by aggregating the data set. However, the distribution was far to negatively skewed to fit a Poisson distribution. 
 
 ## Distributions of Dependent Variables
 
-We see that the dependent variable of Bottles Sold has a non-normal distribution as illustrated in the Cullen and Frey graph @CullenFrey4 from the `fitdistrplus` package and the non normal distribution is futher highlighted in the diagnostic plots.   
+We see that the dependent variable of Bottles Sold has a non-normal distribution as illustrated in the Cullen and Frey graph @CullenFrey4 from the `fitdistrplus` package and the non normal distribution is further highlighted in the diagnostic plots.   
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
 iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") 
@@ -424,7 +422,7 @@ After exploratory analysis was done on the data, it was concluded that most medi
 
 The reason why the hybrid neural network method was carried out was due to the fact that it is not acceptable to apply a fully linear or nonlinear model on sales data. 
 
-The two forecast error measures that were used to evaluate and compare model performance were mean squared error and mean absoute error. The performance of the predicted data was significantly improved when the past records of comembers were used. 
+The two forecast error measures that were used to evaluate and compare model performance were mean squared error and mean absolute error. The performance of the predicted data was significantly improved when the past records of co members were used. 
 
 http://onesearch.cuny.edu/primo_library/libweb/action/display.do?tabs=detailsTab&ct=display&fn=search&doc=TN_gale_ofa425455991&indx=3&recIds=TN_gale_ofa425455991&recIdxs=2&elementId=2&renderMode=poppedOut&displayMode=full&frbrVersion=2&frbg=&&dscnt=0&scp.scps=scope%3A%28CUNY_BEPRESS%29%2Cscope%3A%28BB%29%2Cscope%3A%28BB_LIBGUIDES%29%2Cscope%3A%28AL%29%2Cprimo_central_multiple_fe&tb=t&mode=Basic&vid=bb&srt=rank&tab=default_tab&dum=true&vl(freeText0)=inventory%20prediction%20sales&dstmp=1481346949259
 

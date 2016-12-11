@@ -175,7 +175,7 @@ market worth exploring for a more detailed and statistical understanding
 of sales and volume. We hope to more thoroughly understand what impact
 specific store sights may have accounting for the seasonal impact in
 November that might effect liquor sales. We will limit the analysis to
-the City of Des Moines for only whisky sales in the month of November.
+the City of Des Moines for only whiskey sales in the month of November.
 In 2000 the State of Iowa reported sales at a record pace during the
 last half of 2000 Boshart (2001). The later part of the year has an
 increase in sales so planning to meet capacity is a suitable goal for
@@ -201,56 +201,44 @@ should be placed, assumptions are made as follows - uncertainty always
 exists regardless of the method(s) used, new technologies cannot always
 be forecasted for which paradigms do not exist, and social policy will
 be formulated where the future would be affected, changing the accuracy
-of the forecast.
+of the forecast@Forecast1.
 
 One useful method for predicting inventories is the extrapolation of
 trends. In this method, trends and cycles in the historical data are
 examined and mathematical techniques are used to extrapolate to the
 future. The model chosen for forecasting would depend on the historical
-data. One of the most common models used in this method is
-decomposition, where historical data is separated into trend, seasonal,
-and random components. As a result, forecasts are produced using
-``turning point analysis''. Other examples of models used are adaptive
-filtering, Box-Jenkins analysis, simple linear regression, curve
-fitting, and weighted smoothing.
+data David S. Walonick (1993).
+
+One of the most common models used in this method is decomposition,
+where historical data is separated into trend, seasonal, and random
+components. As a result, forecasts are produced using ``turning point
+analysis''. Other examples of models used are adaptive filtering,
+Box-Jenkins analysis, simple linear regression, curve fitting, and
+weighted smoothing David S. Walonick (1993).
 
 According to Makridakis, ``Judgmental forecasting is superior to
 mathematical models, although there are several forecasting applications
 where computer-generated models would be more feasible.'' When inventory
 levels for bulk-quantity items would need to be forecasted monthly by
 large manufacturing companies, generating models through computer
-software would be more efficient.
-
-http://www.statpac.org/research-library/forecasting.htm
+software would be more efficient David S. Walonick (1993).
 
 Forecasting the demand of a product is very essential in predicting the
 order quantity. As a result, a data bank is created, helping the
 decision makers settle targets, create plans, and demonstrate changes in
-the business setting. Two different methods are utilized in the
-investigation of the future demand - quantitative and qualitative. In
-quantitative methods, mathematical consistencies in the history are
-searched for. Two subcategories exist in quantitative methods - time
-series models and correlation models. On the other hand, qualitative
-methods are based on the opinions that people have had about the product
-in the past based on their experiences, premonitions, and emotions.
+the business setting.
+
+Two different methods are utilized in the investigation of the future
+demand - quantitative and qualitative. In quantitative methods,
+mathematical consistencies in the history are searched for. Two
+subcategories exist in quantitative methods - time series models and
+correlation models. On the other hand, qualitative methods are based on
+the opinions that people have had about the product in the past based on
+their experiences, premonitions, and emotions.
 
 However, when the most suitable forecast model gets selected, it is not
 necessarily based solely on quantitative or qualitative variables. The
 forecast model can even combine several models.
-
-http://www.slideshare.net/AbhishekKumar159/demand-forecast-process-and-inventory-management
-
-There was a study conducted by the Beer Industry Electronic Commerce
-Coalition. The purpose of this study was to highlight, explain, and
-create future considerations for the advancement of forecasting future
-beer sales and the process around how distributors and suppliers can
-collaborate to achieve this goal. Weekly forecasts can be created by
-supplier, brand, package, etc. for up to fifteen weeks into the future
-if necessary. It is important to be aware of the product trends so that
-specific situations can be explained to various employees of the company
-at any time.
-
-https://www.nbwa.org/sites/default/files/hitting\_the\_mark.pdf
 
 \section{Methodology}\label{methodology}
 
@@ -295,15 +283,21 @@ variables for largest city in Iowa of Des Moines as follows;
 and our dependent variables are \texttt{Volume\ sold\ in\ Gallons} and
 \texttt{Profit\ Dollars}.
 
-We then sought to model the mean price per bottle, by modeling the price
-per bottle we can make pricing decisions based on region and the volume
-we plan to sell.
+By modeling \texttt{Volume\ sold\ in\ Gallons} and
+\texttt{Profit\ Dollars} we aim to predict the volume of production
+needed and the possible profit dollars when producing at the predicted
+volume. We first began by using linear regression to model the Volume
+Sold in Gallons, however, the distribution was initially non-normal so
+we used the BoxCox method to transform our dependent variable to a more
+normal distribution. We then used forward selection method to determine
+the final form for the model of Volume Sold in Gallons. We further
+removed points that had unusually high influence on the model.
 
-discuss the key aspects of your problem, data set and regression
-model(s). Given that you are working on real-world data, explain at a
-high-level your exploratory data analysis, how you prepared the data for
-regression modeling, your process for building regression models, and
-your model selection.
+We then modeled our second dependent variable of
+\texttt{Profit\ Dollars}, which is the difference between the sale price
+and retail price, by using linear regression. After using forward
+selection and removing highly influence points in the second model we
+were able more accurately model the data set.
 
 \section{Experimentation and Results}\label{experimentation-and-results}
 
@@ -321,7 +315,7 @@ to large to use in a meaningful model.
 
 We reviewed the liquor sales by gallons sold per year by Liquor
 Category. Initially, we viewed the top 5 Liquor Categories by volume
-sold but there were large disparaties between years, suggesting that the
+sold but there were large disparities between years, suggesting that the
 top 5 change often and is likely due to changing consumer tastes. We do
 see a more stable set of liquor categories for the top 10 category which
 suggests that while tastes may change we don't see large movements in
@@ -338,8 +332,7 @@ in Iowa so we will limit our analysis to this city.
 
 Our first attempt was to use a Poisson regression due to the
 over-dispersion created by aggregating the data set. However, the
-distribution was far to negatively skewed to fit a poission
-distribution.
+distribution was far to negatively skewed to fit a Poisson distribution.
 
 \subsection{Distributions of Dependent
 Variables}\label{distributions-of-dependent-variables}
@@ -347,7 +340,7 @@ Variables}\label{distributions-of-dependent-variables}
 We see that the dependent variable of Bottles Sold has a non-normal
 distribution as illustrated in the Cullen and Frey graph AC and HC
 (1999) from the \texttt{fitdistrplus} package and the non normal
-distribution is futher highlighted in the diagnostic plots.
+distribution is further highlighted in the diagnostic plots.
 
 \subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-10-1.pdf}}{}}\label{section}
 
@@ -739,9 +732,9 @@ to the fact that it is not acceptable to apply a fully linear or
 nonlinear model on sales data.
 
 The two forecast error measures that were used to evaluate and compare
-model performance were mean squared error and mean absoute error. The
+model performance were mean squared error and mean absolute error. The
 performance of the predicted data was significantly improved when the
-past records of comembers were used.
+past records of co members were used.
 
 http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_gale\_ofa425455991\&indx=3\&recIds=TN\_gale\_ofa425455991\&recIdxs=2\&elementId=2\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481346949259
 
@@ -1510,24 +1503,24 @@ lowest :   0.13   0.20   0.30   0.32   0.39, highest: 383.96 417.74 483.05 623.5
   \item Other packages: car~2.1-4, data.table~1.10.0, dplyr~0.5.0,
     fitdistrplus~1.0-7, forecast~7.3, Formula~1.2-1,
     ggplot2~2.2.0, Hmisc~4.0-1, lattice~0.20-34, logspline~2.1.9,
-    magrittr~1.5, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
-    purrr~0.2.2, RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
+    MASS~7.3-45, pacman~0.4.1, pander~0.6.0, purrr~0.2.2,
+    RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
     survival~2.40-1, tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0,
     timeDate~3012.100, zoo~1.7-13
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    codetools~0.2-15, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
-    evaluate~0.10, foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2,
-    gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
-    knitr~1.15.1, labeling~0.3, latticeExtra~0.6-28,
-    lazyeval~0.2.0, lme4~1.1-12, Matrix~1.2-7.1,
-    MatrixModels~0.4-1, mgcv~1.8-16, minqa~1.2.4, munsell~0.4.3,
-    nlme~3.1-128, nloptr~1.0.4, nnet~7.3-12, openssl~0.9.5,
-    parallel~3.3.2, pbkrtest~0.4-6, plyr~1.8.4, quadprog~1.5-5,
-    quantreg~5.29, R6~2.2.0, Rcpp~0.12.8, reshape2~1.4.2,
-    rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1, rticles~0.2,
-    scales~0.4.1, SparseM~1.74, splines~3.3.2, stringi~1.1.2,
-    stringr~1.1.0, tools~3.3.2, tseries~0.10-35, yaml~2.1.14
+    colorspace~1.3-1, DBI~0.5-1, digest~0.6.10, evaluate~0.10,
+    foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2, gridExtra~2.2.1,
+    gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5, knitr~1.15.1,
+    latticeExtra~0.6-28, lazyeval~0.2.0, lme4~1.1-12,
+    magrittr~1.5, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
+    minqa~1.2.4, munsell~0.4.3, nlme~3.1-128, nloptr~1.0.4,
+    nnet~7.3-12, openssl~0.9.5, parallel~3.3.2, pbkrtest~0.4-6,
+    plyr~1.8.4, quadprog~1.5-5, quantreg~5.29, R6~2.2.0,
+    Rcpp~0.12.8, rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1,
+    rticles~0.2, scales~0.4.1, SparseM~1.74, splines~3.3.2,
+    stringi~1.1.2, stringr~1.1.0, tools~3.3.2, tseries~0.10-35,
+    yaml~2.1.14
 \end{itemize}
 
 \section{R statistical programming
@@ -1553,6 +1546,11 @@ Anonymous. 2016. ``Specialty Products Grow in Wine, Spirits.''
 
 \hypertarget{ref-IowaSetsRecord2}{}
 Boshart, Rod. 2001. ``Liquor Sales in Iowa Set Record.'' \emph{Gazette}.
+
+\hypertarget{ref-Forecast1}{}
+David S. Walonick, Ph.D. 1993. ``An Overview of Forecasting
+Methodology.'' \emph{Survival Statistics}.
+doi:\href{https://doi.org/http://www.statpac.org/research-library/forecasting.htm}{http://www.statpac.org/research-library/forecasting.htm}.
 
 \hypertarget{ref-KeepingSpiritsHigh1}{}
 Del Buono, Amanda. 2016. ``Keeping Spirits High.'' \emph{Beverage
