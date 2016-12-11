@@ -182,20 +182,85 @@ increase in sales so planning to meet capacity is a suitable goal for
 any company. Our years of interest for this analysis will be the month
 of November for 2015 and 2016.
 
-\section{Research Background (Literature
-Review)}\label{research-background-literature-review}
+\section{Research Background}\label{research-background}
 
-Our goal is inventory prediction.
+The main goal that has to be achieved in inventory prediction is
+increasing the efficiency without decreasing the service value offered
+to the customers. When managing the levels of inventory, it is important
+to maintain moderate level(s) - not too high and not too low. If the
+inventory level is excessive, business funds can get wasted. These funds
+would not be able to be used for any other purpose, thus involving an
+opportunity cost. The costs of shortage, handling insurance, recording
+and inspection would proportionately increase along with inventory
+volume, thus impairing profitability.
+
+On the other hand, low level(s) of inventory may result in frequent
+interruptions in the production schedule resulting in under-utilization
+of capacity and lower sales. When making predictions about orders that
+should be placed, assumptions are made as follows - uncertainty always
+exists regardless of the method(s) used, new technologies cannot always
+be forecasted for which paradigms do not exist, and social policy will
+be formulated where the future would be affected, changing the accuracy
+of the forecast.
+
+One useful method for predicting inventories is the extrapolation of
+trends. In this method, trends and cycles in the historical data are
+examined and mathematical techniques are used to extrapolate to the
+future. The model chosen for forecasting would depend on the historical
+data. One of the most common models used in this method is
+decomposition, where historical data is separated into trend, seasonal,
+and random components. As a result, forecasts are produced using
+``turning point analysis''. Other examples of models used are adaptive
+filtering, Box-Jenkins analysis, simple linear regression, curve
+fitting, and weighted smoothing.
+
+According to Makridakis, ``Judgmental forecasting is superior to
+mathematical models, although there are several forecasting applications
+where computer-generated models would be more feasible.'' When inventory
+levels for bulk-quantity items would need to be forecasted monthly by
+large manufacturing companies, generating models through computer
+software would be more efficient.
+
+http://www.statpac.org/research-library/forecasting.htm
+
+Forecasting the demand of a product is very essential in predicting the
+order quantity. As a result, a data bank is created, helping the
+decision makers settle targets, create plans, and demonstrate changes in
+the business setting. Two different methods are utilized in the
+investigation of the future demand - quantitative and qualitative. In
+quantitative methods, mathematical consistencies in the history are
+searched for. Two subcategories exist in quantitative methods - time
+series models and correlation models. On the other hand, qualitative
+methods are based on the opinions that people have had about the product
+in the past based on their experiences, premonitions, and emotions.
+
+However, when the most suitable forecast model gets selected, it is not
+necessarily based solely on quantitative or qualitative variables. The
+forecast model can even combine several models.
+
+http://www.slideshare.net/AbhishekKumar159/demand-forecast-process-and-inventory-management
+
+There was a study conducted by the Beer Industry Electronic Commerce
+Coalition. The purpose of this study was to highlight, explain, and
+create future considerations for the advancement of forecasting future
+beer sales and the process around how distributors and suppliers can
+collaborate to achieve this goal. Weekly forecasts can be created by
+supplier, brand, package, etc. for up to fifteen weeks into the future
+if necessary. It is important to be aware of the product trends so that
+specific situations can be explained to various employees of the company
+at any time.
+
+https://www.nbwa.org/sites/default/files/hitting\_the\_mark.pdf
 
 \section{Methodology}\label{methodology}
 
-The initial data set contained many variables and is sufficiently large
-as it includes sales by location and each individual invoice since 2012.
-The reason for the large size of the initial data set is due to it
-including every liquor transaction from 2012 to present in Iowa, so it
-approaches 2.68 GB. For the purposes of this analysis, to analyze a data
-set this large is not feasible. Therefore, we reduced the number of
-variables and summarized to a regional aggregate.
+Our initial data set is sufficiently large in that it includes sales by
+individual stores and the invoices for each store. The reason for the
+large size of the initial data set is due to it including every liquor
+transaction from 2012 to present in Iowa, so it approaches 2.68 GB. For
+the purposes of this analysis, to analyze a data set this large is not
+feasible. Therefore, we reduced the number of variables and summarized
+to a regional aggregate.
 
 Additionally, we looked into the top 10 liquor categories for each year
 by number of bottles sold. In 2015, the top categories were American
@@ -209,30 +274,23 @@ strong sales and growing interest in the US.
 
 Furthermore, we looked into the sales by \texttt{County} for Iowa
 
-So we reduced the data set to a subset of variables as follows;
+We initially attempted to model for a dependent variable of
+\texttt{Volume\ Sold\ in\ Gallons} by the top Counties and top liquor
+categories, however, the distribution of this variable becomes
+over-dispersed and negatively skewed when aggregating the data set and
+therefore we were unsuccessful in modeling this variable across regions.
+Our hope was that if we could model for the gallons sold by entirety of
+Iowa we could more accurately predict our planned inventory and
+anticipate production goals. We were more successful in limiting our
+regional analysis to one city and the stores within that city.
+
+Therefore, our final evaluation data set is the following subset of
+variables for largest city in Iowa of Des Moines as follows;
 \texttt{Vendor\ Name}, \texttt{Pack} (pack size of bottles sold)
 \texttt{Bottle\ Volume}, \texttt{State\ Bottle\ Cost},
 \texttt{State\ Bottle\ Retail}, \texttt{Sales\ Dollars} (Total sales),
 and our dependent variables are \texttt{Volume\ sold\ in\ Gallons} and
 \texttt{Profit\ Dollars}.
-
-We initially attempted to model for a dependent variable of
-\texttt{Volume\ Sold\ in\ Gallons} by \texttt{County}, however, the
-distribution of this variable becomes over-dispersed and negatively
-skewed when aggregating the data set to a manageable size and therefore
-we were unsuccessful in modeling this variable across regions. Our hope
-was that if we could model for the gallons sold by region we could more
-accurately predict our planned inventory and anticipate production
-goals. We were more successful in limiting our regional analysis to one
-city and the stores within that city.
-
-In Des Moines in Iowa, we want to predict bottles sold of whiskey (as a
-whiskey company) in the holiday month of November, the stores (storeID)
-and we have Vendor Name, Pack (in case pack size influences sales),
-bottle volume (people looking for deals) state bottle cost (how much to
-procure), state bottle retail (how much we sell for), Sale Dollars
-(total sales) Volume (gallons), profit margin (calculate for the
-business problem).
 
 We then sought to model the mean price per bottle, by modeling the price
 per bottle we can make pricing decisions based on region and the volume
@@ -250,118 +308,40 @@ your model selection.
 
 \section{Forward step}\label{forward-step}
 
-\begin{verbatim}
-## Start:  AIC=4270.71
-## Bottles.Sold ~ 1
-## 
-##                         Df Sum of Sq      RSS    AIC
-## + Volume.Sold..Gallons.  1  31263820   777424 2874.4
-## + Sale..Dollars.         1  29649270  2391974 3297.0
-## + State.Bottle.Cost      1  17914640 14126604 3964.8
-## + State.Bottle.Retail    1  17910359 14130885 3964.9
-## + Store.Number          72  15883862 16157382 4157.3
-## + Category.Name          7   1729576 30311668 4263.8
-## + Bottle.Volume..ml.     1    191055 31850189 4270.5
-## <none>                               32041244 4270.7
-## + Pack                   1     12595 32028649 4272.6
-## 
-## Step:  AIC=2874.44
-## Bottles.Sold ~ Volume.Sold..Gallons.
-## 
-##                       Df Sum of Sq    RSS    AIC
-## + Category.Name        7    120760 656663 2825.0
-## + Pack                 1     85890 691534 2832.4
-## + State.Bottle.Retail  1     67111 710313 2842.5
-## + State.Bottle.Cost    1     67106 710318 2842.5
-## + Bottle.Volume..ml.   1     52773 724651 2850.0
-## + Sale..Dollars.       1     35590 741834 2858.8
-## <none>                             777424 2874.4
-## + Store.Number        72    228710 548714 2887.4
-## 
-## Step:  AIC=2824.97
-## Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name
-## 
-##                       Df Sum of Sq    RSS    AIC
-## + State.Bottle.Retail  1     71786 584877 2783.4
-## + State.Bottle.Cost    1     71739 584925 2783.5
-## + Pack                 1     66826 589837 2786.6
-## + Bottle.Volume..ml.   1     49810 606854 2797.3
-## + Store.Number        72    230477 426186 2806.4
-## + Sale..Dollars.       1     12286 644378 2819.9
-## <none>                             656663 2825.0
-## 
-## Step:  AIC=2783.44
-## Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + State.Bottle.Retail
-## 
-##                      Df Sum of Sq    RSS    AIC
-## + Pack                1     75578 509299 2733.4
-## + Bottle.Volume..ml.  1     52157 532721 2750.3
-## + Store.Number       72    190258 394619 2779.5
-## + Sale..Dollars.      1      4072 580805 2782.8
-## <none>                            584877 2783.4
-## + State.Bottle.Cost   1      1748 583130 2784.3
-## 
-## Step:  AIC=2733.41
-## Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + State.Bottle.Retail + 
-##     Pack
-## 
-##                      Df Sum of Sq    RSS    AIC
-## + Sale..Dollars.      1      6620 502680 2730.5
-## <none>                            509299 2733.4
-## + Bottle.Volume..ml.  1      2188 507111 2733.8
-## + State.Bottle.Cost   1      1672 507628 2734.2
-## + Store.Number       72    153610 355689 2742.4
-## 
-## Step:  AIC=2730.49
-## Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + State.Bottle.Retail + 
-##     Pack + Sale..Dollars.
-## 
-##                      Df Sum of Sq    RSS    AIC
-## <none>                            502680 2730.5
-## + Bottle.Volume..ml.  1      2354 500326 2730.7
-## + State.Bottle.Cost   1      1016 501663 2731.7
-## + Store.Number       72    147694 354985 2743.7
-\end{verbatim}
-
-\begin{verbatim}
-## 
-## Call:
-## lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + 
-##     State.Bottle.Retail + Pack + Sale..Dollars., data = dfLiquorSales)
-## 
-## Coefficients:
-##                                 (Intercept)  
-##                                  -31.761507  
-##                       Volume.Sold..Gallons.  
-##                                    4.093187  
-##              Category.NameCANADIAN WHISKIES  
-##                                   36.253685  
-##                 Category.NameIRISH WHISKIES  
-##                                   -4.873548  
-##                Category.NameSCOTCH WHISKIES  
-##                                   -8.116166  
-## Category.NameSINGLE BARREL BOURBON WHISKIES  
-##                                   12.384335  
-##      Category.NameSTRAIGHT BOURBON WHISKIES  
-##                                   -3.416345  
-##          Category.NameSTRAIGHT RYE WHISKIES  
-##                                   17.005140  
-##             Category.NameTENNESSEE WHISKIES  
-##                                   -1.310738  
-##                         State.Bottle.Retail  
-##                                    0.079326  
-##                                        Pack  
-##                                    2.759534  
-##                              Sale..Dollars.  
-##                                   -0.003802
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{fit1 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DataTypeTok{formula =} \NormalTok{Bottles.Sold ~}\StringTok{ }\NormalTok{Volume.Sold..Gallons. +}\StringTok{ }\NormalTok{Category.Name +}\StringTok{ }
-\StringTok{     }\NormalTok{State.Bottle.Retail +}\StringTok{ }\NormalTok{Pack +}\StringTok{ }\NormalTok{Sale..Dollars., }\DataTypeTok{data =} \NormalTok{dfLiquorSales)}
-\end{Highlighting}
-\end{Shaded}
+\begin{table}[!htbp] \centering 
+  \caption{Forward Selection Linear Model 1} 
+  \label{} 
+\normalsize 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & Bottles.Sold \\ 
+\hline \\[-1.8ex] 
+ Constant & $-$31.762$^{***}$ (7.570) \\ 
+  Volume.Sold..Gallons. & 4.093$^{***}$ (0.162) \\ 
+  Category.NameCANADIAN WHISKIES & 36.254$^{***}$ (6.601) \\ 
+  Category.NameIRISH WHISKIES & $-$4.874 (8.077) \\ 
+  Category.NameSCOTCH WHISKIES & $-$8.116 (8.189) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & 12.384 (14.612) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & $-$3.416 (6.985) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & 17.005$^{*}$ (9.423) \\ 
+  Category.NameTENNESSEE WHISKIES & $-$1.311 (7.125) \\ 
+  State.Bottle.Retail & 0.079$^{***}$ (0.011) \\ 
+  Pack & 2.760$^{***}$ (0.367) \\ 
+  Sale..Dollars. & $-$0.004$^{**}$ (0.002) \\ 
+ \hline \\[-1.8ex] 
+Observations & 376 \\ 
+R$^{2}$ & 0.984 \\ 
+Adjusted R$^{2}$ & 0.984 \\ 
+Residual Std. Error & 37.162 (df = 364) \\ 
+F Statistic & 2,076.152$^{***}$ (df = 11; 364)  (p = 0.000) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
 
 \section{Volume.Sold..Gallons=One unit of increase in volume sold will
 increase the bottles sold by 4.10
@@ -395,6 +375,8 @@ WHISKIES'' )
 \section{7.133 * (State.Bottle.Retail) + 7.521 * (Pack) - 2.189 *
 Sale..Dollars.}\label{state.bottle.retail-7.521-pack---2.189-sale..dollars.}
 
+\newpage
+
 \section{Data Acquisition}\label{data-acquisition}
 
 The data set contains the spirits purchase information of Iowa Class
@@ -404,17 +386,16 @@ Commerce, Alcoholic Beverages Division,
 \href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
 here} to view the data set at Data.Iowa.Gov.
 
-As discussed in our methodogly section, the data set is 2.68 GB in total
-size and much to large to process with our current techiniques. A
-greater understanding of working with data sets of this size with R w
+As previously discussed, the data set is 2.68 GB in total size and much
+to large to use in a meaningful model.
 
 We reviewed the liquor sales by gallons sold per year by Liquor
 Category. Initially, we viewed the top 5 Liquor Categories by volume
-sold but there were large disparate between years, suggesting that the
-top 5 change often and likely due to changing consumer tastes. We do see
-a more stable set of liquor categories for the top 10 category which
+sold but there were large disparaties between years, suggesting that the
+top 5 change often and is likely due to changing consumer tastes. We do
+see a more stable set of liquor categories for the top 10 category which
 suggests that while tastes may change we don't see large movements in
-liquor categories. For this analysis we will focus on the whiskey
+liquor categories at this level. We focused our attention on the whiskey
 categories.
 
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-1.pdf}
@@ -424,7 +405,7 @@ over-dispersion created by aggregating the data set. However, the
 distribution was far to negatively skewed to fit a poission
 distribution. We therefore chose
 
-\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-7-1.pdf}}{}}\label{section}
+\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-8-1.pdf}}{}}\label{section}
 
 \begin{longtable}[]{@{}cccccccc@{}}
 \toprule
@@ -432,12 +413,101 @@ min & max & median & mean & sd & skewness & kurtosis &
 method\tabularnewline
 \midrule
 \endhead
-6.834324 & 22.80474 & 13.21952 & 13.31821 & 3.604091 & 0.3534382 &
-2.604675 & unbiased\tabularnewline
+2814 & 962072 & 24111.5 & 53022.46 & 92140.34 & 5.928606 & 52.56773 &
+unbiased\tabularnewline
 \bottomrule
 \end{longtable}
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-8-1.pdf}
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+describe the specifics of what you did (data exploration, data
+preparation, model building, model selection, model evaluation, etc.),
+and what you found out (statistical analyses, interpretation and
+discussion of the results, etc.).
+
+\section{Discussion and Conclusions}\label{discussion-and-conclusions}
+
+In two studies that were conducted, the statistical data from the
+previous time interval was used to predict what would happen in the next
+time interval. One study was for pharmaceutical distribution companies.
+The other study involved data mining models.
+
+In one study involving pharmaceutical distribution companies, the
+purpose was to propose a novel method to forecast the sales of the
+companies. Network-based analysis was conducted to find clique sets and
+group members and to use the sales data of comembers. The reason for
+this was the lack of sufficient historic sales records of each drug.
+
+Three methods were used to build time series models forecasting sales -
+ARIMA methodology, neural network, and an advanced hybrid neural network
+approach. The performance of the proposed method was evaluated using a
+real dataset provided by one of the leading pharmacy distribution
+companies in Iran. The results of the evaluation indicated that the
+proposed method can cope with the low number of past records while
+accurately forecasting medicine sales.
+
+After exploratory analysis was done on the data, it was concluded that
+most medicines had different and specific characteristics and sales
+behavior, it was impractical to make a single prediction model for all
+medicines, and most sales records had nonlinear relationships.
+
+The reason why the hybrid neural network method was carried out was due
+to the fact that it is not acceptable to apply a fully linear or
+nonlinear model on sales data.
+
+The two forecast error measures that were used to evaluate and compare
+model performance were mean squared error and mean absoute error. The
+performance of the predicted data was significantly improved when the
+past records of comembers were used.
+
+http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_gale\_ofa425455991\&indx=3\&recIds=TN\_gale\_ofa425455991\&recIdxs=2\&elementId=2\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481346949259
+
+The other study that examined prediction-based inventory optimization
+using data mining models, the Back propagation neural network was used
+for training the prediction model. The idea that gave rise to this
+method of inventory prediction was the idea that the demand of marketing
+is viewed as the foundation of inventory management.
+
+On the basis of the prediction result, a simple and concise inventory
+policy was established. Following this, the historic sales data was used
+to estimate a normal distribution of demand and to calculate the
+inventory cost with inventory strategy.
+
+Two models (Back Propagation Neural Network and Support Vector
+Regression) were established using three input variables (historical
+sales data, the frequency of searching the commodity, and the click
+volume of the commodity page).
+
+When the back-propagation neural network method was used, there was more
+accuracy shown in the performance because the predicted values almost
+matched the actual values in the graphs.
+
+The mean absolute percentage error calculated for this model is 0.06.
+
+http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?frbrVersion=2\&tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_ieee10.1109\%2fCSO.2014.118\&indx=10\&recIds=TN\_ieee10.1109\%2fCSO.2014.118\&recIdxs=9\&elementId=9\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481412549638
+
+In another study conducted in 2012 in Idaho, the monthly revenue
+generated was examined rather than the yearly revenue generated. The
+continued growth was rather owed to the number of weekends a month has
+(five instead of four) and to the higher prices in neighboring states.
+In Washington, the voters approved an initiative that led the state to
+sell its liquor stores and add new distributor and retail fees, making
+prices in the neighboring states (Idaho and Oregon) look better. There
+were no changes made in marketing or pricing in response to the
+regulatory shift in Washington ({\textbf{???}}). Further research into
+the proximity of our counties to states and towns with higher prices and
+regulation may provide more insight into sales and volume of liquor
+sold. Additionally, reviewing the data by identifying months that has 5
+weekends instead of four could provide further insights.
+
+conclude your findings, limitations, and suggest areas for future work.
+
+\newpage
+
+\section{Appendices}\label{appendices}
+
+\section{Supplemental tables and/or
+figures.}\label{supplemental-tables-andor-figures.}
 
 \begin{spacing}{0.7}
 \begin{center}\textbf{ dfLiquorSales \\ 14 Variables~~~~~ 376 ~Observations}\end{center}
@@ -1147,36 +1217,6 @@ lowest :   0.13   0.20   0.30   0.32   0.39, highest: 383.96 417.74 483.05 623.5
 ## WHISKIES (27, 0.072), TENNESSEE WHISKIES (63, 0.168)
 \end{verbatim}
 
-describe the specifics of what you did (data exploration, data
-preparation, model building, model selection, model evaluation, etc.),
-and what you found out (statistical analyses, interpretation and
-discussion of the results, etc.).
-
-\section{Discussion and Conclusions}\label{discussion-and-conclusions}
-
-In another study conducted in 2012 in Idaho, the monthly revenue
-generated was examined rather than the yearly revenue generated. The
-continued growth was rather owed to the number of weekends a month has
-(five instead of four) and to the higher prices in neighboring states.
-In Washington, the voters approved an initiative that led the state to
-sell its liquor stores and add new distributor and retail fees, making
-prices in the neighboring states (Idaho and Oregon) look better. There
-were no changes made in marketing or pricing in response to the
-regulatory shift in Washington ({\textbf{???}}). Further research into
-the proximity of our counties to states and towns with higher prices and
-regulation may provide more insight into sales and volume of liquor
-sold. Additionally, reviewing the data by identifying months that has 5
-weekends instead of four could provide further insights.
-
-conclude your findings, limitations, and suggest areas for future work.
-
-\newpage
-
-\section{Appendices}\label{appendices}
-
-\section{Supplemental tables and/or
-figures.}\label{supplemental-tables-andor-figures.}
-
 \section{Session Info}\label{session-info}
 
 \begin{itemize}\raggedright
@@ -1186,18 +1226,17 @@ figures.}\label{supplemental-tables-andor-figures.}
     methods, stats, utils
   \item Other packages: dplyr~0.5.0, fitdistrplus~1.0-7,
     Formula~1.2-1, ggplot2~2.2.0, Hmisc~4.0-1, lattice~0.20-34,
-    logspline~2.1.9, magrittr~1.5, MASS~7.3-45, pacman~0.4.1,
-    pander~0.6.0, purrr~0.2.2, readr~1.0.0, survival~2.40-1,
+    logspline~2.1.9, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
+    purrr~0.2.2, readr~1.0.0, stargazer~5.2, survival~2.40-1,
     tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    codetools~0.2-15, colorspace~1.3-1, data.table~1.10.0,
-    DBI~0.5-1, digest~0.6.10, evaluate~0.10, foreign~0.8-67,
-    grid~3.3.2, gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7,
-    htmltools~0.3.5, knitr~1.15.1, labeling~0.3,
-    latticeExtra~0.6-28, lazyeval~0.2.0, Matrix~1.2-7.1,
-    munsell~0.4.3, nnet~7.3-12, openssl~0.9.5, plyr~1.8.4,
-    R6~2.2.0, RColorBrewer~1.1-2, Rcpp~0.12.8, reshape2~1.4.2,
+    colorspace~1.3-1, data.table~1.10.0, DBI~0.5-1, digest~0.6.10,
+    evaluate~0.10, foreign~0.8-67, grid~3.3.2, gridExtra~2.2.1,
+    gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5, knitr~1.15.1,
+    latticeExtra~0.6-28, lazyeval~0.2.0, magrittr~1.5,
+    Matrix~1.2-7.1, munsell~0.4.3, nnet~7.3-12, openssl~0.9.5,
+    plyr~1.8.4, R6~2.2.0, RColorBrewer~1.1-2, Rcpp~0.12.8,
     rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1, rticles~0.2,
     scales~0.4.1, splines~3.3.2, stringi~1.1.2, stringr~1.1.0,
     tools~3.3.2, yaml~2.1.14
