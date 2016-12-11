@@ -43,7 +43,7 @@ p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse)
 Problem
 =================
 
-The objective of this report is to create a statistical model for the volume sold of liquor in gallons and the profit margin in the City of Des Moines which is within the state of Iowa. This will help us make informed decisions on inventory production, sales, and assist wholesale distributors to plan for the predicted volume of distribution.  
+The objective of this report is to create a statistical model for the volume sold of liquor in gallons and the profit dollars in the City of Des Moines which is within the state of Iowa. This can help us make informed decisions on inventory production, sales, and assist wholesale distributors to plan for the predicted volume of distribution.  
 
 Introduction
 =================
@@ -64,7 +64,7 @@ The initial data set contained many variables and is sufficiently large as it in
 
 Additionally, we looked into the top 10 liquor categories for each year by number of bottles sold. In 2015, the top categories were American Cocktails, Blended Whiskies, Canadian Whiskies, Imported Vodka, Puerto Rico & Virgin Islands Rum, Spiced Rum, Straight Bourbon Whiskies, Tequila, Vodka 80 Proof, and Whiskey Liqueur. Interestingly straight bourbon appears to have more sales in 2015 than 2014 which coincides with the literature of strong growing whiskey sales for every whiskey segment (@SpecialityGrow3). We decided to focus on whiskey do to its strong sales and growing interest in the US.
 
-Furthermore, 
+Furthermore, we looked into the sales by `County` for Iowa 
 
 So we reduced the data set to a subset of variables as follows; `Vendor Name`, `Pack` (pack size of bottles sold) `Bottle Volume`, `State Bottle Cost`, `State Bottle Retail`, `Sales Dollars` (Total sales), and our dependent variables are `Volume sold in Gallons` and `Profit Dollars`.
 
@@ -231,12 +231,14 @@ write.csv(iowaDataReduced, "iowa_data_reduced.csv")
 
 We reviewed the liquor sales by gallons sold per year by Liquor Category. Initially, we viewed the top 5 Liquor Categories by volume sold but there were large disparate between years, suggesting that the top 5 change often and likely due to changing consumer tastes. We do see a more stable set of liquor categories for the top 10 category which suggests that while tastes may change we don't see large movements in liquor categories. For this analysis we will focus on the whiskey categories.  
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=TRUE}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=5, fig.width=10, eval=TRUE}
 ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Volume.Sold..Gallons., fill = factor(Year))) + 
       scale_y_continuous(labels = scales::comma) + 
       geom_bar(stat = "identity") +
       facet_grid(~Year) +
-      theme(axis.text.x = element_text(angle = 70, hjust = 1), legend.position = "none") +
+      theme_minimal() + 
+      theme(axis.text.x = element_text(angle = 70, hjust = 1), legend.position = "none") + 
+      coord_flip() + 
       xlab("Liquor Category") + 
       ylab("Volume Sold by Gallons\n") +
       ggtitle("                                        Volume of Liquor Category Sales by Gallons Sold")
@@ -254,9 +256,12 @@ fit.norm <- fitdist(iowaDataReduced$`Avg Price Per Bottle`, "norm")
 plot(fit.norm)
 ```
 
-```{r, results='asis', echo=FALSE}
+```{r data set decsribed, results='asis', echo=FALSE}
 describedData <- describe(dfLiquorSales)
 latex(describedData, file = '')
+```
+
+```{r}
 describe(dfLiquorSales$Store.Number)
 describe(dfLiquorSales$Category.Name)
 ```

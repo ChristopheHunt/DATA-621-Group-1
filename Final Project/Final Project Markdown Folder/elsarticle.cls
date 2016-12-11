@@ -23,7 +23,14 @@
 %%
 %% $Id: elsarticle.cls,v 1.18 2008-08-28 06:03:47 cvr Exp $
 %%
+\usepackage[sfdefault]{noto}
+\usepackage{relsize}
+\usepackage{setspace}
 \usepackage[sfdefault]{roboto}
+\usepackage[T1]{fontenc}
+
+
+
  \def\RCSfile{elsarticle}%
  \def\RCSversion{1.0.1}%
  \def\RCSdate{2008/05/22}%

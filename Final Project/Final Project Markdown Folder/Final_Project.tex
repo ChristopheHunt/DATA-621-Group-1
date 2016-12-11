@@ -152,8 +152,8 @@
 \section{Problem}\label{problem}
 
 The objective of this report is to create a statistical model for the
-volume sold of liquor in gallons and the profit margin in the City of
-Des Moines which is within the state of Iowa. This will help us make
+volume sold of liquor in gallons and the profit dollars in the City of
+Des Moines which is within the state of Iowa. This can help us make
 informed decisions on inventory production, sales, and assist wholesale
 distributors to plan for the predicted volume of distribution.
 
@@ -207,7 +207,7 @@ with the literature of strong growing whiskey sales for every whiskey
 segment (Anonymous (2016)). We decided to focus on whiskey do to its
 strong sales and growing interest in the US.
 
-Furthermore,
+Furthermore, we looked into the sales by \texttt{County} for Iowa
 
 So we reduced the data set to a subset of variables as follows;
 \texttt{Vendor\ Name}, \texttt{Pack} (pack size of bottles sold)
@@ -1116,15 +1116,36 @@ lowest :   0.13   0.20   0.30   0.32   0.39, highest: 383.96 417.74 483.05 623.5
 \smallskip\hrule\smallskip
 }\end{spacing}
 
-dfLiquorSales\$Store.Number n missing distinct 376 0 73
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{describe}\NormalTok{(dfLiquorSales$Store.Number)}
+\end{Highlighting}
+\end{Shaded}
 
-lowest : 2190 2248 2527 2528 2532, highest: 5131 5132 5137 5145 5169
-dfLiquorSales\$Category.Name n missing distinct 376 0 8
+\begin{verbatim}
+## dfLiquorSales$Store.Number 
+##        n  missing distinct 
+##      376        0       73 
+## 
+## lowest : 2190 2248 2527 2528 2532, highest: 5131 5132 5137 5145 5169
+\end{verbatim}
 
-BLENDED WHISKIES (61, 0.162), CANADIAN WHISKIES (71, 0.189), IRISH
-WHISKIES (39, 0.104), SCOTCH WHISKIES (41, 0.109), SINGLE BARREL BOURBON
-WHISKIES (8, 0.021), STRAIGHT BOURBON WHISKIES (66, 0.176), STRAIGHT RYE
-WHISKIES (27, 0.072), TENNESSEE WHISKIES (63, 0.168)
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{describe}\NormalTok{(dfLiquorSales$Category.Name)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## dfLiquorSales$Category.Name 
+##        n  missing distinct 
+##      376        0        8 
+## 
+## BLENDED WHISKIES (61, 0.162), CANADIAN WHISKIES (71, 0.189), IRISH
+## WHISKIES (39, 0.104), SCOTCH WHISKIES (41, 0.109), SINGLE BARREL BOURBON
+## WHISKIES (8, 0.021), STRAIGHT BOURBON WHISKIES (66, 0.176), STRAIGHT RYE
+## WHISKIES (27, 0.072), TENNESSEE WHISKIES (63, 0.168)
+\end{verbatim}
 
 describe the specifics of what you did (data exploration, data
 preparation, model building, model selection, model evaluation, etc.),
@@ -1165,17 +1186,18 @@ figures.}\label{supplemental-tables-andor-figures.}
     methods, stats, utils
   \item Other packages: dplyr~0.5.0, fitdistrplus~1.0-7,
     Formula~1.2-1, ggplot2~2.2.0, Hmisc~4.0-1, lattice~0.20-34,
-    logspline~2.1.9, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
-    purrr~0.2.2, readr~1.0.0, survival~2.40-1, tibble~1.2,
-    tidyr~0.6.0, tidyverse~1.0.0
+    logspline~2.1.9, magrittr~1.5, MASS~7.3-45, pacman~0.4.1,
+    pander~0.6.0, purrr~0.2.2, readr~1.0.0, survival~2.40-1,
+    tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    colorspace~1.3-1, data.table~1.10.0, DBI~0.5-1, digest~0.6.10,
-    evaluate~0.10, foreign~0.8-67, grid~3.3.2, gridExtra~2.2.1,
-    gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5, knitr~1.15.1,
-    latticeExtra~0.6-28, lazyeval~0.2.0, magrittr~1.5,
-    Matrix~1.2-7.1, munsell~0.4.3, nnet~7.3-12, openssl~0.9.5,
-    plyr~1.8.4, R6~2.2.0, RColorBrewer~1.1-2, Rcpp~0.12.8,
+    codetools~0.2-15, colorspace~1.3-1, data.table~1.10.0,
+    DBI~0.5-1, digest~0.6.10, evaluate~0.10, foreign~0.8-67,
+    grid~3.3.2, gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7,
+    htmltools~0.3.5, knitr~1.15.1, labeling~0.3,
+    latticeExtra~0.6-28, lazyeval~0.2.0, Matrix~1.2-7.1,
+    munsell~0.4.3, nnet~7.3-12, openssl~0.9.5, plyr~1.8.4,
+    R6~2.2.0, RColorBrewer~1.1-2, Rcpp~0.12.8, reshape2~1.4.2,
     rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1, rticles~0.2,
     scales~0.4.1, splines~3.3.2, stringi~1.1.2, stringr~1.1.0,
     tools~3.3.2, yaml~2.1.14
