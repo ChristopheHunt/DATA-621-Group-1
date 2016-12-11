@@ -37,7 +37,7 @@ output: rticles::elsevier_article
 ```{r options and library load, include = FALSE}
 options(xtable.comment = FALSE)
 library(pacman)
-p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table)
+p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table, RColorBrewer)
 ```
 
 Problem
@@ -220,9 +220,15 @@ iowaCounties <- iowaCounties %>%
 ```
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4.05, fig.width=10, eval=TRUE}
+iowaCountiesPolk <- iowaCounties %>% filter(County == "POLK")
+
+numberColors <- length(unique(iowaCountiesPolk$City))
+ColorPalette <- colorRampPalette(brewer.pal(9, "Spectral"))
+
 ggplot(iowaCounties %>% filter(County == "POLK"), aes(x = County, y = `Volume Sold (Gallons)`, fill = City)) + 
       scale_y_continuous(labels = scales::comma) + 
       geom_bar(stat = "identity") +
+      scale_fill_manual(values = ColorPalette(numberColors)) + 
       facet_grid(~Year) +
       theme_minimal() + 
       theme(axis.text.x = element_text(angle = 70, hjust = 1)) + 
