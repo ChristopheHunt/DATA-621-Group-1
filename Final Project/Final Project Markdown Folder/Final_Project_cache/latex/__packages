@@ -19,3 +19,7 @@ purrr
 stargazer
 data.table
 RColorBrewer
+zoo
+timeDate
+forecast
+car

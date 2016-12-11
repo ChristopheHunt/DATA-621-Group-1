@@ -37,7 +37,7 @@ output: rticles::elsevier_article
 ```{r options and library load, include = FALSE}
 options(xtable.comment = FALSE)
 library(pacman)
-p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table, RColorBrewer)
+p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table, RColorBrewer, forecast, car)
 ```
 
 Problem
@@ -83,9 +83,9 @@ Our initial data set is sufficiently large in that it includes sales by individu
 
 Additionally, we looked into the top 10 liquor categories for each year by number of bottles sold. In 2015, the top categories were American Cocktails, Blended Whiskies, Canadian Whiskies, Imported Vodka, Puerto Rico & Virgin Islands Rum, Spiced Rum, Straight Bourbon Whiskies, Tequila, Vodka 80 Proof, and Whiskey Liqueur. Interestingly straight bourbon appears to have more sales in 2015 than 2014 which coincides with the literature of strong growing whiskey sales for every whiskey segment (@SpecialityGrow3). We decided to focus on whiskey do to its strong sales and growing interest in the US.
 
-Furthermore, we looked into the sales by `County` for Iowa 
+We initially attempted to model for a dependent variable of `Volume Sold in Gallons` by the top Counties and top liquor categories, however, the distribution of this variable becomes over-dispersed and negatively skewed when aggregating the data set and therefore we were unsuccessful in modeling this variable across regions. Our hope was that if we could model for the gallons sold by entirety of Iowa we could more accurately predict our planned inventory and anticipate production goals. We were more successful in limiting our regional analysis to one city and the stores within that city.
 
-We initially attempted to model for a dependent variable of `Volume Sold in Gallons` by the top Counties and top liquor categories, however, the distribution of this variable becomes over-dispersed and negatively skewed when aggregating the data set and therefore we were unsuccessful in modeling this variable across regions. Our hope was that if we could model for the gallons sold by entirety of Iowa we could more accurately predict our planned inventory and anticipate production goals. We were more successful in limiting our regional analysis to one city and the stores within that city. 
+We accomplished this by looking into volume of sales by the largest `County` for Iowa which is Polk county. The City of Des Moines has the largest volume of whiskey sales in Polk county so we limited our analysis to this city. 
 
 Therefore, our final evaluation data set is the following subset of variables for largest city in Iowa of Des Moines as follows; `Vendor Name`, `Pack` (pack size of bottles sold) `Bottle Volume`, `State Bottle Cost`, `State Bottle Retail`, `Sales Dollars` (Total sales), and our dependent variables are `Volume sold in Gallons` and `Profit Dollars`.
 
@@ -103,6 +103,61 @@ Experimentation and Results
 The data set contains the spirits purchase information of Iowa Class "E" liquor licensees by product and date of purchase from January 1, 2012 to current. The data set is provided by the Iowa Department of Commerce, Alcoholic Beverages Division, [click here](https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy) to view the data set at Data.Iowa.Gov.
 
 As previously discussed, the data set is 2.68 GB in total size and much to large to use in a meaningful model.
+
+```{r , echo = FALSE, results='asis', warning = FALSE, message = FALSE , cache=TRUE, eval=FALSE}
+library(data.table)
+library(tidyverse)
+
+iowa_data <- fread("~./Iowa_Liquor_Sales.csv", header = T, sep = ',')
+
+removeDollars <- function(column){
+  as.numeric(gsub("\\,","",gsub("\\$","", column)))
+}
+
+iowa_data_reduced <- iowa_data %>%
+                     dplyr::select(Date, City, `Category Name`, `Store Number`, `Store Name`, `Pack`, 
+                            `Item Number`, `Item Description`, `Bottle Volume (ml)`, 
+                            `State Bottle Cost`, `State Bottle Retail`, `Sale (Dollars)`,
+                             `Volume Sold (Gallons)`, `Bottles Sold`) %>%
+                    mutate(Date = as.Date(Date, format = "%m/%d/%Y"),
+                           City = factor(toupper(City)),
+                           `Category Name` = factor( toupper(`Category Name`)),
+                           `Store Number` = factor(`Store Number`),
+                           `Store Name` = factor(`Store Name`), 
+                           `Pack` = as.integer(`Pack`),
+                           `Bottle Volume (ml)` = as.numeric(`Bottle Volume (ml)`), 
+                           `State Bottle Cost` = removeDollars(`State Bottle Cost`), 
+                           `State Bottle Retail` = removeDollars(`State Bottle Retail`), 
+                           `Sale (Dollars)` = removeDollars(`Sale (Dollars)`),
+                           `Volume Sold (Gallons)` = as.numeric(`Volume Sold (Gallons)`), 
+                           `Bottles Sold` = as.integer(`Bottles Sold`)) %>%
+                    mutate(Month = format(Date, "%m"),
+                           Year = format(Date, "%Y")) %>%
+                    dplyr::filter(Month == "11") %>%
+                    dplyr::filter(Year == "2015") %>% 
+                    dplyr::filter(City == "DES MOINES") %>% 
+                    dplyr::filter(grepl("WHISKIES", `Category Name`)) %>%
+                    dplyr::select(-Date) %>%
+                    group_by(Month, Year, City, `Category Name`, `Store Number`, `Store Name`)  %>%
+                    summarize( `Pack` = mean(`Pack`),
+                               `Bottles Sold` = sum(`Bottles Sold`), 
+                               `Sale (Dollars)` = sum(`Sale (Dollars)`), 
+                               `Bottle Volume (ml)` = mean(`Bottle Volume (ml)`),
+                               `State Bottle Cost` = sum(`State Bottle Cost`),
+                               `State Bottle Retail` = sum(`State Bottle Retail`),
+                               `Sale (Dollars)` = sum(`Sale (Dollars)`),
+                               `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
+                    as_tibble()
+
+iowa_data_reduced <- iowa_data_reduced %>%
+                    dplyr::ungroup() %>%
+                    mutate(Month = as.numeric(Month),
+                           Year = as.numeric(Year),
+                           `Category Name`= factor(`Category Name`)) %>%
+                    arrange(Year, Month, County, City)
+
+write.csv(iowa_data_reduced, "iowa_data_reduced.csv")
+```
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE}
 iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced.csv") 
@@ -153,7 +208,7 @@ write.csv(iowaDataReduced, "iowa_data_reduced.csv")
 
 We reviewed the liquor sales by gallons sold per year by Liquor Category. Initially, we viewed the top 5 Liquor Categories by volume sold but there were large disparaties between years, suggesting that the top 5 change often and is likely due to changing consumer tastes. We do see a more stable set of liquor categories for the top 10 category which suggests that while tastes may change we don't see large movements in liquor categories at this level. We focused our attention on the whiskey categories.  
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=5, fig.width=10, eval=TRUE}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.75, fig.width=10, eval=TRUE}
 ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Volume.Sold..Gallons., fill = factor(Year))) + 
       scale_y_continuous(labels = scales::comma) + 
       geom_bar(stat = "identity") +
@@ -242,86 +297,100 @@ Our first attempt was to  use a Poisson regression due to the over-dispersion cr
 
 ## Distributions of Dependent Variables
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=TRUE}
-x <- descdist(iowaDataReduced$`Bottles Sold`, discrete = FALSE, boot = 100)
+We see that the dependent variable of Bottles Sold has a non-normal distribution as illustrated in the Cullen and Frey graph @CullenFrey4 from the `fitdistrplus` package and the non normal distribution is futher highlighted in the diagnostic plots.   
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
+iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") 
+x <- descdist(iowaDataReduced$Bottles.Sold, discrete = FALSE, boot = 200)
 pandoc.table(x)
 ```
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=6, fig.width=10, eval=TRUE}
-fit.norm <- fitdist(iowaDataReduced$`Bottles Sold`, "norm")
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=10, eval=TRUE}
+fit.norm <- fitdist(iowaDataReduced$Bottles.Sold, "norm")
 plot(fit.norm)
 ```
 
+The lambda value of the BoxCox transformation of the Bottles Sold is `r round(BoxCox.lambda(as.numeric(iowaDataReduced$Bottles.Sold)),0)`. We therefore apply the log transformation of the dependent variable of Bottles Sold and see a more normal distribution.  
 
-describe the specifics of what you did (data exploration, data preparation,
-model building, model selection, model evaluation, etc.), and what you found out (statistical analyses,
-interpretation and discussion of the results, etc.).
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
+iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") 
+x <- descdist(log(iowaDataReduced$Bottles.Sold), discrete = FALSE, boot = 200)
+pandoc.table(x)
+```
+\newpage
 
+The diagnostic plots show a much more normal distribution after the log transformation. 
 
-```{r , echo = FALSE, results='asis', warning = FALSE, message = FALSE , cache=TRUE, eval=FALSE}
-library(data.table)
-library(tidyverse)
-
-iowa_data <- fread("~./Iowa_Liquor_Sales.csv", header = T, sep = ',')
-
-removeDollars <- function(column){
-  as.numeric(gsub("\\,","",gsub("\\$","", column)))
-}
-
-iowa_data_reduced <- iowa_data %>%
-                     dplyr::select(Date, City, `Category Name`, `Store Number`, `Store Name`, `Pack`, 
-                            `Item Number`, `Item Description`, `Bottle Volume (ml)`, 
-                            `State Bottle Cost`, `State Bottle Retail`, `Sale (Dollars)`,
-                             `Volume Sold (Gallons)`, `Bottles Sold`) %>%
-                    mutate(Date = as.Date(Date, format = "%m/%d/%Y"),
-                           City = factor(toupper(City)),
-                           `Category Name` = factor( toupper(`Category Name`)),
-                           `Store Number` = factor(`Store Number`),
-                           `Store Name` = factor(`Store Name`), 
-                           `Pack` = as.integer(`Pack`),
-                           `Bottle Volume (ml)` = as.numeric(`Bottle Volume (ml)`), 
-                           `State Bottle Cost` = removeDollars(`State Bottle Cost`), 
-                           `State Bottle Retail` = removeDollars(`State Bottle Retail`), 
-                           `Sale (Dollars)` = removeDollars(`Sale (Dollars)`),
-                           `Volume Sold (Gallons)` = as.numeric(`Volume Sold (Gallons)`), 
-                           `Bottles Sold` = as.integer(`Bottles Sold`)) %>%
-                    mutate(Month = format(Date, "%m"),
-                           Year = format(Date, "%Y")) %>%
-                    dplyr::filter(Month == "11") %>%
-                    dplyr::filter(Year == "2015") %>% 
-                    dplyr::filter(City == "DES MOINES") %>% 
-                    dplyr::filter(grepl("WHISKIES", `Category Name`)) %>%
-                    dplyr::select(-Date) %>%
-                    group_by(Month, Year, City, `Category Name`, `Store Number`, `Store Name`)  %>%
-                    summarize( `Pack` = mean(`Pack`),
-                               `Bottles Sold` = sum(`Bottles Sold`), 
-                               `Sale (Dollars)` = sum(`Sale (Dollars)`), 
-                               `Bottle Volume (ml)` = mean(`Bottle Volume (ml)`),
-                               `State Bottle Cost` = sum(`State Bottle Cost`),
-                               `State Bottle Retail` = sum(`State Bottle Retail`),
-                               `Sale (Dollars)` = sum(`Sale (Dollars)`),
-                               `Volume Sold (Gallons)` = sum(`Volume Sold (Gallons)`)) %>%
-                    as_tibble()
-
-iowa_data_reduced <- iowa_data_reduced %>%
-                    dplyr::ungroup() %>%
-                    mutate(Month = as.numeric(Month),
-                           Year = as.numeric(Year),
-                           `Category Name`= factor(`Category Name`)) %>%
-                    arrange(Year, Month, County, City)
-
-write.csv(iowa_data_reduced, "iowa_data_reduced.csv")
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
+x <- log(iowaDataReduced$Bottles.Sold)
+fit.norm <- fitdist(x, "norm")
+plot(fit.norm)
 ```
 
+### Model Development  
 
-# Model 1 
+Our first model uses the forward selection method and Bottles Sold as our dependent variable. By using this selection method the final model excludes the Sales Dollars variable. 
 
-```{r data read for model, echo = FALSE, cache=TRUE}
+```{r data read, echo = FALSE, cache=TRUE}
 dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
 ```
 
 
-#Forward step 
+```{r forward, echo = FALSE, cache=TRUE}
+
+forward <- step(lm(log(Bottles.Sold)~1,data=dfLiquorSales),direction = "forward",
+                 scope=~Category.Name + Pack + Sale..Dollars. + Bottle.Volume..ml.
+                 + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons.,trace = TRUE)
+
+fit2 <- lm(formula = log(Bottles.Sold) ~ State.Bottle.Cost + Category.Name + 
+             State.Bottle.Retail + Pack + Volume.Sold..Gallons. + Bottle.Volume..ml., 
+           data = dfLiquorSales)
+
+stargazer(fit2)
+```
+
+
+```{r}
+#Removal of influence points based on two methods
+#1. influence points
+influencePlot(fit2)
+
+#2. Cooks distance plot
+plot(fit2,4)
+
+#Remove the influential points and update the model
+fit2 <- update(fit2,data=dfLiquorSales[c(-70,-115,-229),])
+
+
+plot(fit2)
+#Plots look better than fit1's plot but some of the predicted values are very high
+coefficients(fit2)
+
+#State.Bottle.Cost=One unit of increase in State.Bottle.Cost will increase 
+#the log of bottles sold by 1.06 units
+
+#Category.Name
+# CANADIAN WHISKIES, IRISH, SCOTCH are highly significant. 
+# In comparison to BLENDED WHISKIES, Canadian Whiskies will increase the log of bottles sold by 0.75
+# In comparison to BLENDED WHISKIES, IRISH Whiskies will decrease the log of  bottles sold by 0.76
+# In comparison to BLENDED WHISKIES, SCOTCH Whiskies will decrease the log of bottles sold by 0.60
+# In comparison to BLENDED WHISKIES, SINGLE BARREL BOURBON Whiskies will decrease the log of  bottles sold by 0.68
+# In comparison to BLENDED WHISKIES, STRAIGHT BOURBON Whiskies will decrease the log of  bottles sold by 0.11
+# In comparison to BLENDED WHISKIES, STRAIGHT RYE Whiskies will decrease thelog of  bottles sold by 0.54
+# In comparison to BLENDED WHISKIES, TENNESSEE WHISKIES  will decrease the log of bottles sold by 0.30
+
+#State.Bottle.Retail=One unit of increase in State.Bottle.Retail will decrease the log of bottles sold by 0.70 units
+#Pack=One unit of increase in Pack will increase the log of bottles sold by 0.06  units 
+#Volume.Sold..Gallons.=One unit of increase in Volume.Sold..Gallons. will increase the log of bottles sold by 0.013 units
+#Bottle.Volume..ml=One unit of increase in Bottle.Volume..ml will increase the log of bottles sold by 0.0005 units
+
+
+
+
+
+plot(fit2$model$`log(Bottles.Sold)`,fit2$fitted.values)
+
+```
 
 ```{r forward step selection for model, echo = FALSE, cache=TRUE, include=FALSE} 
 step( lm(Bottles.Sold~1, data = dfLiquorSales), direction = "forward", scope=~Category.Name + Store.Number + Pack + Sale..Dollars. + Bottle.Volume..ml. + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons., trace = FALSE)
@@ -345,8 +414,6 @@ stargazer(fit1, header = FALSE, no.space = TRUE, style = "all2", font.size = "no
 
 #Formula = -4.196 + 25.314*Volume.Sold..Gallons. + 5.492 * (Category.Name="CANADIAN WHISKIES" ) + 
 #       7.133 * (State.Bottle.Retail) + 7.521 * (Pack) - 2.189 * Sale..Dollars. 
-
-
 
 
 Discussion and Conclusions
