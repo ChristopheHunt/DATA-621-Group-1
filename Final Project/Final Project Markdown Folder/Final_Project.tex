@@ -331,122 +331,149 @@ in Iowa so we will limit our analysis to this city.
 
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-9-1.pdf}
 
-Our first attempt was to use a Poisson regression due to the
-over-dispersion created by aggregating the data set. However, the
-distribution was far to negatively skewed to fit a Poisson distribution.
-
-\subsection{Distributions of Dependent
-Variables}\label{distributions-of-dependent-variables}
-
-We see that the dependent variable of Bottles Sold has a non-normal
-distribution as illustrated in the Cullen and Frey graph AC and HC
-(1999) from the \texttt{fitdistrplus} package and the non normal
-distribution is further highlighted in the diagnostic plots.
-
-\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-10-1.pdf}}{}}\label{section}
-
-\begin{longtable}[]{@{}cccccccc@{}}
-\caption{Summary Statistics for Bottles Sold}\tabularnewline
-\toprule
-min & max & median & mean & sd & skewness & kurtosis &
-method\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-min & max & median & mean & sd & skewness & kurtosis &
-method\tabularnewline
-\midrule
-\endhead
-1 & 3228 & 32 & 116.0505 & 292.3069 & 6.364168 & 54.45724 &
-unbiased\tabularnewline
-\bottomrule
-\end{longtable}
-
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-11-1.pdf}
-
-The lambda value of the BoxCox transformation of the Bottles Sold is
-\texttt{0}. Therefore, we apply the log transformation of the dependent
-variable of Bottles Sold and see a more normal distribution.
-
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-12-1.pdf}
-
-\begin{longtable}[]{@{}cccccccc@{}}
-\caption{Summary Statistics for Log Transformation of Bottles
-Sold}\tabularnewline
-\toprule
-\begin{minipage}[b]{0.07\columnwidth}\centering\strut
-min\strut
-\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
-max\strut
-\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
-median\strut
-\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
-mean\strut
-\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
-sd\strut
-\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
-skewness\strut
-\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
-kurtosis\strut
-\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
-method\strut
-\end{minipage}\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-\begin{minipage}[b]{0.07\columnwidth}\centering\strut
-min\strut
-\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
-max\strut
-\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
-median\strut
-\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
-mean\strut
-\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
-sd\strut
-\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
-skewness\strut
-\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
-kurtosis\strut
-\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
-method\strut
-\end{minipage}\tabularnewline
-\midrule
-\endhead
-\begin{minipage}[t]{0.07\columnwidth}\centering\strut
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
-8.079618\strut
-\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
-3.465736\strut
-\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
-3.471787\strut
-\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-1.57412\strut
-\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-0.2576122\strut
-\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-2.645664\strut
-\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-unbiased\strut
-\end{minipage}\tabularnewline
-\bottomrule
-\end{longtable}
-
-\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
-
-The diagnostic plots show a much more normal distribution after the log
-transformation.
-
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-14-1.pdf}
-
 \subsubsection{Model Development}\label{model-development}
 
 \paragraph{Bottles Sold Model}\label{bottles-sold-model}
 
-Our first model uses the forward selection method and Bottles Sold as
-our dependent variable. By using this selection method, the final model
-excludes the Sales Dollars variable.
+We used forward selection method for our initial model for the Bottles
+Sold. However, we expect some high degrees of multicollinearity as some
+of our variables can be easily explained by other variables in the data
+set. We see a very high degree of multicollinearity in our independent
+variables for Bottles Sold and with good reason. If more bottles sold
+then certainly the volume sold by gallons would increase as would the
+sale dollars, we therefore removed
+
+\begin{longtable}[]{@{}lcccc@{}}
+\toprule
+rn & GVIF & Df & GVIF\^{}(1/(2*Df)) & Adjusted\_GVIF\tabularnewline
+\midrule
+\endhead
+Volume.Sold..Gallons. & 37.245911 & 1 & 6.102943 &
+37.245911\tabularnewline
+Category.Name & 1.738855 & 7 & 1.040307 & 1.082239\tabularnewline
+State.Bottle.Retail & 2.359291 & 1 & 1.535998 & 2.359291\tabularnewline
+Pack & 1.248515 & 1 & 1.117370 & 1.248515\tabularnewline
+Sale..Dollars. & 33.330891 & 1 & 5.773291 & 33.330891\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lcccc@{}}
+\toprule
+rn & GVIF & Df & GVIF\^{}(1/(2*Df)) & Adjusted\_GVIF\tabularnewline
+\midrule
+\endhead
+Volume.Sold..Gallons. & 2.208269 & 1 & 1.486025 &
+2.208269\tabularnewline
+Category.Name & 1.373528 & 7 & 1.022929 & 1.046384\tabularnewline
+State.Bottle.Retail & 2.286351 & 1 & 1.512069 & 2.286351\tabularnewline
+Pack & 1.243523 & 1 & 1.115134 & 1.243523\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+  StudRes        Hat      CookD
+\end{verbatim}
+
+70 -1.216045 0.41255823 0.09428831 74 7.415261 0.01615678 0.07151257 227
+5.590855 0.04581225 0.12598651
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Remove the influential points and update the model}
+
+\NormalTok{fit1 <-}\StringTok{ }\KeywordTok{update}\NormalTok{(fit1, }\DataTypeTok{data=}\NormalTok{dfLiquorSales[}\KeywordTok{c}\NormalTok{(-}\DecValTok{65}\NormalTok{,-}\DecValTok{70}\NormalTok{,-}\DecValTok{227}\NormalTok{),])}
+\CommentTok{#predict(fit1,dfLiquorFit1,type = "response")}
+\NormalTok{s.fit1 <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(fit1)}
+\NormalTok{rmse <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{(fit1$residuals^}\DecValTok{2}\NormalTok{)/s.fit1$df[}\DecValTok{2}\NormalTok{])}
+\CommentTok{#rmse = 31}
+
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow =} \KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\NormalTok{x <-}\StringTok{ }\KeywordTok{plot}\NormalTok{(fit1)}
+\KeywordTok{plot}\NormalTok{(fit1$model$Bottles.Sold, fit1$fitted.values, }\DataTypeTok{xlab =} \StringTok{"Actual Values"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Fitted Values"}\NormalTok{)}
+
+\KeywordTok{stargazer}\NormalTok{(fit1, }\DataTypeTok{header =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{no.space =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{style =} \StringTok{"all2"}\NormalTok{, }\DataTypeTok{font.size =} \StringTok{"normalsize"}\NormalTok{, }\DataTypeTok{single.row =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{intercept.bottom =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{title =} \StringTok{"Forward Selection Linear Model for Bottles Sold without Influencial Points"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## \begin{table}[!htbp] \centering 
+##   \caption{Forward Selection Linear Model for Bottles Sold without Influencial Points} 
+##   \label{} 
+## \normalsize 
+## \begin{tabular}{@{\extracolsep{5pt}}lc} 
+## \\[-1.8ex]\hline 
+## \hline \\[-1.8ex] 
+##  & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+## \cline{2-2} 
+## \\[-1.8ex] & Bottles.Sold \\ 
+## \hline \\[-1.8ex] 
+##  Constant & $-$25.596$^{***}$ (6.602) \\ 
+##   Volume.Sold..Gallons. & 3.771$^{***}$ (0.045) \\ 
+##   Category.NameCANADIAN WHISKIES & 32.910$^{***}$ (6.002) \\ 
+##   Category.NameIRISH WHISKIES & $-$10.398 (6.947) \\ 
+##   Category.NameSCOTCH WHISKIES & $-$12.880$^{*}$ (7.053) \\ 
+##   Category.NameSINGLE BARREL BOURBON WHISKIES & 6.909 (13.108) \\ 
+##   Category.NameSTRAIGHT BOURBON WHISKIES & $-$8.602 (6.185) \\ 
+##   Category.NameSTRAIGHT RYE WHISKIES & 10.806 (8.213) \\ 
+##   Category.NameTENNESSEE WHISKIES & $-$6.136 (6.102) \\ 
+##   State.Bottle.Retail & 0.072$^{***}$ (0.011) \\ 
+##   Pack & 2.647$^{***}$ (0.333) \\ 
+##  \hline \\[-1.8ex] 
+## Observations & 373 \\ 
+## R$^{2}$ & 0.981 \\ 
+## Adjusted R$^{2}$ & 0.980 \\ 
+## Residual Std. Error & 33.781 (df = 362) \\ 
+## F Statistic & 1,833.018$^{***}$ (df = 10; 362)  (p = 0.000) \\ 
+## \hline 
+## \hline \\[-1.8ex] 
+## \textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+## \end{tabular} 
+## \end{table}
+\end{verbatim}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+Our model has an extremely good Adjusted \(R^2\) at 0.98 but we see that
+the distribution of the residuals is not normally distributed. The
+fitted values plotted to the actual values do show a clearly linear
+relationship. We will need to further transform the variables in order
+to have a more normal distribution of our residuals. We have an
+interesting correlation in that an increase in the Retail Price will
+have a .0723 increase in the number of bottles sold. The expectation
+would be that as retail price increases the number of bottles sold would
+decrease.
+
+Our adjusted model uses the same selection method of forward and keeps
+Bottles Sold as our dependent variable. However, we use the BoxCox
+transformation method to transform our dependent variable. The resulting
+\(\lambda\) is 0 so our tranformation is log. In using this selection
+method and dependent variable transformation, the final model excludes
+the Sales Dollars variable. Additionally, we have high multicollinearity
+between the Bottle Cost and the Retail variables, which is inituitive
+because Bottle Cost has a high impact on Retail price. We remove the
+bottle cost variable as we have more interest in the impacts Retail
+Price may have on our dependent variable.
+
+\begin{longtable}[]{@{}lcccc@{}}
+\toprule
+rn & GVIF & Df & GVIF\^{}(1/(2*Df)) & Adjusted\_GVIF\tabularnewline
+\midrule
+\endhead
+State.Bottle.Cost & 5.159072e+05 & 1 & 718.266832 &
+5.159072e+05\tabularnewline
+Category.Name & 2.102294e+00 & 7 & 1.054507 &
+1.111985e+00\tabularnewline
+State.Bottle.Retail & 5.158069e+05 & 1 & 718.196947 &
+5.158069e+05\tabularnewline
+Pack & 2.516499e+00 & 1 & 1.586348 & 2.516499e+00\tabularnewline
+Volume.Sold..Gallons. & 2.231722e+00 & 1 & 1.493895 &
+2.231722e+00\tabularnewline
+Bottle.Volume..ml. & 2.332312e+00 & 1 & 1.527191 &
+2.332312e+00\tabularnewline
+\bottomrule
+\end{longtable}
 
 \begin{table}[!htbp] \centering 
   \caption{Forward Selection Linear Model for Log of Bottles Sold with Influencial Points} 
@@ -459,25 +486,24 @@ excludes the Sales Dollars variable.
 \cline{2-2} 
 \\[-1.8ex] & log(Bottles.Sold) \\ 
 \hline \\[-1.8ex] 
- Constant & 1.744$^{***}$ (0.438) \\ 
-  State.Bottle.Cost & 0.864$^{***}$ (0.212) \\ 
-  Category.NameCANADIAN WHISKIES & 0.677$^{***}$ (0.187) \\ 
-  Category.NameIRISH WHISKIES & $-$0.774$^{***}$ (0.221) \\ 
-  Category.NameSCOTCH WHISKIES & $-$0.740$^{***}$ (0.216) \\ 
-  Category.NameSINGLE BARREL BOURBON WHISKIES & $-$0.881$^{**}$ (0.423) \\ 
-  Category.NameSTRAIGHT BOURBON WHISKIES & $-$0.218 (0.200) \\ 
-  Category.NameSTRAIGHT RYE WHISKIES & $-$0.634$^{**}$ (0.280) \\ 
-  Category.NameTENNESSEE WHISKIES & $-$0.328$^{*}$ (0.194) \\ 
-  State.Bottle.Retail & $-$0.572$^{***}$ (0.141) \\ 
-  Pack & 0.061$^{***}$ (0.014) \\ 
-  Volume.Sold..Gallons. & 0.003$^{***}$ (0.001) \\ 
-  Bottle.Volume..ml. & 0.001$^{***}$ (0.0002) \\ 
+ Constant & 1.845$^{***}$ (0.447) \\ 
+  Category.NameCANADIAN WHISKIES & 0.730$^{***}$ (0.191) \\ 
+  Category.NameIRISH WHISKIES & $-$0.761$^{***}$ (0.226) \\ 
+  Category.NameSCOTCH WHISKIES & $-$0.680$^{***}$ (0.220) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & $-$1.062$^{**}$ (0.429) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & $-$0.326 (0.202) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & $-$0.649$^{**}$ (0.286) \\ 
+  Category.NameTENNESSEE WHISKIES & $-$0.313 (0.198) \\ 
+  State.Bottle.Retail & 0.003$^{***}$ (0.0003) \\ 
+  Pack & 0.060$^{***}$ (0.014) \\ 
+  Volume.Sold..Gallons. & 0.004$^{***}$ (0.001) \\ 
+  Bottle.Volume..ml. & 0.001$^{**}$ (0.0002) \\ 
  \hline \\[-1.8ex] 
 Observations & 376 \\ 
-R$^{2}$ & 0.601 \\ 
-Adjusted R$^{2}$ & 0.588 \\ 
-Residual Std. Error & 1.011 (df = 363) \\ 
-F Statistic & 45.537$^{***}$ (df = 12; 363)  (p = 0.000) \\ 
+R$^{2}$ & 0.583 \\ 
+Adjusted R$^{2}$ & 0.570 \\ 
+Residual Std. Error & 1.032 (df = 364) \\ 
+F Statistic & 46.203$^{***}$ (df = 11; 364)  (p = 0.000) \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
@@ -489,9 +515,9 @@ our model. Using the \texttt{influencePlot} function from the
 \texttt{car} package and Cooks Distance, we can see which values that
 have the greatest impact on our model.
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-15-1.pdf}
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-14-1.pdf}
 
-By excluding the values \texttt{70}, \texttt{115}, and \texttt{229} from
+By excluding the values \texttt{70}, \texttt{229}, and \texttt{272} from
 our evaluation data set we are able to fit a more appropriate model.
 
 We further examine our diagnostic plots for our first model.
@@ -507,51 +533,54 @@ We further examine our diagnostic plots for our first model.
 \cline{2-2} 
 \\[-1.8ex] & log(Bottles.Sold) \\ 
 \hline \\[-1.8ex] 
- Constant & 1.717$^{***}$ (0.404) \\ 
-  State.Bottle.Cost & 1.057$^{***}$ (0.249) \\ 
-  Category.NameCANADIAN WHISKIES & 0.755$^{***}$ (0.173) \\ 
-  Category.NameIRISH WHISKIES & $-$0.757$^{***}$ (0.204) \\ 
-  Category.NameSCOTCH WHISKIES & $-$0.601$^{***}$ (0.200) \\ 
-  Category.NameSINGLE BARREL BOURBON WHISKIES & $-$0.683$^{*}$ (0.392) \\ 
-  Category.NameSTRAIGHT BOURBON WHISKIES & $-$0.107 (0.186) \\ 
-  Category.NameSTRAIGHT RYE WHISKIES & $-$0.541$^{**}$ (0.258) \\ 
-  Category.NameTENNESSEE WHISKIES & $-$0.296$^{*}$ (0.179) \\ 
-  State.Bottle.Retail & $-$0.702$^{***}$ (0.166) \\ 
-  Pack & 0.060$^{***}$ (0.013) \\ 
-  Volume.Sold..Gallons. & 0.013$^{***}$ (0.002) \\ 
-  Bottle.Volume..ml. & 0.001$^{**}$ (0.0002) \\ 
+ Constant & 1.863$^{***}$ (0.414) \\ 
+  Category.NameCANADIAN WHISKIES & 0.626$^{***}$ (0.178) \\ 
+  Category.NameIRISH WHISKIES & $-$0.788$^{***}$ (0.209) \\ 
+  Category.NameSCOTCH WHISKIES & $-$0.710$^{***}$ (0.205) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & $-$1.026$^{**}$ (0.398) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & $-$0.279 (0.188) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & $-$0.629$^{**}$ (0.265) \\ 
+  Category.NameTENNESSEE WHISKIES & $-$0.336$^{*}$ (0.184) \\ 
+  State.Bottle.Retail & 0.003$^{***}$ (0.0003) \\ 
+  Pack & 0.058$^{***}$ (0.013) \\ 
+  Volume.Sold..Gallons. & 0.008$^{***}$ (0.001) \\ 
+  Bottle.Volume..ml. & 0.0005$^{**}$ (0.0002) \\ 
  \hline \\[-1.8ex] 
 Observations & 373 \\ 
-R$^{2}$ & 0.643 \\ 
-Adjusted R$^{2}$ & 0.631 \\ 
-Residual Std. Error & 0.930 (df = 360) \\ 
-F Statistic & 53.961$^{***}$ (df = 12; 360)  (p = 0.000) \\ 
+R$^{2}$ & 0.622 \\ 
+Adjusted R$^{2}$ & 0.611 \\ 
+Residual Std. Error & 0.957 (df = 361) \\ 
+F Statistic & 54.043$^{***}$ (df = 11; 361)  (p = 0.000) \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 \end{table}
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-17-1.pdf}
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-16-1.pdf}
 
 \bigskip
 
-The table of our detailed model is located in the Appendix.
-Interestingly, our results show that one unit increase in the cost to
-the State for \texttt{Bottle} will increase the log of bottles sold by
-1.06 units. Candian whiskies, Irish Whiskies, and Scotch were shown to
-be the most significant but they do represent the majority of sales. In
+The table of our detailed model is located in the Appendix, fortunately,
+we see a much more normal distribution of the residuals. Interestingly,
+our results show that one unit increase in the Retail will increase the
+log of bottles sold by .0032 units. We would expect a negative
+correlation with bottles price and bottles sold. Canadian whiskies,
+Irish Whiskies, and Scotch were shown to be the most significant but
+they do represent the majority of sales while Single Barrel Bourbon
+Whiskies and Straight Rye Whiskies are approaching significance. In
 comparison to Blended Whiskey, Canadian Whiskies will increase the log
-of bottles sold by 0.75, whereas, IRISH Whiskies will decrease the log
-of bottles sold by 0.76 and Scotch will decrease the log of bottles sold
-by 0.60.
+of bottles sold by 0.62, whereas, Irish Whiskies will decrease the log
+of bottles sold by 0.788 and Scotch will decrease the log of bottles
+sold by 0.71.
 
-Also, as expected, a unit increase in the retail price will decrease the
-log of bottles sold by 0.70 units. Another interesting finding is that a
-unit increase in Bottle Volume will increase log of bottles sold by
-.0005 units, it would suggest that larger bottles are correlated with
-better sales. The Adjusted R\^{}2 was improved from .588 to .631 by
-removing the influence points.
+Also, as expected, a unit increase in the Pack will increase the log of
+bottles sold by 0.05 units. Another interesting finding is that a unit
+increase in Bottle Volume will increase log of bottles sold by .0005
+units, it would suggest that larger bottles are correlated with better
+sales. The Adjusted R\^{}2 was improved from .588 to .631 by removing
+the influence points. Also, the AIC of this model is 1039.4688826 which
+is a much better AIC than 3697.2020391 from our previous model.
 
 \newpage
 
@@ -595,7 +624,7 @@ CookD\strut
 \bottomrule
 \end{longtable}
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-19-1.pdf}
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-18-1.pdf}
 
 \begin{table}[!htbp] \centering 
   \caption{Forward Selection Linear Model Profit Dollars without Influencial Points} 
@@ -630,7 +659,10 @@ F Statistic & 45.190$^{***}$ (df = 9; 364)  (p = 0.000) \\
 \end{tabular} 
 \end{table}
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-20-1.pdf}
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-19-1.pdf}
+
+The table of our detailed model for Profit Dollars is located in the
+Appendix.
 
 \section{Volume.Sold..Gallons=One unit of increase in volume sold in
 Gallons will increase the bottles sold by 1.70
@@ -745,8 +777,6 @@ weekends instead of four could provide further insights. A follow up
 study on how prices may have been impacted by pricing strategies in
 neighboring states and the number of weekends per month may offer
 further insights and improve the approach taken in this analysis.
-
-conclude your findings, limitations, and suggest areas for future work.
 
 \newpage
 
@@ -1519,18 +1549,18 @@ lowest :   1.61   1.73   1.75   2.05   2.20, highest: 444.17 459.89 523.01 687.2
     methods, stats, utils
   \item Other packages: car~2.1-4, data.table~1.10.0, dplyr~0.5.0,
     fitdistrplus~1.0-7, forecast~7.3, Formula~1.2-1,
-    ggplot2~2.2.0, Hmisc~4.0-1, lattice~0.20-34, logspline~2.1.9,
-    magrittr~1.5, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
+    ggplot2~2.2.0, Hmisc~4.0-1, knitr~1.15.1, lattice~0.20-34,
+    logspline~2.1.9, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
     purrr~0.2.2, RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
     survival~2.40-1, tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0,
     timeDate~3012.100, zoo~1.7-13
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    codetools~0.2-15, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
-    evaluate~0.10, foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2,
-    gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
-    knitr~1.15.1, latticeExtra~0.6-28, lazyeval~0.2.0,
-    lme4~1.1-12, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
+    colorspace~1.3-1, DBI~0.5-1, digest~0.6.10, evaluate~0.10,
+    foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2, gridExtra~2.2.1,
+    gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
+    latticeExtra~0.6-28, lazyeval~0.2.0, lme4~1.1-12,
+    magrittr~1.5, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
     minqa~1.2.4, munsell~0.4.3, nlme~3.1-128, nloptr~1.0.4,
     nnet~7.3-12, openssl~0.9.5, parallel~3.3.2, pbkrtest~0.4-6,
     plyr~1.8.4, quadprog~1.5-5, quantreg~5.29, R6~2.2.0,
@@ -1549,14 +1579,12 @@ Project.rmd} on GitHub for source code.
 
 https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final\%20Project/Final\%20Project.Rmd
 
+\newpage
+
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
-\hypertarget{ref-CullenFrey4}{}
-AC, Cullen, and Frey HC. 1999. ``Probabilistic Techniques in Exposure
-Assessment,'' 181--241.
-
 \hypertarget{ref-SpecialityGrow3}{}
 Anonymous. 2016. ``Specialty Products Grow in Wine, Spirits.''
 \emph{Beverage Industry} 107(7).
@@ -1567,7 +1595,6 @@ Boshart, Rod. 2001. ``Liquor Sales in Iowa Set Record.'' \emph{Gazette}.
 \hypertarget{ref-Forecast1}{}
 David S. Walonick, Ph.D. 1993. ``An Overview of Forecasting
 Methodology.'' \emph{Survival Statistics}.
-doi:\href{https://doi.org/http://www.statpac.org/research-library/forecasting.htm}{http://www.statpac.org/research-library/forecasting.htm}.
 
 \hypertarget{ref-KeepingSpiritsHigh1}{}
 Del Buono, Amanda. 2016. ``Keeping Spirits High.'' \emph{Beverage

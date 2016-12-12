@@ -38,7 +38,7 @@ output: rticles::elsevier_article
 old.par <- par(mar = c(0, 0, 0, 0))
 options(xtable.comment = FALSE)
 library(pacman)
-p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table, RColorBrewer, forecast, car)
+p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table, RColorBrewer, forecast, car, knitr)
 ```
 
 Problem
@@ -287,49 +287,68 @@ ggplot(iowaCounties %>% filter(County == "POLK"), aes(x = County, y = `Volume So
       ggtitle("Gallons Sold by Polk County and City for Whiskey Categories")
 ```
 
-Our first attempt was to  use a Poisson regression due to the over-dispersion created by aggregating the data set. However, the distribution was far to negatively skewed to fit a Poisson distribution. 
-
-## Distributions of Dependent Variables
-
-We see that the dependent variable of Bottles Sold has a non-normal distribution as illustrated in the Cullen and Frey graph @CullenFrey4 from the `fitdistrplus` package and the non normal distribution is further highlighted in the diagnostic plots.   
-
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
-iowaDataReduced <- fread("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv", showProgress = FALSE) 
-x <- descdist(iowaDataReduced$`Bottles Sold`, discrete = FALSE, boot = 200)
-pandoc.table(x, caption = "Summary Statistics for Bottles Sold")
-```
-
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4.5, fig.width=10, eval=TRUE}
-fit.norm <- fitdist(iowaDataReduced$`Bottles Sold`, "norm")
-plot(fit.norm)
-```
-
-The lambda value of the BoxCox transformation of the Bottles Sold is `0`. Therefore, we apply the log transformation of the dependent variable of Bottles Sold and see a more normal distribution.  
-
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
-iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") 
-x <- descdist(log(iowaDataReduced$Bottles.Sold), discrete = FALSE, boot = 200)
-```
-
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE,  eval=TRUE}
-pandoc.table(x , caption = "Summary Statistics for Log Transformation of Bottles Sold")
-```
-
-\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
-
-The diagnostic plots show a much more normal distribution after the log transformation. 
-
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
-x <- log(iowaDataReduced$Bottles.Sold)
-fit.norm <- fitdist(x, "norm")
-plot(fit.norm)
-```
-
 ### Model Development  
 
 #### Bottles Sold Model
 
-Our first model uses the forward selection method and Bottles Sold as our dependent variable. By using this selection method, the final model excludes the Sales Dollars variable. 
+We used forward selection method for our initial model for the Bottles Sold. However, we expect some high degrees of multicollinearity as some of our variables can be easily explained by other variables in the data set. We see a very high degree of multicollinearity in our independent variables for Bottles Sold and with good reason. If more bottles sold then certainly the volume sold by gallons would increase as would the sale dollars, we therefore removed 
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
+dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
+```
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
+#Forward step 
+forward <- step(lm(Bottles.Sold~1,data=dfLiquorSales),direction = "forward",
+               scope=~Category.Name+Pack+Sale..Dollars.+Bottle.Volume..ml.
+               +State.Bottle.Cost+State.Bottle.Retail+Volume.Sold..Gallons.,trace = FALSE)
+
+fit1 <- lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + State.Bottle.Retail + 
+             Pack + Sale..Dollars., data = dfLiquorSales)
+
+dfVifFit <- setDT(as.data.frame(car::vif(fit1)), keep.rownames = TRUE)[]
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
+```
+
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
+fit1 <- lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + State.Bottle.Retail + 
+             Pack, data = dfLiquorSales)
+
+dfVifFit <- setDT(as.data.frame(car::vif(fit1)), keep.rownames = TRUE)[]
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
+
+#Removal of influence points based on two methods
+par(mfrow=c(1,2))
+
+#1. influence points
+influencePlot(fit1)
+
+#2. Cooks distance plot
+plot(fit1,4)
+
+```
+
+```{r}
+#Remove the influential points and update the model
+
+fit1 <- update(fit1, data=dfLiquorSales[c(-65,-70,-227),])
+#predict(fit1,dfLiquorFit1,type = "response")
+s.fit1 <- summary(fit1)
+rmse <- sqrt(sum(fit1$residuals^2)/s.fit1$df[2])
+#rmse = 31
+
+par(mfrow = c(2,3))
+x <- plot(fit1)
+plot(fit1$model$Bottles.Sold, fit1$fitted.values, xlab = "Actual Values", ylab = "Fitted Values")
+
+stargazer(fit1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Bottles Sold without Influencial Points")
+```
+
+Our model has an extremely good Adjusted $R^2$ at 0.98 but we see that the distribution of the residuals is not normally distributed. The fitted values plotted to the actual values do show a clearly linear relationship. We will need to further transform the variables in order to have a more normal distribution of our residuals. We have an interesting correlation in that an increase in the Retail Price will have a .0723 increase in the number of bottles sold. The expectation would be that as retail price increases the number of bottles sold would decrease. 
+
+Our adjusted model uses the same selection method of forward and keeps Bottles Sold as our dependent variable. However, we use the BoxCox transformation method to transform our dependent variable. The resulting $\lambda$ is 0 so our tranformation is log. In using this selection method and dependent variable transformation, the final model excludes the Sales Dollars variable. Additionally, we have high multicollinearity between the Bottle Cost and the Retail variables, which is inituitive because Bottle Cost has a high impact on Retail price. We remove the bottle cost variable as we have more interest in the impacts Retail Price may have on our dependent variable. 
 
 ```{r data read, echo = FALSE, cache=TRUE}
 dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
@@ -344,6 +363,13 @@ fit2 <- lm(formula = log(Bottles.Sold) ~ State.Bottle.Cost + Category.Name +
              State.Bottle.Retail + Pack + Volume.Sold..Gallons. + Bottle.Volume..ml., 
            data = dfLiquorSales)
 
+dfVifFit <- setDT(as.data.frame(car::vif(fit2)), keep.rownames = TRUE)[]
+dfVifFit$Adjusted_GVIF <- (dfVifFit$`GVIF^(1/(2*Df))`^2)
+kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
+
+fit2 <- lm(formula = log(Bottles.Sold) ~ Category.Name + 
+             State.Bottle.Retail + Pack + Volume.Sold..Gallons. + Bottle.Volume..ml., 
+           data = dfLiquorSales)
 stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log of Bottles Sold with Influencial Points")
 ```
 
@@ -358,13 +384,13 @@ influence <- influencePlot(fit2)
 cook <- plot(fit2,4)
 ```
 
-By excluding the values `70`, `115`, and `229` from our evaluation data set we are able to fit a more appropriate model.
+By excluding the values `70`, `229`, and `272` from our evaluation data set we are able to fit a more appropriate model.
 
 We further examine our diagnostic plots for our first model. 
 
 ```{r, echo = FALSE, cache=TRUE, results='asis'}
 #Remove the influential points and update the model
-fit2 <- update(fit2,data=dfLiquorSales[c(-70,-115,-229),])
+fit2 <- update(fit2,data=dfLiquorSales[c(-70,-229, -272),])
 
 stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log of Bottles Sold without Influencial Points")
 ```
@@ -377,14 +403,13 @@ plot(fit2$model$`log(Bottles.Sold)`, fit2$fitted.values, xlab = "Actual Values",
 
 \bigskip
 
-The table of our detailed model is located in the Appendix. Interestingly, our results show that one unit increase in the cost to the State for `Bottle` will increase the log of bottles sold by 1.06 units. Candian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.75, whereas, IRISH Whiskies will decrease the log of  bottles sold by 0.76 and Scotch will decrease the log of bottles sold by 0.60. 
+The table of our detailed model is located in the Appendix, fortunately, we see a much more normal distribution of the residuals. Interestingly, our results show that one unit increase in the Retail will increase the log of bottles sold by .0032 units. We would expect a negative correlation with bottles price and bottles sold. Canadian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales while Single Barrel Bourbon Whiskies and Straight Rye Whiskies are approaching significance. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.62, whereas, Irish Whiskies will decrease the log of bottles sold by 0.788 and Scotch will decrease the log of bottles sold by 0.71. 
 
-Also, as expected, a unit increase in the retail price will decrease the log of bottles sold by 0.70 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. The Adjusted R^2 was improved from .588 to .631 by removing the influence points. 
+Also, as expected, a unit increase in the Pack will increase the log of bottles sold by 0.05 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. The Adjusted R^2 was improved from .588 to .631 by removing the influence points. Also, the AIC of this model is `r AIC(fit2)` which is a much better AIC than `r AIC(fit1)` from our previous model. 
 
 \newpage
 
 #### Profit Dollars Model Development
-
 
 We now developed a model for the Profit Dollars for Whiskey sales in Des Moines. Profit Dollars is the Retail Sale less the Cost of the liquor. We measure this value as pricing stragies are necessary in attempting to maximize effecient inventory control. Using the forward selection method we find that the variables `Pack` and `Bottle Volume in ml` are not significant so they will be removed from our final model. 
 
@@ -423,8 +448,10 @@ plot(fit3)
 plot(fit3$fitted.values,fit3$model$ProfitDollar, xlab = "Actual Values", ylab = "Fitted Values" )
 abline(fit3)
 stargazer(fit3, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model Profit Dollars without Influencial Points")
+
 ```
 
+The table of our detailed model for Profit Dollars is located in the Appendix. 
 
 #Volume.Sold..Gallons=One unit of increase in volume sold in Gallons will increase the bottles sold by 1.70 units
 
@@ -458,10 +485,7 @@ Two models (Back Propagation Neural Network and Support Vector Regression) were 
 
 http://onesearch.cuny.edu/primo_library/libweb/action/display.do?frbrVersion=2&tabs=detailsTab&ct=display&fn=search&doc=TN_ieee10.1109%2fCSO.2014.118&indx=10&recIds=TN_ieee10.1109%2fCSO.2014.118&recIdxs=9&elementId=9&renderMode=poppedOut&displayMode=full&frbrVersion=2&frbg=&&dscnt=0&scp.scps=scope%3A%28CUNY_BEPRESS%29%2Cscope%3A%28BB%29%2Cscope%3A%28BB_LIBGUIDES%29%2Cscope%3A%28AL%29%2Cprimo_central_multiple_fe&tb=t&mode=Basic&vid=bb&srt=rank&tab=default_tab&dum=true&vl(freeText0)=inventory%20prediction%20sales&dstmp=1481412549638
 
-
 In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated. Which is in line with our model approach for using a single month rather than a year. The continued growth was rather owed to the number of weekends a month has (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales4. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into sales and volume of liquor sold. Additionally, reviewing the data by identifying months that has 5 weekends instead of four could provide further insights. A follow up study on how prices may have been impacted by pricing strategies in neighboring states and the number of weekends per month may offer further insights and improve the approach taken in this analysis. 
-
-conclude your findings, limitations, and suggest areas for future work.
 
 \newpage
 
@@ -492,5 +516,7 @@ Please see [Final Project.rmd](https://github.com/ChristopheHunt/DATA-621-Group-
 
 https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final%20Project/Final%20Project.Rmd
 
+\newpage
 References {#references .unnumbered}
 ===============
+
