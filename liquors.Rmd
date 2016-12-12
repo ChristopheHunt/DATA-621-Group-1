@@ -97,6 +97,14 @@ Guo, Xiaoxiao; Liu, Chang; Xu, Wei; Yuan, Hui; Wang, Mingming. (2014). "A Predic
 
 Zadeh, Neda Khalil; Sepehri, Mohammad Mehdi; Farvaresh, Hamid. (2014). "Intelligent sales prediction for pharmaceutical distribution companies: a data mining based approach". Cengage Learning, Inc.  
 
+### Naive Forecasting ###
 
+When doing naive forecasting, the model outputted should be simple to calculate such that it can automatically be run. Two examples of traditional models that would result are the random walk and the seasonal random walk. 
+
+The random walk forecast uses the data from the last observation as the future forecast. 
+
+On the other hand, the seasonal random walk forecast uses the data from a year ago as the forecast for the corresponding period for the current year. 
+
+http://blogs.sas.com/content/forecasting/2011/04/26/which-naive-model-to-use/
 
 
