@@ -303,7 +303,7 @@ fit.norm <- fitdist(iowaDataReduced$`Bottles Sold`, "norm")
 plot(fit.norm)
 ```
 
-The lambda value of the BoxCox transformation of the Bottles Sold is `r round(BoxCox.lambda(as.numeric(iowaDataReduced$Bottles.Sold)),0)`. We therefore apply the log transformation of the dependent variable of Bottles Sold and see a more normal distribution.  
+The lambda value of the BoxCox transformation of the Bottles Sold is `0`. Therefore, we apply the log transformation of the dependent variable of Bottles Sold and see a more normal distribution.  
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=4, fig.width=8, eval=TRUE}
 iowaDataReduced <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") 
@@ -314,7 +314,7 @@ x <- descdist(log(iowaDataReduced$Bottles.Sold), discrete = FALSE, boot = 200)
 pandoc.table(x , caption = "Summary Statistics for Log Transformation of Bottles Sold")
 ```
 
-\bigskip\bigskip\bigskip\bigskip
+\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
 
 The diagnostic plots show a much more normal distribution after the log transformation. 
 
@@ -326,6 +326,8 @@ plot(fit.norm)
 
 ### Model Development  
 
+#### Bottles Sold Model
+
 Our first model uses the forward selection method and Bottles Sold as our dependent variable. By using this selection method, the final model excludes the Sales Dollars variable. 
 
 ```{r data read, echo = FALSE, cache=TRUE}
@@ -333,7 +335,6 @@ dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA
 ```
 
 ```{r forward, echo = FALSE, cache=TRUE, results='asis'}
-
 forward <- step(lm(log(Bottles.Sold)~1,data=dfLiquorSales),direction = "forward",
                  scope=~Category.Name + Pack + Sale..Dollars. + Bottle.Volume..ml.
                  + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons.,trace = FALSE)
@@ -356,66 +357,73 @@ influence <- influencePlot(fit2)
 cook <- plot(fit2,4)
 ```
 
-By excluding the values `70`, `115`, and `229` from our evaluation data set we are able to fit a more appropriate model. Below is the values in question we chose to exclude. 
+By excluding the values `70`, `115`, and `229` from our evaluation data set we are able to fit a more appropriate model.
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10, eval=TRUE}
-pandoc.table(dfLiquorSales[c(70,115,229),] %>% 
-        select(Category.Name, Store.Name, Pack, Bottles.Sold, Sale..Dollars., 
-               Bottle.Volume..ml., State.Bottle.Cost, State.Bottle.Retail, Volume.Sold..Gallons.), split.table = Inf, use.hyphening = TRUE, split.cells = 15)
-```
+We further examine our diagnostic plots for our first model. 
 
 ```{r, echo = FALSE, cache=TRUE, results='asis'}
 #Remove the influential points and update the model
 fit2 <- update(fit2,data=dfLiquorSales[c(-70,-115,-229),])
 
+par(mfrow=c(2,3))
 plot(fit2)
-#Plots look better than fit1's plot but some of the predicted values are very high
-
-
-#State.Bottle.Cost=One unit of increase in State.Bottle.Cost will increase 
-#the log of bottles sold by 1.06 units
-
-#Category.Name
-# CANADIAN WHISKIES, IRISH, SCOTCH are highly significant. 
-# In comparison to BLENDED WHISKIES, Canadian Whiskies will increase the log of bottles sold by 0.75
-# In comparison to BLENDED WHISKIES, IRISH Whiskies will decrease the log of  bottles sold by 0.76
-# In comparison to BLENDED WHISKIES, SCOTCH Whiskies will decrease the log of bottles sold by 0.60
-# In comparison to BLENDED WHISKIES, SINGLE BARREL BOURBON Whiskies will decrease the log of  bottles sold by 0.68
-# In comparison to BLENDED WHISKIES, STRAIGHT BOURBON Whiskies will decrease the log of  bottles sold by 0.11
-# In comparison to BLENDED WHISKIES, STRAIGHT RYE Whiskies will decrease thelog of  bottles sold by 0.54
-# In comparison to BLENDED WHISKIES, TENNESSEE WHISKIES  will decrease the log of bottles sold by 0.30
-
-#State.Bottle.Retail=One unit of increase in State.Bottle.Retail will decrease the log of bottles sold by 0.70 units
-#Pack=One unit of increase in Pack will increase the log of bottles sold by 0.06  units 
-#Volume.Sold..Gallons.=One unit of increase in Volume.Sold..Gallons. will increase the log of bottles sold by 0.013 units
-#Bottle.Volume..ml=One unit of increase in Bottle.Volume..ml will increase the log of bottles sold by 0.0005 units
-
-plot(fit2$model$`log(Bottles.Sold)`,fit2$fitted.values)
-
+plot(fit2$model$`log(Bottles.Sold)`,fit2$fitted.values, xlab="Actual Values", ylab="Fitted Values")
 ```
 
-```{r forward step selection for model, echo = FALSE, cache=TRUE, include=FALSE} 
-step( lm(Bottles.Sold~1, data = dfLiquorSales), direction = "forward", scope=~Category.Name + Store.Number + Pack + Sale..Dollars. + Bottle.Volume..ml. + State.Bottle.Cost + State.Bottle.Retail + Volume.Sold..Gallons., trace = FALSE)
+The table of our detailed model is located in the Appendix. Interestingly, our results show that one unit increase in the cost to the State for `Bottle` will increase the log of bottles sold by 1.06 units. Candian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.75, whereas, IRISH Whiskies will decrease the log of  bottles sold by 0.76 and Scotch will decrease the log of bottles sold by 0.60. 
+
+Also, as expected, a unit increase in the retail price will decrease the log of bottles sold by 0.70 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. 
+
+#### Profit Dollars Model Development
+
+```{r bottles, echo = FALSE, cache=TRUE, results='asis'}
+dfLiquorSales$ProfitDollar <- dfLiquorSales$State.Bottle.Retail - dfLiquorSales$State.Bottle.Cost
+
+step <- step(lm(ProfitDollar~1,data = dfLiquorSales),direction = "forward",
+             scope = ~Category.Name+Pack+Sale..Dollars.+Bottle.Volume..ml.
+             + Volume.Sold..Gallons.,trace = FALSE)
+
+fit3 <- lm(formula = ProfitDollar ~ Volume.Sold..Gallons. + Category.Name + 
+     Sale..Dollars., data = dfLiquorSales)
 ```
 
-```{r model 1, echo = FALSE, cache=TRUE, results = 'asis', eval = TRUE}
-fit1 <- lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name +  State.Bottle.Retail + Pack + Sale..Dollars., data = dfLiquorSales)
-stargazer(fit1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model 1")
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10}
+#Removal of influence points based on two methods
+#1. influence points
+par(mfrow=c(1,2))
+x <- influencePlot(fit3)
+pandoc.table(x)
+#2. Cooks distance plot
+plot(fit3,4)
+#Remove the influential points and update the model
+fit3 <- update(fit3,data=dfLiquorSales[c(-70,-229),])
+```
+
+```{r}
+par(mfrow=c(2,3))
+plot(fit3)
+plot(fit3$fitted.values,fit3$model$ProfitDollar, )
+abline(fit3)
+stargazer(fit3, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model Profit Dollars without Influencial Points")
 ```
 
 
-#Volume.Sold..Gallons=One unit of increase in volume sold will increase the bottles sold by 4.10 units
+#Volume.Sold..Gallons=One unit of increase in volume sold in Gallons will increase the bottles sold by 1.70 units
 
 #Category.Name
 # CANADIAN WHISKIES is the only one that is significant. 
-# CANDIAN WHISKIES vs BLENDED WHISKIES coefficient is 5.492
+# In comparison to BLENDED WHISKIES, Canadian Whiskies will increase the bottles sold by 27.88
+# In comparison to BLENDED WHISKIES, IRISH Whiskies will increase the bottles sold by 21.72
+# In comparison to BLENDED WHISKIES, SCOTCH Whiskies will increase the bottles sold by 54.76
+# In comparison to BLENDED WHISKIES, SINGLE BARREL BOURBON Whiskies will increase the bottles sold by 31.54
+# In comparison to BLENDED WHISKIES, STRAIGHT BOURBON Whiskies will increase the bottles sold by 48.00
+# In comparison to BLENDED WHISKIES, STRAIGHT RYE Whiskies will increase the bottles sold by 22.16
+# In comparison to BLENDED WHISKIES, TENNESSEE WHISKIES  will increase the bottles sold by 23.11
 
-#State.Bottle.Retail=One unit of increase in State.Bottle.Retail will increase the bottles sold by 7.133 units
-#Pack=One unit of increase in Pack will increase the bottles sold by 7.133 units
-#Sale..Dollars.=It is slightly significant. One unit of increase in Sale..Dollars. will decrease the bottles sold by 2.189 units
+#State..Dollars=One unit of increase in State..Dollars will decrease the bottles sold by 0.008 units
 
-#Formula = -4.196 + 25.314*Volume.Sold..Gallons. + 5.492 * (Category.Name="CANADIAN WHISKIES" ) + 
-#       7.133 * (State.Bottle.Retail) + 7.521 * (Pack) - 2.189 * Sale..Dollars. 
+plot(fit3$fitted.values,fit3$model$ProfitDollar)
+abline(fit3)
 
 
 Discussion and Conclusions

@@ -1,0 +1,1555 @@
+\documentclass[]{elsarticle} %review=doublespace preprint=single 5p=2 column
+%%% Begin My package additions %%%%%%%%%%%%%%%%%%%
+\usepackage[hyphens]{url}
+\usepackage{lineno} % add
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\bibliographystyle{elsarticle-harv}
+\biboptions{sort&compress} % For natbib
+\usepackage{graphicx}
+\usepackage{booktabs} % book-quality tables
+%% Redefines the elsarticle footer
+%\makeatletter
+%\def\ps@pprintTitle{%
+% \let\@oddhead\@empty
+% \let\@evenhead\@empty
+% \def\@oddfoot{\it \hfill\today}%
+% \let\@evenfoot\@oddfoot}
+%\makeatother
+
+% A modified page layout
+\textwidth 6.75in
+\oddsidemargin -0.15in
+\evensidemargin -0.15in
+\textheight 9in
+\topmargin -0.5in
+%%%%%%%%%%%%%%%% end my additions to header
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \usepackage{fontspec}
+  \ifxetex
+    \usepackage{xltxtra,xunicode}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{longtable}
+\usepackage{graphicx}
+% We will generate all images so they have a width \maxwidth. This means
+% that they will get their normal width if they fit onto the page, but
+% are scaled down if they would overflow the margins.
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
+\else\Gin@nat@width\fi}
+\makeatother
+\let\Oldincludegraphics\includegraphics
+\renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=\maxwidth]{#1}}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={Regional Liquor Sales in Des Moines, Iowa},
+            colorlinks=true,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{0}
+% Pandoc toggle for numbering sections (defaults to be off)
+\setcounter{secnumdepth}{0}
+% Pandoc header
+
+
+\usepackage[nomarkers]{endfloat}
+
+\begin{document}
+\begin{frontmatter}
+
+  \title{Regional Liquor Sales in Des Moines, Iowa}
+    \author[CUNY School of Professional Studies]{Christophe Hunt\corref{c1}}
+   \ead{christophe.hunt@spsmail.cuny.edu} 
+   \cortext[c1]{Authors}
+    \author[CUNY School of Professional Studies]{Senthil Dhanapal}
+   \ead{senthil.dhanapal@spsmail.cuny.edu} 
+  
+    \author[CUNY School of Professional Studies]{Yadu Chittampalli}
+   \ead{yadu.chittampalli@spsmail.cuny.edu} 
+  
+      \address[CUNY School of Professional Studies]{CUNY School of Professional Studies, Data Analytics, New York, NY}
+  
+  \begin{abstract}
+  This is the abstract.
+  
+  It consists of two paragraphs
+  
+  \section{Keywords: Liquor Sales, Naive
+  Forecast*}\label{keywords-liquor-sales-naive-forecast}
+  \end{abstract}
+  
+ \end{frontmatter}
+
+\section{Problem}\label{problem}
+
+The objective of this report is to create a statistical model for the
+volume sold of liquor in gallons and the profit dollars in the City of
+Des Moines which is within the state of Iowa. This can help us make
+informed decisions on inventory production, sales, and assist wholesale
+distributors to plan for the predicted volume of distribution.
+
+\section{Introduction}\label{introduction}
+
+In February, the Distilled Spirits Council (DISCUS), announced that
+spirits had an estimated retail sales of nearly \$72 billion in 2015.
+Additionally, DISCUS credits the continuous growth of the distilled
+spirits industry to several key factors - continuous fascination with
+American Whiskeys in the United States and abroad, innovations in
+flavors, permutation across all spirits categories leading to consumer
+interest, improved regulatory and tax environment resulting in expanded
+market access and a relatively low number of state tax threats, and the
+growth of small distillers, which expanded grassroots and overall
+interest in the spirits category (Del Buono (2016)).
+
+This establishes that spirit sales in the Unites States is a valuable
+market worth exploring for a more detailed and statistical understanding
+of sales and volume. We hope to more thoroughly understand what impact
+specific store sights may have accounting for the seasonal impact in
+November that might effect liquor sales. We will limit the analysis to
+the City of Des Moines for only whiskey sales in the month of November.
+In 2000 the State of Iowa reported sales at a record pace during the
+last half of 2000 (Boshart (2001)). The later part of the year has an
+increase in sales so planning to meet capacity is a suitable goal for
+any company. Our years of interest for this analysis will be the month
+of November for 2015 and 2016.
+
+\section{Research Background}\label{research-background}
+
+The main goal that has to be achieved in inventory prediction is
+increasing the efficiency without decreasing the service value offered
+to the customers. When managing the levels of inventory, it is important
+to maintain moderate level(s) - not too high and not too low. If the
+inventory level is excessive, business funds can get wasted. These funds
+would not be able to be used for any other purpose, thus involving an
+opportunity cost. The costs of shortage, handling insurance, recording
+and inspection would proportionately increase along with inventory
+volume, thus impairing profitability.
+
+On the other hand, low level(s) of inventory may result in frequent
+interruptions in the production schedule resulting in under-utilization
+of capacity and lower sales. When making predictions about orders that
+should be placed, assumptions are made as follows - uncertainty always
+exists regardless of the method(s) used, new technologies cannot always
+be forecasted for which paradigms do not exist, and social policy will
+be formulated where the future would be affected, changing the accuracy
+of the forecast (David S. Walonick (1993)).
+
+One useful method for predicting inventories is the extrapolation of
+trends. In this method, trends and cycles in the historical data are
+examined and mathematical techniques are used to extrapolate to the
+future. The model chosen for forecasting would depend on the historical
+data (David S. Walonick (1993)).
+
+One of the most common models used in this method is decomposition,
+where historical data is separated into trend, seasonal, and random
+components. As a result, forecasts are produced using ``turning point
+analysis''. Other examples of models used are adaptive filtering,
+Box-Jenkins analysis, simple linear regression, curve fitting, and
+weighted smoothing (David S. Walonick (1993)).
+
+According to Makridakis, ``Judgmental forecasting is superior to
+mathematical models, although there are several forecasting applications
+where computer-generated models would be more feasible.'' When inventory
+levels for bulk-quantity items would need to be forecasted monthly by
+large manufacturing companies, generating models through computer
+software would be more efficient (David S. Walonick (1993)).
+
+Forecasting the demand of a product is very essential in predicting the
+order quantity. As a result, a data bank is created, helping the
+decision makers settle targets, create plans, and demonstrate changes in
+the business setting.
+
+Two different methods are utilized in the investigation of the future
+demand - quantitative and qualitative. In quantitative methods,
+mathematical consistencies in the history are searched for. Two
+subcategories exist in quantitative methods - time series models and
+correlation models. On the other hand, qualitative methods are based on
+the opinions that people have had about the product in the past based on
+their experiences, premonitions, and emotions (Kumar (2012)).
+
+However, when the most suitable forecast model gets selected, it is not
+necessarily based solely on quantitative or qualitative variables. The
+forecast model can even combine several models (Kumar (2012)).
+
+\section{Methodology}\label{methodology}
+
+Our initial data set is sufficiently large in that it includes sales by
+individual stores and the invoices for each store. The reason for the
+large size of the initial data set is due to it including every liquor
+transaction from 2012 to present in Iowa, so it approaches 2.68 GB. For
+the purposes of this analysis, to analyze a data set this large is not
+feasible. Therefore, we reduced the number of variables and summarized
+to a regional aggregate.
+
+Additionally, we looked into the top 10 liquor categories for each year
+by number of bottles sold. In 2015, the top categories were American
+Cocktails, Blended Whiskies, Canadian Whiskies, Imported Vodka, Puerto
+Rico \& Virgin Islands Rum, Spiced Rum, Straight Bourbon Whiskies,
+Tequila, Vodka 80 Proof, and Whiskey Liqueur. Interestingly straight
+bourbon appears to have more sales in 2015 than 2014 which coincides
+with the literature of strong growing whiskey sales for every whiskey
+segment (Anonymous (2016)). We decided to focus on whiskey do to its
+strong sales and growing interest in the US.
+
+We initially attempted to model for a dependent variable of
+\texttt{Volume\ Sold\ in\ Gallons} by the top Counties and top liquor
+categories, however, the distribution of this variable becomes
+over-dispersed and negatively skewed when aggregating the data set and
+therefore we were unsuccessful in modeling this variable across regions.
+Our hope was that if we could model for the gallons sold by entirety of
+Iowa we could more accurately predict our planned inventory and
+anticipate production goals. We were more successful in limiting our
+regional analysis to one city and the stores within that city.
+
+We accomplished this by looking into volume of sales by the largest
+\texttt{County} for Iowa which is Polk county. The City of Des Moines
+has the largest volume of whiskey sales in Polk county so we limited our
+analysis to this city.
+
+Therefore, our final evaluation data set is the following subset of
+variables for largest city in Iowa of Des Moines as follows;
+\texttt{Vendor\ Name}, \texttt{Pack} (pack size of bottles sold)
+\texttt{Bottle\ Volume}, \texttt{State\ Bottle\ Cost},
+\texttt{State\ Bottle\ Retail}, \texttt{Sales\ Dollars} (Total sales),
+and our dependent variables are \texttt{Volume\ sold\ in\ Gallons} and
+\texttt{Profit\ Dollars}.
+
+By modeling \texttt{Volume\ sold\ in\ Gallons} and
+\texttt{Profit\ Dollars} we aim to predict the volume of production
+needed and the possible profit dollars when producing at the predicted
+volume. We first began by using linear regression to model the Volume
+Sold in Gallons, however, the distribution was initially non-normal so
+we used the BoxCox method to transform our dependent variable to a more
+normal distribution. We then used forward selection method to determine
+the final form for the model of Volume Sold in Gallons. We further
+removed points that had unusually high influence on the model.
+
+We then modeled our second dependent variable of
+\texttt{Profit\ Dollars}, which is the difference between the sale price
+and retail price, by using linear regression. After using forward
+selection and removing highly influence points in the second model we
+were able more accurately model the data set.
+
+\section{Experimentation and Results}\label{experimentation-and-results}
+
+\subsubsection{Data Acquisition}\label{data-acquisition}
+
+The data set contains the spirits purchase information of Iowa Class
+``E'' liquor licensees by product and date of purchase from January 1,
+2012 to current. The data set is provided by the Iowa Department of
+Commerce, Alcoholic Beverages Division,
+\href{https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}{click
+here} to view the data set at Data.Iowa.Gov.
+
+As previously discussed, the data set is 2.68 GB in total size and much
+to large to use in a meaningful model.
+
+We reviewed the liquor sales by gallons sold per year by Liquor
+Category. Initially, we viewed the top 5 Liquor Categories by volume
+sold but there were large disparities between years, suggesting that the
+top 5 change often and is likely due to changing consumer tastes. We do
+see a more stable set of liquor categories for the top 10 category which
+suggests that while tastes may change we don't see large movements in
+liquor categories at this level. We focused our attention on the whiskey
+categories.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+We can further see that Des Moines accounts for a significant portion of
+the liquor sales in Polk County. Polk County is the most populous county
+in Iowa so we will limit our analysis to this city.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+Our first attempt was to use a Poisson regression due to the
+over-dispersion created by aggregating the data set. However, the
+distribution was far to negatively skewed to fit a Poisson distribution.
+
+\subsection{Distributions of Dependent
+Variables}\label{distributions-of-dependent-variables}
+
+We see that the dependent variable of Bottles Sold has a non-normal
+distribution as illustrated in the Cullen and Frey graph AC and HC
+(1999) from the \texttt{fitdistrplus} package and the non normal
+distribution is further highlighted in the diagnostic plots.
+
+\subsection{\texorpdfstring{\protect\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-10-1.pdf}}{}}\label{section}
+
+\begin{longtable}[]{@{}cccccccc@{}}
+\caption{Summary Statistics for Bottles Sold}\tabularnewline
+\toprule
+min & max & median & mean & sd & skewness & kurtosis &
+method\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+min & max & median & mean & sd & skewness & kurtosis &
+method\tabularnewline
+\midrule
+\endhead
+1 & 3228 & 32 & 116.0505 & 292.3069 & 6.364168 & 54.45724 &
+unbiased\tabularnewline
+\bottomrule
+\end{longtable}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+The lambda value of the BoxCox transformation of the Bottles Sold is
+\texttt{0}. Therefore, we apply the log transformation of the dependent
+variable of Bottles Sold and see a more normal distribution.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\begin{longtable}[]{@{}cccccccc@{}}
+\caption{Summary Statistics for Log Transformation of Bottles
+Sold}\tabularnewline
+\toprule
+\begin{minipage}[b]{0.07\columnwidth}\centering\strut
+min\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+max\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+median\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+mean\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+sd\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+skewness\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+kurtosis\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+method\strut
+\end{minipage}\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{0.07\columnwidth}\centering\strut
+min\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+max\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+median\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+mean\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+sd\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+skewness\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+kurtosis\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+method\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.07\columnwidth}\centering\strut
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+8.079618\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+3.465736\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+3.471787\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+1.57412\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.2576122\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+2.645664\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+unbiased\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
+
+The diagnostic plots show a much more normal distribution after the log
+transformation.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\subsubsection{Model Development}\label{model-development}
+
+\paragraph{Bottles Sold Model}\label{bottles-sold-model}
+
+Our first model uses the forward selection method and Bottles Sold as
+our dependent variable. By using this selection method, the final model
+excludes the Sales Dollars variable.
+
+\begin{table}[!htbp] \centering 
+  \caption{Forward Selection Linear Model 1 with Influencial Points} 
+  \label{} 
+\normalsize 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & log(Bottles.Sold) \\ 
+\hline \\[-1.8ex] 
+ Constant & 1.744$^{***}$ (0.438) \\ 
+  State.Bottle.Cost & 0.864$^{***}$ (0.212) \\ 
+  Category.NameCANADIAN WHISKIES & 0.677$^{***}$ (0.187) \\ 
+  Category.NameIRISH WHISKIES & $-$0.774$^{***}$ (0.221) \\ 
+  Category.NameSCOTCH WHISKIES & $-$0.740$^{***}$ (0.216) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & $-$0.881$^{**}$ (0.423) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & $-$0.218 (0.200) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & $-$0.634$^{**}$ (0.280) \\ 
+  Category.NameTENNESSEE WHISKIES & $-$0.328$^{*}$ (0.194) \\ 
+  State.Bottle.Retail & $-$0.572$^{***}$ (0.141) \\ 
+  Pack & 0.061$^{***}$ (0.014) \\ 
+  Volume.Sold..Gallons. & 0.003$^{***}$ (0.001) \\ 
+  Bottle.Volume..ml. & 0.001$^{***}$ (0.0002) \\ 
+ \hline \\[-1.8ex] 
+Observations & 376 \\ 
+R$^{2}$ & 0.601 \\ 
+Adjusted R$^{2}$ & 0.588 \\ 
+Residual Std. Error & 1.011 (df = 363) \\ 
+F Statistic & 45.537$^{***}$ (df = 12; 363)  (p = 0.000) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
+
+However, several values may have undue influence on the final form of
+our model. Using the \texttt{influencePlot} function from the
+\texttt{car} package and Cooks Distance, we can see which values that
+have the greatest impact on our model.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-15-1.pdf}
+
+By excluding the values \texttt{70}, \texttt{115}, and \texttt{229} from
+our evaluation data set we are able to fit a more appropriate model.
+
+We further examine our diagnostic plots for our first model.
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+The table of our detailed model is located in the Appendix.
+Interestingly, our results show that one unit increase in the cost to
+the State for \texttt{Bottle} will increase the log of bottles sold by
+1.06 units. Candian whiskies, Irish Whiskies, and Scotch were shown to
+be the most significant but they do represent the majority of sales. In
+comparison to Blended Whiskey, Canadian Whiskies will increase the log
+of bottles sold by 0.75, whereas, IRISH Whiskies will decrease the log
+of bottles sold by 0.76 and Scotch will decrease the log of bottles sold
+by 0.60.
+
+Also, as expected, a unit increase in the retail price will decrease the
+log of bottles sold by 0.70 units. Another interesting finding is that a
+unit increase in Bottle Volume will increase log of bottles sold by
+.0005 units, it would suggest that larger bottles are correlated with
+better sales.
+
+\paragraph{Profit Dollars Model
+Development}\label{profit-dollars-model-development}
+
+\begin{longtable}[]{@{}cccc@{}}
+\toprule
+\begin{minipage}[b]{0.11\columnwidth}\centering\strut
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+StudRes\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+Hat\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+CookD\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.11\columnwidth}\centering\strut
+\textbf{70}\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+-7.167\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.3365\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+2.29\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(fit3)}
+\KeywordTok{plot}\NormalTok{(fit3$fitted.values,fit3$model$ProfitDollar, )}
+\KeywordTok{abline}\NormalTok{(fit3)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in abline(fit3): only using the first two of 10 regression
+## coefficients
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{stargazer}\NormalTok{(fit3, }\DataTypeTok{header =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{no.space =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{style =} \StringTok{"all2"}\NormalTok{, }\DataTypeTok{font.size =} \StringTok{"normalsize"}\NormalTok{, }\DataTypeTok{single.row =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{intercept.bottom =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{title =} \StringTok{"Forward Selection Linear Model Profit Dollars without Influencial Points"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## \begin{table}[!htbp] \centering 
+##   \caption{Forward Selection Linear Model Profit Dollars without Influencial Points} 
+##   \label{} 
+## \normalsize 
+## \begin{tabular}{@{\extracolsep{5pt}}lc} 
+## \\[-1.8ex]\hline 
+## \hline \\[-1.8ex] 
+##  & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+## \cline{2-2} 
+## \\[-1.8ex] & ProfitDollar \\ 
+## \hline \\[-1.8ex] 
+##  Constant & $-$2.458 (7.447) \\ 
+##   Volume.Sold..Gallons. & 1.680$^{***}$ (0.226) \\ 
+##   Category.NameCANADIAN WHISKIES & 27.875$^{***}$ (9.382) \\ 
+##   Category.NameIRISH WHISKIES & 21.716$^{*}$ (11.499) \\ 
+##   Category.NameSCOTCH WHISKIES & 54.760$^{***}$ (11.288) \\ 
+##   Category.NameSINGLE BARREL BOURBON WHISKIES & 31.538 (20.280) \\ 
+##   Category.NameSTRAIGHT BOURBON WHISKIES & 48.001$^{***}$ (9.705) \\ 
+##   Category.NameSTRAIGHT RYE WHISKIES & 22.161$^{*}$ (12.837) \\ 
+##   Category.NameTENNESSEE WHISKIES & 23.106$^{**}$ (10.147) \\ 
+##   Sale..Dollars. & $-$0.008$^{***}$ (0.002) \\ 
+##  \hline \\[-1.8ex] 
+## Observations & 374 \\ 
+## R$^{2}$ & 0.528 \\ 
+## Adjusted R$^{2}$ & 0.516 \\ 
+## Residual Std. Error & 53.219 (df = 364) \\ 
+## F Statistic & 45.190$^{***}$ (df = 9; 364)  (p = 0.000) \\ 
+## \hline 
+## \hline \\[-1.8ex] 
+## \textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+## \end{tabular} 
+## \end{table}
+\end{verbatim}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-18-1.pdf}
+
+\section{Volume.Sold..Gallons=One unit of increase in volume sold in
+Gallons will increase the bottles sold by 1.70
+units}\label{volume.sold..gallonsone-unit-of-increase-in-volume-sold-in-gallons-will-increase-the-bottles-sold-by-1.70-units}
+
+\section{Category.Name}\label{category.name}
+
+\section{CANADIAN WHISKIES is the only one that is
+significant.}\label{canadian-whiskies-is-the-only-one-that-is-significant.}
+
+\section{In comparison to BLENDED WHISKIES, Canadian Whiskies will
+increase the bottles sold by
+27.88}\label{in-comparison-to-blended-whiskies-canadian-whiskies-will-increase-the-bottles-sold-by-27.88}
+
+\section{In comparison to BLENDED WHISKIES, IRISH Whiskies will increase
+the bottles sold by
+21.72}\label{in-comparison-to-blended-whiskies-irish-whiskies-will-increase-the-bottles-sold-by-21.72}
+
+\section{In comparison to BLENDED WHISKIES, SCOTCH Whiskies will
+increase the bottles sold by
+54.76}\label{in-comparison-to-blended-whiskies-scotch-whiskies-will-increase-the-bottles-sold-by-54.76}
+
+\section{In comparison to BLENDED WHISKIES, SINGLE BARREL BOURBON
+Whiskies will increase the bottles sold by
+31.54}\label{in-comparison-to-blended-whiskies-single-barrel-bourbon-whiskies-will-increase-the-bottles-sold-by-31.54}
+
+\section{In comparison to BLENDED WHISKIES, STRAIGHT BOURBON Whiskies
+will increase the bottles sold by
+48.00}\label{in-comparison-to-blended-whiskies-straight-bourbon-whiskies-will-increase-the-bottles-sold-by-48.00}
+
+\section{In comparison to BLENDED WHISKIES, STRAIGHT RYE Whiskies will
+increase the bottles sold by
+22.16}\label{in-comparison-to-blended-whiskies-straight-rye-whiskies-will-increase-the-bottles-sold-by-22.16}
+
+\section{In comparison to BLENDED WHISKIES, TENNESSEE WHISKIES will
+increase the bottles sold by
+23.11}\label{in-comparison-to-blended-whiskies-tennessee-whiskies-will-increase-the-bottles-sold-by-23.11}
+
+\section{State..Dollars=One unit of increase in State..Dollars will
+decrease the bottles sold by 0.008
+units}\label{state..dollarsone-unit-of-increase-in-state..dollars-will-decrease-the-bottles-sold-by-0.008-units}
+
+plot(fit3\(fitted.values,fit3\)model\$ProfitDollar) abline(fit3)
+
+\section{Discussion and Conclusions}\label{discussion-and-conclusions}
+
+In two studies that were conducted, the statistical data from the
+previous time interval was used to predict what would happen in the next
+time interval. One study was for pharmaceutical distribution companies.
+The other study involved data mining models.
+
+In one study involving pharmaceutical distribution companies, the
+purpose was to propose a novel method to forecast the sales of the
+companies. Network-based analysis was conducted to find clique sets and
+group members and to use the sales data of comembers. The reason for
+this was the lack of sufficient historic sales records of each drug.
+
+Three methods were used to build time series models forecasting sales -
+ARIMA methodology, neural network, and an advanced hybrid neural network
+approach. The performance of the proposed method was evaluated using a
+real dataset provided by one of the leading pharmacy distribution
+companies in Iran. The results of the evaluation indicated that the
+proposed method can cope with the low number of past records while
+accurately forecasting medicine sales.
+
+After exploratory analysis was done on the data, it was concluded that
+most medicines had different and specific characteristics and sales
+behavior, it was impractical to make a single prediction model for all
+medicines, and most sales records had nonlinear relationships.
+
+The reason why the hybrid neural network method was carried out was due
+to the fact that it is not acceptable to apply a fully linear or
+nonlinear model on sales data.
+
+The two forecast error measures that were used to evaluate and compare
+model performance were mean squared error and mean absolute error. The
+performance of the predicted data was significantly improved when the
+past records of co members were used.
+
+http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_gale\_ofa425455991\&indx=3\&recIds=TN\_gale\_ofa425455991\&recIdxs=2\&elementId=2\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481346949259
+
+The other study that examined prediction-based inventory optimization
+using data mining models, the Back propagation neural network was used
+for training the prediction model. The idea that gave rise to this
+method of inventory prediction was the idea that the demand of marketing
+is viewed as the foundation of inventory management.
+
+On the basis of the prediction result, a simple and concise inventory
+policy was established. Following this, the historic sales data was used
+to estimate a normal distribution of demand and to calculate the
+inventory cost with inventory strategy.
+
+Two models (Back Propagation Neural Network and Support Vector
+Regression) were established using three input variables (historical
+sales data, the frequency of searching the commodity, and the click
+volume of the commodity page).
+
+When the back-propagation neural network method was used, there was more
+accuracy shown in the performance because the predicted values almost
+matched the actual values in the graphs.
+
+The mean absolute percentage error calculated for this model is 0.06.
+
+http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?frbrVersion=2\&tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_ieee10.1109\%2fCSO.2014.118\&indx=10\&recIds=TN\_ieee10.1109\%2fCSO.2014.118\&recIdxs=9\&elementId=9\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481412549638
+
+In another study conducted in 2012 in Idaho, the monthly revenue
+generated was examined rather than the yearly revenue generated. The
+continued growth was rather owed to the number of weekends a month has
+(five instead of four) and to the higher prices in neighboring states.
+In Washington, the voters approved an initiative that led the state to
+sell its liquor stores and add new distributor and retail fees, making
+prices in the neighboring states (Idaho and Oregon) look better. There
+were no changes made in marketing or pricing in response to the
+regulatory shift in Washington ({\textbf{???}}). Further research into
+the proximity of our counties to states and towns with higher prices and
+regulation may provide more insight into sales and volume of liquor
+sold. Additionally, reviewing the data by identifying months that has 5
+weekends instead of four could provide further insights.
+
+conclude your findings, limitations, and suggest areas for future work.
+
+\newpage
+
+\section{Appendices}\label{appendices}
+
+\section{Supplemental tables and/or
+figures.}\label{supplemental-tables-andor-figures.}
+
+\begin{spacing}{0.7}
+\begin{center}\textbf{ dfLiquorSales \\ 15 Variables~~~~~ 376 ~Observations}\end{center}
+\smallskip\hrule\smallskip{\small
+\noindent\textbf{X}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){40}}
+\put(20,0){\line(0,1){100}}
+\put(39,0){\line(0,1){100}}
+\put(59,0){\line(0,1){100}}
+\put(79,0){\line(0,1){100}}
+\put(99,0){\line(0,1){100}}
+\put(118,0){\line(0,1){100}}
+\put(138,0){\line(0,1){100}}
+\put(158,0){\line(0,1){100}}
+\put(178,0){\line(0,1){100}}
+\put(197,0){\line(0,1){100}}
+\put(217,0){\line(0,1){100}}
+\put(237,0){\line(0,1){100}}
+\put(257,0){\line(0,1){100}}
+\put(276,0){\line(0,1){100}}
+\put(296,0){\line(0,1){100}}
+\put(316,0){\line(0,1){100}}
+\put(336,0){\line(0,1){100}}
+\put(355,0){\line(0,1){100}}
+\put(375,0){\line(0,1){100}}
+\put(395,0){\line(0,1){100}}
+\put(414,0){\line(0,1){100}}
+\put(434,0){\line(0,1){100}}
+\put(454,0){\line(0,1){100}}
+\put(474,0){\line(0,1){100}}
+\put(493,0){\line(0,1){100}}
+\put(513,0){\line(0,1){100}}
+\put(533,0){\line(0,1){100}}
+\put(553,0){\line(0,1){100}}
+\put(572,0){\line(0,1){100}}
+\put(592,0){\line(0,1){100}}
+\put(612,0){\line(0,1){100}}
+\put(632,0){\line(0,1){100}}
+\put(651,0){\line(0,1){100}}
+\put(671,0){\line(0,1){100}}
+\put(691,0){\line(0,1){100}}
+\put(711,0){\line(0,1){100}}
+\put(730,0){\line(0,1){100}}
+\put(750,0){\line(0,1){100}}
+\put(770,0){\line(0,1){100}}
+\put(789,0){\line(0,1){100}}
+\put(809,0){\line(0,1){100}}
+\put(829,0){\line(0,1){100}}
+\put(849,0){\line(0,1){100}}
+\put(868,0){\line(0,1){100}}
+\put(888,0){\line(0,1){100}}
+\put(908,0){\line(0,1){100}}
+\put(928,0){\line(0,1){100}}
+\put(947,0){\line(0,1){100}}
+\put(967,0){\line(0,1){100}}
+\put(987,0){\line(0,1){100}}
+\put(1007,0){\line(0,1){100}}
+\put(1026,0){\line(0,1){100}}
+\put(1046,0){\line(0,1){100}}
+\put(1066,0){\line(0,1){100}}
+\put(1086,0){\line(0,1){100}}
+\put(1105,0){\line(0,1){100}}
+\put(1125,0){\line(0,1){100}}
+\put(1145,0){\line(0,1){100}}
+\put(1164,0){\line(0,1){100}}
+\put(1184,0){\line(0,1){100}}
+\put(1204,0){\line(0,1){100}}
+\put(1224,0){\line(0,1){100}}
+\put(1243,0){\line(0,1){100}}
+\put(1263,0){\line(0,1){100}}
+\put(1283,0){\line(0,1){100}}
+\put(1303,0){\line(0,1){100}}
+\put(1322,0){\line(0,1){100}}
+\put(1342,0){\line(0,1){100}}
+\put(1362,0){\line(0,1){100}}
+\put(1382,0){\line(0,1){100}}
+\put(1401,0){\line(0,1){100}}
+\put(1421,0){\line(0,1){100}}
+\put(1441,0){\line(0,1){100}}
+\put(1461,0){\line(0,1){100}}
+\put(1480,0){\line(0,1){80}}
+\end{picture}
+
+{\smaller[2]
+\begin{tabular}{ rrrrrrrrrrrrr }
+n&missing&distinct&Info&Mean&Gmd&.05&.10&.25&.50&.75&.90&.95 \\
+376&0&376&1&188.5&125.7& 19.75& 38.50& 94.75&188.50&282.25&338.50&357.25 \end{tabular}
+\begin{verbatim}
+
+lowest :   1   2   3   4   5, highest: 372 373 374 375 376
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Month}
+
+{\smaller
+\begin{tabular}{ rrrrrr }
+n&missing&distinct&Info&Mean&Gmd \\
+376&0&1&0&11&0 \end{tabular}
+\begin{verbatim}
+              
+Value       11
+Frequency  376
+Proportion   1
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Year}
+
+{\smaller
+\begin{tabular}{ rrrrrr }
+n&missing&distinct&Info&Mean&Gmd \\
+376&0&1&0&2015&0 \end{tabular}
+\begin{verbatim}
+               
+Value      2015
+Frequency   376
+Proportion    1
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{City}
+
+{\smaller
+\begin{tabular}{ rrrr }
+n&missing&distinct&value \\
+376&0&1&DES MOINES \end{tabular}
+\begin{verbatim}
+                     
+Value      DES MOINES
+Frequency         376
+Proportion          1
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Category.Name}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){86}}
+\put(188,0){\line(0,1){100}}
+\put(375,0){\line(0,1){55}}
+\put(562,0){\line(0,1){58}}
+\put(750,0){\line(0,1){11}}
+\put(938,0){\line(0,1){93}}
+\put(1125,0){\line(0,1){38}}
+\put(1312,0){\line(0,1){89}}
+\end{picture}
+
+{\smaller
+\begin{tabular}{ rrr }
+n&missing&distinct \\
+376&0&8 \end{tabular}
+\begin{verbatim}
+
+BLENDED WHISKIES (61, 0.162), CANADIAN WHISKIES (71, 0.189), IRISH WHISKIES (39, 0.104),
+SCOTCH WHISKIES (41, 0.109), SINGLE BARREL BOURBON WHISKIES (8, 0.021), STRAIGHT BOURBON
+WHISKIES (66, 0.176), STRAIGHT RYE WHISKIES (27, 0.072), TENNESSEE WHISKIES (63, 0.168)
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Store.Number}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){100}}
+\put(29,0){\line(0,1){100}}
+\put(167,0){\line(0,1){100}}
+\put(168,0){\line(0,1){88}}
+\put(170,0){\line(0,1){88}}
+\put(184,0){\line(0,1){100}}
+\put(217,0){\line(0,1){100}}
+\put(217,0){\line(0,1){75}}
+\put(220,0){\line(0,1){100}}
+\put(221,0){\line(0,1){88}}
+\put(328,0){\line(0,1){25}}
+\put(329,0){\line(0,1){62}}
+\put(601,0){\line(0,1){75}}
+\put(739,0){\line(0,1){88}}
+\put(748,0){\line(0,1){75}}
+\put(786,0){\line(0,1){50}}
+\put(789,0){\line(0,1){62}}
+\put(792,0){\line(0,1){75}}
+\put(812,0){\line(0,1){75}}
+\put(838,0){\line(0,1){62}}
+\put(927,0){\line(0,1){88}}
+\put(930,0){\line(0,1){75}}
+\put(968,0){\line(0,1){75}}
+\put(969,0){\line(0,1){75}}
+\put(983,0){\line(0,1){38}}
+\put(991,0){\line(0,1){75}}
+\put(1034,0){\line(0,1){75}}
+\put(1045,0){\line(0,1){62}}
+\put(1048,0){\line(0,1){38}}
+\put(1069,0){\line(0,1){50}}
+\put(1078,0){\line(0,1){62}}
+\put(1086,0){\line(0,1){50}}
+\put(1136,0){\line(0,1){75}}
+\put(1153,0){\line(0,1){75}}
+\put(1194,0){\line(0,1){50}}
+\put(1194,0){\line(0,1){50}}
+\put(1195,0){\line(0,1){50}}
+\put(1195,0){\line(0,1){50}}
+\put(1196,0){\line(0,1){25}}
+\put(1196,0){\line(0,1){50}}
+\put(1197,0){\line(0,1){50}}
+\put(1197,0){\line(0,1){38}}
+\put(1198,0){\line(0,1){38}}
+\put(1205,0){\line(0,1){75}}
+\put(1208,0){\line(0,1){38}}
+\put(1217,0){\line(0,1){50}}
+\put(1231,0){\line(0,1){50}}
+\put(1294,0){\line(0,1){62}}
+\put(1294,0){\line(0,1){62}}
+\put(1296,0){\line(0,1){38}}
+\put(1296,0){\line(0,1){38}}
+\put(1297,0){\line(0,1){62}}
+\put(1297,0){\line(0,1){88}}
+\put(1298,0){\line(0,1){50}}
+\put(1298,0){\line(0,1){50}}
+\put(1311,0){\line(0,1){100}}
+\put(1321,0){\line(0,1){25}}
+\put(1359,0){\line(0,1){25}}
+\put(1367,0){\line(0,1){38}}
+\put(1383,0){\line(0,1){38}}
+\put(1394,0){\line(0,1){88}}
+\put(1421,0){\line(0,1){50}}
+\put(1424,0){\line(0,1){62}}
+\put(1458,0){\line(0,1){75}}
+\put(1458,0){\line(0,1){88}}
+\put(1459,0){\line(0,1){88}}
+\put(1459,0){\line(0,1){88}}
+\put(1460,0){\line(0,1){88}}
+\put(1461,0){\line(0,1){62}}
+\put(1461,0){\line(0,1){62}}
+\put(1464,0){\line(0,1){38}}
+\put(1468,0){\line(0,1){75}}
+\put(1479,0){\line(0,1){50}}
+\end{picture}
+
+{\smaller
+\begin{tabular}{ rrr }
+n&missing&distinct \\
+376&0&73 \end{tabular}
+\begin{verbatim}
+
+lowest : 2190 2248 2527 2528 2532, highest: 5131 5132 5137 5145 5169
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Store.Name}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){44}}
+\put(21,0){\line(0,1){44}}
+\put(42,0){\line(0,1){22}}
+\put(62,0){\line(0,1){67}}
+\put(83,0){\line(0,1){78}}
+\put(104,0){\line(0,1){89}}
+\put(125,0){\line(0,1){89}}
+\put(146,0){\line(0,1){22}}
+\put(167,0){\line(0,1){56}}
+\put(188,0){\line(0,1){78}}
+\put(208,0){\line(0,1){33}}
+\put(229,0){\line(0,1){56}}
+\put(250,0){\line(0,1){67}}
+\put(271,0){\line(0,1){67}}
+\put(292,0){\line(0,1){22}}
+\put(312,0){\line(0,1){67}}
+\put(333,0){\line(0,1){67}}
+\put(354,0){\line(0,1){89}}
+\put(375,0){\line(0,1){89}}
+\put(396,0){\line(0,1){78}}
+\put(417,0){\line(0,1){78}}
+\put(438,0){\line(0,1){89}}
+\put(458,0){\line(0,1){89}}
+\put(479,0){\line(0,1){67}}
+\put(500,0){\line(0,1){78}}
+\put(521,0){\line(0,1){89}}
+\put(542,0){\line(0,1){44}}
+\put(562,0){\line(0,1){33}}
+\put(583,0){\line(0,1){33}}
+\put(604,0){\line(0,1){56}}
+\put(625,0){\line(0,1){44}}
+\put(646,0){\line(0,1){67}}
+\put(667,0){\line(0,1){67}}
+\put(688,0){\line(0,1){56}}
+\put(708,0){\line(0,1){100}}
+\put(729,0){\line(0,1){56}}
+\put(750,0){\line(0,1){78}}
+\put(771,0){\line(0,1){78}}
+\put(792,0){\line(0,1){78}}
+\put(812,0){\line(0,1){44}}
+\put(833,0){\line(0,1){22}}
+\put(854,0){\line(0,1){44}}
+\put(875,0){\line(0,1){44}}
+\put(896,0){\line(0,1){56}}
+\put(917,0){\line(0,1){33}}
+\put(938,0){\line(0,1){44}}
+\put(958,0){\line(0,1){44}}
+\put(979,0){\line(0,1){44}}
+\put(1000,0){\line(0,1){33}}
+\put(1021,0){\line(0,1){33}}
+\put(1042,0){\line(0,1){44}}
+\put(1062,0){\line(0,1){67}}
+\put(1083,0){\line(0,1){78}}
+\put(1104,0){\line(0,1){67}}
+\put(1125,0){\line(0,1){67}}
+\put(1146,0){\line(0,1){67}}
+\put(1167,0){\line(0,1){67}}
+\put(1188,0){\line(0,1){33}}
+\put(1208,0){\line(0,1){33}}
+\put(1229,0){\line(0,1){56}}
+\put(1250,0){\line(0,1){78}}
+\put(1271,0){\line(0,1){67}}
+\put(1292,0){\line(0,1){44}}
+\put(1312,0){\line(0,1){67}}
+\put(1333,0){\line(0,1){56}}
+\put(1354,0){\line(0,1){56}}
+\put(1375,0){\line(0,1){33}}
+\put(1396,0){\line(0,1){56}}
+\put(1417,0){\line(0,1){78}}
+\put(1438,0){\line(0,1){44}}
+\put(1458,0){\line(0,1){44}}
+\put(1479,0){\line(0,1){33}}
+\end{picture}
+
+{\smaller
+\begin{tabular}{ rrr }
+n&missing&distinct \\
+376&0&72 \end{tabular}
+\begin{verbatim}
+
+lowest : AV Superstop                  Best Food Mart / Des Moines   C Fresh Market                Cash Saver  /  E Euclid Ave   Cash Saver  /  Fleur         
+highest: Walgreens #05852 / Des Moines Walgreens #07452 / Des Moines Walgreens #07453 / Des Moines Walgreens #07833 / Des Moines Walgreens #07968 / Des Moines
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Pack}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){1}}
+\put(67,0){\line(0,1){4}}
+\put(89,0){\line(0,1){2}}
+\put(111,0){\line(0,1){1}}
+\put(134,0){\line(0,1){52}}
+\put(178,0){\line(0,1){5}}
+\put(200,0){\line(0,1){2}}
+\put(223,0){\line(0,1){1}}
+\put(245,0){\line(0,1){8}}
+\put(267,0){\line(0,1){24}}
+\put(290,0){\line(0,1){14}}
+\put(312,0){\line(0,1){19}}
+\put(334,0){\line(0,1){14}}
+\put(356,0){\line(0,1){16}}
+\put(379,0){\line(0,1){12}}
+\put(401,0){\line(0,1){100}}
+\put(423,0){\line(0,1){6}}
+\put(445,0){\line(0,1){15}}
+\put(468,0){\line(0,1){9}}
+\put(490,0){\line(0,1){11}}
+\put(512,0){\line(0,1){9}}
+\put(535,0){\line(0,1){9}}
+\put(557,0){\line(0,1){9}}
+\put(579,0){\line(0,1){16}}
+\put(601,0){\line(0,1){6}}
+\put(624,0){\line(0,1){6}}
+\put(646,0){\line(0,1){2}}
+\put(668,0){\line(0,1){19}}
+\put(690,0){\line(0,1){5}}
+\put(713,0){\line(0,1){2}}
+\put(735,0){\line(0,1){2}}
+\put(757,0){\line(0,1){9}}
+\put(780,0){\line(0,1){4}}
+\put(802,0){\line(0,1){4}}
+\put(824,0){\line(0,1){6}}
+\put(846,0){\line(0,1){4}}
+\put(869,0){\line(0,1){1}}
+\put(891,0){\line(0,1){1}}
+\put(935,0){\line(0,1){16}}
+\put(1002,0){\line(0,1){2}}
+\put(1025,0){\line(0,1){1}}
+\put(1069,0){\line(0,1){2}}
+\put(1091,0){\line(0,1){1}}
+\put(1114,0){\line(0,1){4}}
+\put(1136,0){\line(0,1){1}}
+\put(1203,0){\line(0,1){1}}
+\put(1292,0){\line(0,1){1}}
+\put(1314,0){\line(0,1){1}}
+\put(1381,0){\line(0,1){1}}
+\put(1470,0){\line(0,1){4}}
+\end{picture}
+
+{\smaller
+\begin{tabular}{ rrrrrrrrrrrrr }
+n&missing&distinct&Info&Mean&Gmd&.05&.10&.25&.50&.75&.90&.95 \\
+376&0&141&0.99&13.38&6.201& 6.00& 6.00& 9.75&12.00&16.00&21.37&24.00 \end{tabular}
+\begin{verbatim}
+
+lowest :  3.00000  4.50000  5.00000  5.25000  5.40000, highest: 30.00000 32.00000 32.57143 33.81818 36.00000
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Bottles.Sold}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){100}}
+\put(22,0){\line(0,1){46}}
+\put(44,0){\line(0,1){23}}
+\put(66,0){\line(0,1){15}}
+\put(88,0){\line(0,1){7}}
+\put(111,0){\line(0,1){3}}
+\put(133,0){\line(0,1){2}}
+\put(155,0){\line(0,1){3}}
+\put(177,0){\line(0,1){2}}
+\put(199,0){\line(0,1){2}}
+\put(221,0){\line(0,1){1}}
+\put(265,0){\line(0,1){1}}
+\put(288,0){\line(0,1){1}}
+\put(310,0){\line(0,1){1}}
+\put(332,0){\line(0,1){1}}
+\put(354,0){\line(0,1){1}}
+\put(376,0){\line(0,1){1}}
+\put(420,0){\line(0,1){1}}
+\put(487,0){\line(0,1){1}}
+\put(641,0){\line(0,1){1}}
+\put(752,0){\line(0,1){1}}
+\put(862,0){\line(0,1){1}}
+\put(1084,0){\line(0,1){1}}
+\put(1438,0){\line(0,1){1}}
+\end{picture}
+
+{\smaller[2]
+\begin{tabular}{ rrrrrrrrrrrrr }
+n&missing&distinct&Info&Mean&Gmd&.05&.10&.25&.50&.75&.90&.95 \\
+376&0&153&0.999&116.1&173.3&  3.00&  5.00&  9.75& 32.00& 96.50&247.00&444.25 \end{tabular}
+\begin{verbatim}
+
+lowest :    1    2    3    4    5, highest: 1450 1704 1961 2431 3228
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Sale..Dollars.}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){100}}
+\put(20,0){\line(0,1){47}}
+\put(40,0){\line(0,1){12}}
+\put(60,0){\line(0,1){5}}
+\put(80,0){\line(0,1){4}}
+\put(101,0){\line(0,1){1}}
+\put(121,0){\line(0,1){1}}
+\put(141,0){\line(0,1){1}}
+\put(161,0){\line(0,1){1}}
+\put(201,0){\line(0,1){1}}
+\put(221,0){\line(0,1){1}}
+\put(241,0){\line(0,1){1}}
+\put(282,0){\line(0,1){1}}
+\put(523,0){\line(0,1){1}}
+\put(543,0){\line(0,1){1}}
+\put(604,0){\line(0,1){1}}
+\put(724,0){\line(0,1){1}}
+\put(785,0){\line(0,1){1}}
+\put(805,0){\line(0,1){1}}
+\put(1107,0){\line(0,1){1}}
+\put(1429,0){\line(0,1){1}}
+\end{picture}
+
+{\smaller[2]
+\begin{tabular}{ rrrrrrrrrrrrr }
+n&missing&distinct&Info&Mean&Gmd&.05&.10&.25&.50&.75&.90&.95 \\
+376&0&343&1&1891&3024&  44.98&  69.84& 162.63& 371.25&1078.08&2937.44&6963.48 \end{tabular}
+\begin{verbatim}
+
+lowest :     7.20    21.74    22.49    26.25    27.14, highest: 35818.26 38945.46 40135.98 54923.22 71157.84
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Bottle.Volume..ml.}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){1}}
+\put(76,0){\line(0,1){4}}
+\put(95,0){\line(0,1){2}}
+\put(113,0){\line(0,1){3}}
+\put(151,0){\line(0,1){2}}
+\put(170,0){\line(0,1){15}}
+\put(189,0){\line(0,1){3}}
+\put(208,0){\line(0,1){7}}
+\put(227,0){\line(0,1){14}}
+\put(246,0){\line(0,1){3}}
+\put(265,0){\line(0,1){2}}
+\put(284,0){\line(0,1){14}}
+\put(302,0){\line(0,1){1}}
+\put(321,0){\line(0,1){8}}
+\put(340,0){\line(0,1){19}}
+\put(359,0){\line(0,1){7}}
+\put(378,0){\line(0,1){3}}
+\put(397,0){\line(0,1){7}}
+\put(416,0){\line(0,1){3}}
+\put(435,0){\line(0,1){6}}
+\put(454,0){\line(0,1){6}}
+\put(473,0){\line(0,1){5}}
+\put(492,0){\line(0,1){3}}
+\put(510,0){\line(0,1){2}}
+\put(529,0){\line(0,1){100}}
+\put(548,0){\line(0,1){5}}
+\put(567,0){\line(0,1){5}}
+\put(586,0){\line(0,1){7}}
+\put(605,0){\line(0,1){5}}
+\put(624,0){\line(0,1){8}}
+\put(643,0){\line(0,1){6}}
+\put(662,0){\line(0,1){8}}
+\put(681,0){\line(0,1){3}}
+\put(699,0){\line(0,1){2}}
+\put(718,0){\line(0,1){8}}
+\put(737,0){\line(0,1){5}}
+\put(756,0){\line(0,1){8}}
+\put(775,0){\line(0,1){4}}
+\put(794,0){\line(0,1){7}}
+\put(813,0){\line(0,1){4}}
+\put(832,0){\line(0,1){3}}
+\put(851,0){\line(0,1){3}}
+\put(870,0){\line(0,1){3}}
+\put(889,0){\line(0,1){1}}
+\put(907,0){\line(0,1){5}}
+\put(926,0){\line(0,1){2}}
+\put(945,0){\line(0,1){1}}
+\put(964,0){\line(0,1){2}}
+\put(983,0){\line(0,1){9}}
+\put(1002,0){\line(0,1){2}}
+\put(1021,0){\line(0,1){1}}
+\put(1040,0){\line(0,1){1}}
+\put(1059,0){\line(0,1){1}}
+\put(1096,0){\line(0,1){2}}
+\put(1153,0){\line(0,1){1}}
+\put(1229,0){\line(0,1){2}}
+\put(1286,0){\line(0,1){1}}
+\put(1323,0){\line(0,1){1}}
+\put(1475,0){\line(0,1){19}}
+\end{picture}
+
+{\smaller[2]
+\begin{tabular}{ rrrrrrrrrrrrr }
+n&missing&distinct&Info&Mean&Gmd&.05&.10&.25&.50&.75&.90&.95 \\
+376&0&180&0.986&803.8&345.4& 375.0& 435.4& 573.8& 750.0& 953.8&1250.0&1564.3 \end{tabular}
+\begin{verbatim}
+
+lowest :  200.000  270.000  287.500  300.000  310.000, highest: 1416.667 1500.000 1550.000 1607.143 1750.000
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{State.Bottle.Cost}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){32}}
+\put(18,0){\line(0,1){100}}
+\put(35,0){\line(0,1){57}}
+\put(53,0){\line(0,1){39}}
+\put(71,0){\line(0,1){25}}
+\put(89,0){\line(0,1){21}}
+\put(106,0){\line(0,1){10}}
+\put(124,0){\line(0,1){6}}
+\put(142,0){\line(0,1){11}}
+\put(160,0){\line(0,1){7}}
+\put(177,0){\line(0,1){9}}
+\put(195,0){\line(0,1){4}}
+\put(213,0){\line(0,1){6}}
+\put(231,0){\line(0,1){3}}
+\put(248,0){\line(0,1){2}}
+\put(266,0){\line(0,1){2}}
+\put(284,0){\line(0,1){4}}
+\put(319,0){\line(0,1){1}}
+\put(355,0){\line(0,1){2}}
+\put(390,0){\line(0,1){2}}
+\put(426,0){\line(0,1){1}}
+\put(514,0){\line(0,1){1}}
+\put(532,0){\line(0,1){1}}
+\put(568,0){\line(0,1){2}}
+\put(621,0){\line(0,1){1}}
+\put(639,0){\line(0,1){1}}
+\put(710,0){\line(0,1){1}}
+\put(745,0){\line(0,1){1}}
+\put(780,0){\line(0,1){1}}
+\put(816,0){\line(0,1){1}}
+\put(922,0){\line(0,1){1}}
+\put(1206,0){\line(0,1){1}}
+\put(1455,0){\line(0,1){1}}
+\end{picture}
+
+{\smaller
+\begin{verbatim}
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50 
+     376        0      319        1    101.7    127.4    7.262   10.670   18.495   47.375 
+     .75      .90      .95 
+ 103.537  225.940  338.075 
+
+lowest :    3.21    3.46    3.50    4.10    4.40, highest:  887.95  918.77 1045.11 1362.12 1640.44
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{State.Bottle.Retail}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){16}}
+\put(12,0){\line(0,1){100}}
+\put(24,0){\line(0,1){66}}
+\put(36,0){\line(0,1){42}}
+\put(48,0){\line(0,1){45}}
+\put(60,0){\line(0,1){29}}
+\put(71,0){\line(0,1){23}}
+\put(83,0){\line(0,1){14}}
+\put(95,0){\line(0,1){14}}
+\put(107,0){\line(0,1){11}}
+\put(119,0){\line(0,1){6}}
+\put(131,0){\line(0,1){5}}
+\put(143,0){\line(0,1){11}}
+\put(155,0){\line(0,1){5}}
+\put(167,0){\line(0,1){8}}
+\put(179,0){\line(0,1){7}}
+\put(191,0){\line(0,1){2}}
+\put(202,0){\line(0,1){6}}
+\put(214,0){\line(0,1){5}}
+\put(226,0){\line(0,1){1}}
+\put(238,0){\line(0,1){4}}
+\put(250,0){\line(0,1){1}}
+\put(262,0){\line(0,1){4}}
+\put(274,0){\line(0,1){1}}
+\put(286,0){\line(0,1){2}}
+\put(298,0){\line(0,1){1}}
+\put(322,0){\line(0,1){1}}
+\put(345,0){\line(0,1){1}}
+\put(369,0){\line(0,1){1}}
+\put(393,0){\line(0,1){2}}
+\put(429,0){\line(0,1){1}}
+\put(512,0){\line(0,1){1}}
+\put(536,0){\line(0,1){1}}
+\put(572,0){\line(0,1){2}}
+\put(619,0){\line(0,1){1}}
+\put(643,0){\line(0,1){1}}
+\put(703,0){\line(0,1){1}}
+\put(750,0){\line(0,1){1}}
+\put(798,0){\line(0,1){1}}
+\put(822,0){\line(0,1){1}}
+\put(929,0){\line(0,1){1}}
+\put(1215,0){\line(0,1){1}}
+\put(1465,0){\line(0,1){1}}
+\end{picture}
+
+{\smaller[2]
+\begin{tabular}{ rrrrrrrrrrrrr }
+n&missing&distinct&Info&Mean&Gmd&.05&.10&.25&.50&.75&.90&.95 \\
+376&0&322&1&152.6&191.3& 10.90& 16.01& 27.75& 71.09&155.34&338.93&507.33 \end{tabular}
+\begin{verbatim}
+
+lowest :    4.82    5.19    5.25    6.15    6.60, highest: 1332.12 1378.66 1568.12 2049.35 2467.91
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Volume.Sold..Gallons.}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){100}}
+\put(17,0){\line(0,1){45}}
+\put(35,0){\line(0,1){20}}
+\put(52,0){\line(0,1){10}}
+\put(69,0){\line(0,1){4}}
+\put(87,0){\line(0,1){5}}
+\put(104,0){\line(0,1){2}}
+\put(121,0){\line(0,1){3}}
+\put(139,0){\line(0,1){2}}
+\put(156,0){\line(0,1){1}}
+\put(173,0){\line(0,1){1}}
+\put(191,0){\line(0,1){1}}
+\put(208,0){\line(0,1){1}}
+\put(225,0){\line(0,1){2}}
+\put(242,0){\line(0,1){1}}
+\put(294,0){\line(0,1){1}}
+\put(346,0){\line(0,1){1}}
+\put(433,0){\line(0,1){1}}
+\put(502,0){\line(0,1){1}}
+\put(658,0){\line(0,1){1}}
+\put(727,0){\line(0,1){1}}
+\put(831,0){\line(0,1){1}}
+\put(1074,0){\line(0,1){1}}
+\put(1438,0){\line(0,1){1}}
+\end{picture}
+
+{\smaller[2]
+\begin{tabular}{ rrrrrrrrrrrrr }
+n&missing&distinct&Info&Mean&Gmd&.05&.10&.25&.50&.75&.90&.95 \\
+376&0&254&1&24.4&38.04& 0.4225& 0.7350& 1.7900& 5.1500&18.2400&47.0350&88.4975 \end{tabular}
+\begin{verbatim}
+
+lowest :   0.13   0.20   0.30   0.32   0.39, highest: 383.96 417.74 483.05 623.52 830.55
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{ProfitDollar}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){32}}
+\put(18,0){\line(0,1){100}}
+\put(35,0){\line(0,1){57}}
+\put(53,0){\line(0,1){39}}
+\put(70,0){\line(0,1){25}}
+\put(88,0){\line(0,1){21}}
+\put(105,0){\line(0,1){10}}
+\put(123,0){\line(0,1){6}}
+\put(140,0){\line(0,1){11}}
+\put(158,0){\line(0,1){7}}
+\put(175,0){\line(0,1){9}}
+\put(193,0){\line(0,1){4}}
+\put(210,0){\line(0,1){6}}
+\put(228,0){\line(0,1){2}}
+\put(245,0){\line(0,1){2}}
+\put(263,0){\line(0,1){3}}
+\put(280,0){\line(0,1){4}}
+\put(315,0){\line(0,1){1}}
+\put(350,0){\line(0,1){2}}
+\put(386,0){\line(0,1){2}}
+\put(421,0){\line(0,1){1}}
+\put(508,0){\line(0,1){1}}
+\put(526,0){\line(0,1){1}}
+\put(561,0){\line(0,1){2}}
+\put(613,0){\line(0,1){1}}
+\put(631,0){\line(0,1){1}}
+\put(701,0){\line(0,1){1}}
+\put(736,0){\line(0,1){1}}
+\put(771,0){\line(0,1){1}}
+\put(806,0){\line(0,1){1}}
+\put(911,0){\line(0,1){1}}
+\put(1209,0){\line(0,1){1}}
+\put(1455,0){\line(0,1){1}}
+\end{picture}
+
+{\smaller
+\begin{verbatim}
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50 
+     376        0      317        1    50.96    63.89    3.635    5.340    9.253   23.720 
+     .75      .90      .95 
+  51.807  112.990  169.260 
+
+lowest :   1.61   1.73   1.75   2.05   2.20, highest: 444.17 459.89 523.01 687.23 827.47
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+}\end{spacing}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{describe}\NormalTok{(dfLiquorSales$Store.Number)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## dfLiquorSales$Store.Number 
+##        n  missing distinct 
+##      376        0       73 
+## 
+## lowest : 2190 2248 2527 2528 2532, highest: 5131 5132 5137 5145 5169
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{describe}\NormalTok{(dfLiquorSales$Category.Name)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## dfLiquorSales$Category.Name 
+##        n  missing distinct 
+##      376        0        8 
+## 
+## BLENDED WHISKIES (61, 0.162), CANADIAN WHISKIES (71, 0.189), IRISH
+## WHISKIES (39, 0.104), SCOTCH WHISKIES (41, 0.109), SINGLE BARREL BOURBON
+## WHISKIES (8, 0.021), STRAIGHT BOURBON WHISKIES (66, 0.176), STRAIGHT RYE
+## WHISKIES (27, 0.072), TENNESSEE WHISKIES (63, 0.168)
+\end{verbatim}
+
+\section{Session Info}\label{session-info}
+
+\begin{itemize}\raggedright
+  \item R version 3.3.2 (2016-10-31), \verb|x86_64-w64-mingw32|
+  \item Locale: \verb|LC_COLLATE=English_United States.1252|, \verb|LC_CTYPE=English_United States.1252|, \verb|LC_MONETARY=English_United States.1252|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=English_United States.1252|
+  \item Base packages: base, datasets, graphics, grDevices,
+    methods, stats, utils
+  \item Other packages: car~2.1-4, data.table~1.10.0, dplyr~0.5.0,
+    fitdistrplus~1.0-7, forecast~7.3, Formula~1.2-1,
+    ggplot2~2.2.0, Hmisc~4.0-1, lattice~0.20-34, logspline~2.1.9,
+    magrittr~1.5, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
+    purrr~0.2.2, RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
+    survival~2.40-1, tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0,
+    timeDate~3012.100, zoo~1.7-13
+  \item Loaded via a namespace (and not attached): acepack~1.4.1,
+    assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
+    codetools~0.2-15, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
+    evaluate~0.10, foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2,
+    gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
+    knitr~1.15.1, latticeExtra~0.6-28, lazyeval~0.2.0,
+    lme4~1.1-12, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
+    minqa~1.2.4, munsell~0.4.3, nlme~3.1-128, nloptr~1.0.4,
+    nnet~7.3-12, openssl~0.9.5, parallel~3.3.2, pbkrtest~0.4-6,
+    plyr~1.8.4, quadprog~1.5-5, quantreg~5.29, R6~2.2.0,
+    Rcpp~0.12.8, rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1,
+    rticles~0.2, scales~0.4.1, SparseM~1.74, splines~3.3.2,
+    stringi~1.1.2, stringr~1.1.0, tools~3.3.2, tseries~0.10-35,
+    yaml~2.1.14
+\end{itemize}
+
+\section{R statistical programming
+code.}\label{r-statistical-programming-code.}
+
+Please see
+\href{https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final\%20Project/Final\%20Project.Rmd}{Final
+Project.rmd} on GitHub for source code.
+
+https://github.com/ChristopheHunt/DATA-621-Group-1/blob/master/Final\%20Project/Final\%20Project.Rmd
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\hypertarget{ref-CullenFrey4}{}
+AC, Cullen, and Frey HC. 1999. ``Probabilistic Techniques in Exposure
+Assessment,'' 181--241.
+
+\hypertarget{ref-SpecialityGrow3}{}
+Anonymous. 2016. ``Specialty Products Grow in Wine, Spirits.''
+\emph{Beverage Industry} 107(7).
+
+\hypertarget{ref-IowaSetsRecord2}{}
+Boshart, Rod. 2001. ``Liquor Sales in Iowa Set Record.'' \emph{Gazette}.
+
+\hypertarget{ref-Forecast1}{}
+David S. Walonick, Ph.D. 1993. ``An Overview of Forecasting
+Methodology.'' \emph{Survival Statistics}.
+doi:\href{https://doi.org/http://www.statpac.org/research-library/forecasting.htm}{http://www.statpac.org/research-library/forecasting.htm}.
+
+\hypertarget{ref-KeepingSpiritsHigh1}{}
+Del Buono, Amanda. 2016. ``Keeping Spirits High.'' \emph{Beverage
+Industry} 107.4: 14--16, 18.
+
+\hypertarget{ref-Demand1}{}
+Kumar, Abhishek. 2012. ``Demand Forecast Process and Inventory
+Management.''
+
+\end{document}
+
+
