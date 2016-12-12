@@ -556,7 +556,19 @@ better sales.
 \paragraph{Profit Dollars Model
 Development}\label{profit-dollars-model-development}
 
-We now developed a model for the Profit Dollars for sales in Des Moines.
+\bigskip
+
+We now developed a model for the Profit Dollars for Whiskey sales in Des
+Moines. Profit Dollars is the Retail Sale less the Cost of the liquor.
+We measure this value as pricing stragies are necessary in attempting to
+maximize effecient inventory control. Using the forward selection method
+we find that the variables \texttt{Pack} and
+\texttt{Bottle\ Volume\ in\ ml} are not significant so they will be
+removed from our final model.
+
+We further remove influencial points as we did in our previous model by
+those observations illustrated by our influence plot and Cooks distance
+plot.
 
 \begin{longtable}[]{@{}cccc@{}}
 \toprule
@@ -583,7 +595,7 @@ CookD\strut
 \bottomrule
 \end{longtable}
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-18-1.pdf}
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-19-1.pdf}
 
 \begin{table}[!htbp] \centering 
   \caption{Forward Selection Linear Model Profit Dollars without Influencial Points} 
@@ -618,7 +630,7 @@ F Statistic & 45.190$^{***}$ (df = 9; 364)  (p = 0.000) \\
 \end{tabular} 
 \end{table}
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-19-1.pdf}
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-20-1.pdf}
 
 \section{Volume.Sold..Gallons=One unit of increase in volume sold in
 Gallons will increase the bottles sold by 1.70
@@ -661,14 +673,7 @@ increase the bottles sold by
 decrease the bottles sold by 0.008
 units}\label{state..dollarsone-unit-of-increase-in-state..dollars-will-decrease-the-bottles-sold-by-0.008-units}
 
-plot(fit3\(fitted.values,fit3\)model\$ProfitDollar) abline(fit3)
-
 \section{Discussion and Conclusions}\label{discussion-and-conclusions}
-
-In two studies that were conducted, the statistical data from the
-previous time interval was used to predict what would happen in the next
-time interval. One study was for pharmaceutical distribution companies.
-The other study involved data mining models.
 
 In one study involving pharmaceutical distribution companies, the
 purpose was to propose a novel method to forecast the sales of the
@@ -682,21 +687,22 @@ approach. The performance of the proposed method was evaluated using a
 real dataset provided by one of the leading pharmacy distribution
 companies in Iran. The results of the evaluation indicated that the
 proposed method can cope with the low number of past records while
-accurately forecasting medicine sales.
+accurately forecasting medicine sales. An evaluation of the liquor data
+set using these techinques may provide greater insight as the vast
+number of records could produce a more accurate model.
 
 After exploratory analysis was done on the data, it was concluded that
 most medicines had different and specific characteristics and sales
 behavior, it was impractical to make a single prediction model for all
-medicines, and most sales records had nonlinear relationships.
-
-The reason why the hybrid neural network method was carried out was due
-to the fact that it is not acceptable to apply a fully linear or
-nonlinear model on sales data.
-
-The two forecast error measures that were used to evaluate and compare
-model performance were mean squared error and mean absolute error. The
-performance of the predicted data was significantly improved when the
-past records of co members were used.
+medicines, and most sales records had nonlinear relationships. This may
+suggest that it would be more beneficial to model liquor categories
+individually. However, the reason why the hybrid neural network method
+was carried out was due to the fact that it is not acceptable to apply a
+fully linear or nonlinear model on sales data. The two forecast error
+measures that were used to evaluate and compare model performance were
+mean squared error and mean absolute error. The performance of the
+predicted data was significantly improved when the past records of
+comembers were used.
 
 http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_gale\_ofa425455991\&indx=3\&recIds=TN\_gale\_ofa425455991\&recIdxs=2\&elementId=2\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481346949259
 
@@ -704,39 +710,41 @@ The other study that examined prediction-based inventory optimization
 using data mining models, the Back propagation neural network was used
 for training the prediction model. The idea that gave rise to this
 method of inventory prediction was the idea that the demand of marketing
-is viewed as the foundation of inventory management.
-
-On the basis of the prediction result, a simple and concise inventory
-policy was established. Following this, the historic sales data was used
-to estimate a normal distribution of demand and to calculate the
-inventory cost with inventory strategy.
+is viewed as the foundation of inventory management. On the basis of the
+prediction result, a simple and concise inventory policy was
+established. Following this, the historic sales data was used to
+estimate a normal distribution of demand and to calculate the inventory
+cost with inventory strategy.
 
 Two models (Back Propagation Neural Network and Support Vector
 Regression) were established using three input variables (historical
 sales data, the frequency of searching the commodity, and the click
-volume of the commodity page).
-
-When the back-propagation neural network method was used, there was more
-accuracy shown in the performance because the predicted values almost
-matched the actual values in the graphs.
-
-The mean absolute percentage error calculated for this model is 0.06.
+volume of the commodity page). When the back-propagation neural network
+method was used, there was more accuracy shown in the performance
+because the predicted values almost matched the actual values in the
+graphs. This suggests that our Naive Forecast approach could be improved
+through the use of theses techniques in conjunction with historical
+sales to create a more robust model.
 
 http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?frbrVersion=2\&tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_ieee10.1109\%2fCSO.2014.118\&indx=10\&recIds=TN\_ieee10.1109\%2fCSO.2014.118\&recIdxs=9\&elementId=9\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481412549638
 
 In another study conducted in 2012 in Idaho, the monthly revenue
-generated was examined rather than the yearly revenue generated. The
-continued growth was rather owed to the number of weekends a month has
-(five instead of four) and to the higher prices in neighboring states.
-In Washington, the voters approved an initiative that led the state to
-sell its liquor stores and add new distributor and retail fees, making
-prices in the neighboring states (Idaho and Oregon) look better. There
-were no changes made in marketing or pricing in response to the
+generated was examined rather than the yearly revenue generated. Which
+is in line with our model approach for using a single month rather than
+a year. The continued growth was rather owed to the number of weekends a
+month has (five instead of four) and to the higher prices in neighboring
+states. In Washington, the voters approved an initiative that led the
+state to sell its liquor stores and add new distributor and retail fees,
+making prices in the neighboring states (Idaho and Oregon) look better.
+There were no changes made in marketing or pricing in response to the
 regulatory shift in Washington ({\textbf{???}}). Further research into
 the proximity of our counties to states and towns with higher prices and
 regulation may provide more insight into sales and volume of liquor
 sold. Additionally, reviewing the data by identifying months that has 5
-weekends instead of four could provide further insights.
+weekends instead of four could provide further insights. A follow up
+study on how prices may have been impacted by pricing strategies in
+neighboring states and the number of weekends per month may offer
+further insights and improve the approach taken in this analysis.
 
 conclude your findings, limitations, and suggest areas for future work.
 
@@ -1512,17 +1520,17 @@ lowest :   1.61   1.73   1.75   2.05   2.20, highest: 444.17 459.89 523.01 687.2
   \item Other packages: car~2.1-4, data.table~1.10.0, dplyr~0.5.0,
     fitdistrplus~1.0-7, forecast~7.3, Formula~1.2-1,
     ggplot2~2.2.0, Hmisc~4.0-1, lattice~0.20-34, logspline~2.1.9,
-    magrittr~1.5, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
-    purrr~0.2.2, RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
+    MASS~7.3-45, pacman~0.4.1, pander~0.6.0, purrr~0.2.2,
+    RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
     survival~2.40-1, tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0,
     timeDate~3012.100, zoo~1.7-13
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    codetools~0.2-15, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
-    evaluate~0.10, foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2,
-    gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
-    knitr~1.15.1, latticeExtra~0.6-28, lazyeval~0.2.0,
-    lme4~1.1-12, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
+    colorspace~1.3-1, DBI~0.5-1, digest~0.6.10, evaluate~0.10,
+    foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2, gridExtra~2.2.1,
+    gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5, knitr~1.15.1,
+    latticeExtra~0.6-28, lazyeval~0.2.0, lme4~1.1-12,
+    magrittr~1.5, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
     minqa~1.2.4, munsell~0.4.3, nlme~3.1-128, nloptr~1.0.4,
     nnet~7.3-12, openssl~0.9.5, parallel~3.3.2, pbkrtest~0.4-6,
     plyr~1.8.4, quadprog~1.5-5, quantreg~5.29, R6~2.2.0,
