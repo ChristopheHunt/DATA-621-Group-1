@@ -143,8 +143,9 @@
   
   It consists of two paragraphs
   
-  \section{Keywords: Liquor Sales, Naive
-  Forecast*}\label{keywords-liquor-sales-naive-forecast}
+  \section{Keywords: Liquor Sales, Naive Forecast, Linear Regression,
+  Inventory
+  Forecast*}\label{keywords-liquor-sales-naive-forecast-linear-regression-inventory-forecast}
   \end{abstract}
   
  \end{frontmatter}
@@ -549,14 +550,13 @@ Also, as expected, a unit increase in the retail price will decrease the
 log of bottles sold by 0.70 units. Another interesting finding is that a
 unit increase in Bottle Volume will increase log of bottles sold by
 .0005 units, it would suggest that larger bottles are correlated with
-better sales.
+better sales. The Adjusted R\^{}2 was improved from .588 to .631 by
+removing the influence points.
 
 \newpage
 
 \paragraph{Profit Dollars Model
 Development}\label{profit-dollars-model-development}
-
-\bigskip
 
 We now developed a model for the Profit Dollars for Whiskey sales in Des
 Moines. Profit Dollars is the Retail Sale less the Cost of the liquor.
@@ -1520,17 +1520,17 @@ lowest :   1.61   1.73   1.75   2.05   2.20, highest: 444.17 459.89 523.01 687.2
   \item Other packages: car~2.1-4, data.table~1.10.0, dplyr~0.5.0,
     fitdistrplus~1.0-7, forecast~7.3, Formula~1.2-1,
     ggplot2~2.2.0, Hmisc~4.0-1, lattice~0.20-34, logspline~2.1.9,
-    MASS~7.3-45, pacman~0.4.1, pander~0.6.0, purrr~0.2.2,
-    RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
+    magrittr~1.5, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
+    purrr~0.2.2, RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
     survival~2.40-1, tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0,
     timeDate~3012.100, zoo~1.7-13
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    colorspace~1.3-1, DBI~0.5-1, digest~0.6.10, evaluate~0.10,
-    foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2, gridExtra~2.2.1,
-    gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5, knitr~1.15.1,
-    latticeExtra~0.6-28, lazyeval~0.2.0, lme4~1.1-12,
-    magrittr~1.5, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
+    codetools~0.2-15, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
+    evaluate~0.10, foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2,
+    gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
+    knitr~1.15.1, latticeExtra~0.6-28, lazyeval~0.2.0,
+    lme4~1.1-12, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
     minqa~1.2.4, munsell~0.4.3, nlme~3.1-128, nloptr~1.0.4,
     nnet~7.3-12, openssl~0.9.5, parallel~3.3.2, pbkrtest~0.4-6,
     plyr~1.8.4, quadprog~1.5-5, quantreg~5.29, R6~2.2.0,

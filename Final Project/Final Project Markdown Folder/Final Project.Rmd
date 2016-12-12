@@ -19,7 +19,7 @@ abstract: |
 
   It consists of two paragraphs
   
-  #Keywords:  Liquor Sales, Naive Forecast*
+  #Keywords:  Liquor Sales, Naive Forecast, Linear Regression, Inventory Forecast*
 
 bibliography: mybibfile.bib
 output: rticles::elsevier_article
@@ -379,13 +379,12 @@ plot(fit2$model$`log(Bottles.Sold)`, fit2$fitted.values, xlab = "Actual Values",
 
 The table of our detailed model is located in the Appendix. Interestingly, our results show that one unit increase in the cost to the State for `Bottle` will increase the log of bottles sold by 1.06 units. Candian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.75, whereas, IRISH Whiskies will decrease the log of  bottles sold by 0.76 and Scotch will decrease the log of bottles sold by 0.60. 
 
-Also, as expected, a unit increase in the retail price will decrease the log of bottles sold by 0.70 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. 
+Also, as expected, a unit increase in the retail price will decrease the log of bottles sold by 0.70 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. The Adjusted R^2 was improved from .588 to .631 by removing the influence points. 
 
 \newpage
 
 #### Profit Dollars Model Development
 
-\bigskip
 
 We now developed a model for the Profit Dollars for Whiskey sales in Des Moines. Profit Dollars is the Retail Sale less the Cost of the liquor. We measure this value as pricing stragies are necessary in attempting to maximize effecient inventory control. Using the forward selection method we find that the variables `Pack` and `Bottle Volume in ml` are not significant so they will be removed from our final model. 
 
@@ -404,7 +403,7 @@ fit3 <- lm(formula = ProfitDollar ~ Volume.Sold..Gallons. + Category.Name +
 
 We further remove influencial points as we did in our previous model by those observations illustrated by our influence plot and Cooks distance plot. 
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3, fig.width=10}
 #Removal of influence points based on two methods
 #1. influence points
 par(mfrow=c(1,2))
