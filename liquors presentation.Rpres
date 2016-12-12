@@ -1,0 +1,52 @@
+Liquor Sales in Iowa
+========================================================
+author: Yadu Chittampalli, Christophe Hunt, Senthil Dhanapal 
+date: 12/11/2016 
+
+Objectives
+========================================================
+
+- To create statistical models for the volume of liquor sold in gallons and for the profit incurred in Des Moines, Iowa. 
+- Make informed decisions on inventory prediction, sales, and assist wholesale distributors in planning for the predicted volume of distribution.
+
+Proposed Methodologies
+========================================================
+
+- Model the dependent variable of Volume Sold in Gallons by top counties and top liquor categories.
+
+- Accurately predict the planned inventory and anticipate production goals through the model of volume sold entirely by the state of Iowa.
+
+- Model volume sold and profit to predict the necessary volume of production and the possible profit when producing at the predicted volume.
+
+Challenges
+========================================================
+
+- Massive initial dataset that included sales by individual stores and the invoices for each store
+
+- Overdispersion and negative skew in Volume Sold (Gallons) when modeling it by top counties and top liquor categories. 
+
+First Fitted Model
+========================================================
+
+```{r, echo=F}
+library(dplyr)
+dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
+l = step(lm(Bottles.Sold~1,data=dfLiquorSales),direction = "forward",
+     scope=~Category.Name+Pack+Sale..Dollars.+Bottle.Volume..ml.
+     +State.Bottle.Cost+State.Bottle.Retail+Volume.Sold..Gallons.,trace = FALSE)
+l["coefficients"]
+```
+
+
+Diagnostic Plots for the First Fitted Model
+========================================================
+
+- The q-q plot does not show normal distribution. Shows exponential distribution.
+
+```{r, echo=FALSE}
+fit1 <- lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + 
+     State.Bottle.Retail + Pack + Sale..Dollars., data = dfLiquorSales)
+par(mfrow=c(2,3))
+x <- plot(fit1)
+plot(fit1$model$Bottles.Sold, fit1$fitted.values, xlab = "Actual Values", ylab = "Fitted Values")
+```
