@@ -448,7 +448,7 @@ our dependent variable. By using this selection method, the final model
 excludes the Sales Dollars variable.
 
 \begin{table}[!htbp] \centering 
-  \caption{Forward Selection Linear Model 1 with Influencial Points} 
+  \caption{Forward Selection Linear Model for Log of Bottles Sold with Influencial Points} 
   \label{} 
 \normalsize 
 \begin{tabular}{@{\extracolsep{5pt}}lc} 
@@ -495,7 +495,45 @@ our evaluation data set we are able to fit a more appropriate model.
 
 We further examine our diagnostic plots for our first model.
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-16-1.pdf}
+\begin{table}[!htbp] \centering 
+  \caption{Forward Selection Linear Model for Log of Bottles Sold without Influencial Points} 
+  \label{} 
+\normalsize 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & log(Bottles.Sold) \\ 
+\hline \\[-1.8ex] 
+ Constant & 1.717$^{***}$ (0.404) \\ 
+  State.Bottle.Cost & 1.057$^{***}$ (0.249) \\ 
+  Category.NameCANADIAN WHISKIES & 0.755$^{***}$ (0.173) \\ 
+  Category.NameIRISH WHISKIES & $-$0.757$^{***}$ (0.204) \\ 
+  Category.NameSCOTCH WHISKIES & $-$0.601$^{***}$ (0.200) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & $-$0.683$^{*}$ (0.392) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & $-$0.107 (0.186) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & $-$0.541$^{**}$ (0.258) \\ 
+  Category.NameTENNESSEE WHISKIES & $-$0.296$^{*}$ (0.179) \\ 
+  State.Bottle.Retail & $-$0.702$^{***}$ (0.166) \\ 
+  Pack & 0.060$^{***}$ (0.013) \\ 
+  Volume.Sold..Gallons. & 0.013$^{***}$ (0.002) \\ 
+  Bottle.Volume..ml. & 0.001$^{**}$ (0.0002) \\ 
+ \hline \\[-1.8ex] 
+Observations & 373 \\ 
+R$^{2}$ & 0.643 \\ 
+Adjusted R$^{2}$ & 0.631 \\ 
+Residual Std. Error & 0.930 (df = 360) \\ 
+F Statistic & 53.961$^{***}$ (df = 12; 360)  (p = 0.000) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\bigskip
 
 The table of our detailed model is located in the Appendix.
 Interestingly, our results show that one unit increase in the cost to
@@ -513,8 +551,12 @@ unit increase in Bottle Volume will increase log of bottles sold by
 .0005 units, it would suggest that larger bottles are correlated with
 better sales.
 
+\newpage
+
 \paragraph{Profit Dollars Model
 Development}\label{profit-dollars-model-development}
+
+We now developed a model for the Profit Dollars for sales in Des Moines.
 
 \begin{longtable}[]{@{}cccc@{}}
 \toprule
@@ -541,65 +583,42 @@ CookD\strut
 \bottomrule
 \end{longtable}
 
-\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-17-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{))}
-\KeywordTok{plot}\NormalTok{(fit3)}
-\KeywordTok{plot}\NormalTok{(fit3$fitted.values,fit3$model$ProfitDollar, )}
-\KeywordTok{abline}\NormalTok{(fit3)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Warning in abline(fit3): only using the first two of 10 regression
-## coefficients
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{stargazer}\NormalTok{(fit3, }\DataTypeTok{header =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{no.space =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{style =} \StringTok{"all2"}\NormalTok{, }\DataTypeTok{font.size =} \StringTok{"normalsize"}\NormalTok{, }\DataTypeTok{single.row =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{intercept.bottom =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{title =} \StringTok{"Forward Selection Linear Model Profit Dollars without Influencial Points"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-## \begin{table}[!htbp] \centering 
-##   \caption{Forward Selection Linear Model Profit Dollars without Influencial Points} 
-##   \label{} 
-## \normalsize 
-## \begin{tabular}{@{\extracolsep{5pt}}lc} 
-## \\[-1.8ex]\hline 
-## \hline \\[-1.8ex] 
-##  & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
-## \cline{2-2} 
-## \\[-1.8ex] & ProfitDollar \\ 
-## \hline \\[-1.8ex] 
-##  Constant & $-$2.458 (7.447) \\ 
-##   Volume.Sold..Gallons. & 1.680$^{***}$ (0.226) \\ 
-##   Category.NameCANADIAN WHISKIES & 27.875$^{***}$ (9.382) \\ 
-##   Category.NameIRISH WHISKIES & 21.716$^{*}$ (11.499) \\ 
-##   Category.NameSCOTCH WHISKIES & 54.760$^{***}$ (11.288) \\ 
-##   Category.NameSINGLE BARREL BOURBON WHISKIES & 31.538 (20.280) \\ 
-##   Category.NameSTRAIGHT BOURBON WHISKIES & 48.001$^{***}$ (9.705) \\ 
-##   Category.NameSTRAIGHT RYE WHISKIES & 22.161$^{*}$ (12.837) \\ 
-##   Category.NameTENNESSEE WHISKIES & 23.106$^{**}$ (10.147) \\ 
-##   Sale..Dollars. & $-$0.008$^{***}$ (0.002) \\ 
-##  \hline \\[-1.8ex] 
-## Observations & 374 \\ 
-## R$^{2}$ & 0.528 \\ 
-## Adjusted R$^{2}$ & 0.516 \\ 
-## Residual Std. Error & 53.219 (df = 364) \\ 
-## F Statistic & 45.190$^{***}$ (df = 9; 364)  (p = 0.000) \\ 
-## \hline 
-## \hline \\[-1.8ex] 
-## \textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
-## \end{tabular} 
-## \end{table}
-\end{verbatim}
-
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-18-1.pdf}
+
+\begin{table}[!htbp] \centering 
+  \caption{Forward Selection Linear Model Profit Dollars without Influencial Points} 
+  \label{} 
+\normalsize 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & ProfitDollar \\ 
+\hline \\[-1.8ex] 
+ Constant & $-$2.458 (7.447) \\ 
+  Volume.Sold..Gallons. & 1.680$^{***}$ (0.226) \\ 
+  Category.NameCANADIAN WHISKIES & 27.875$^{***}$ (9.382) \\ 
+  Category.NameIRISH WHISKIES & 21.716$^{*}$ (11.499) \\ 
+  Category.NameSCOTCH WHISKIES & 54.760$^{***}$ (11.288) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & 31.538 (20.280) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & 48.001$^{***}$ (9.705) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & 22.161$^{*}$ (12.837) \\ 
+  Category.NameTENNESSEE WHISKIES & 23.106$^{**}$ (10.147) \\ 
+  Sale..Dollars. & $-$0.008$^{***}$ (0.002) \\ 
+ \hline \\[-1.8ex] 
+Observations & 374 \\ 
+R$^{2}$ & 0.528 \\ 
+Adjusted R$^{2}$ & 0.516 \\ 
+Residual Std. Error & 53.219 (df = 364) \\ 
+F Statistic & 45.190$^{***}$ (df = 9; 364)  (p = 0.000) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
+
+\includegraphics{Final_Project_files/figure-latex/unnamed-chunk-19-1.pdf}
 
 \section{Volume.Sold..Gallons=One unit of increase in volume sold in
 Gallons will increase the bottles sold by 1.70

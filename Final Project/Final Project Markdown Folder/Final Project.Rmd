@@ -35,6 +35,7 @@ output: rticles::elsevier_article
 ```
 
 ```{r options and library load, include = FALSE}
+old.par <- par(mar = c(0, 0, 0, 0))
 options(xtable.comment = FALSE)
 library(pacman)
 p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, data.table, RColorBrewer, forecast, car)
@@ -343,7 +344,7 @@ fit2 <- lm(formula = log(Bottles.Sold) ~ State.Bottle.Cost + Category.Name +
              State.Bottle.Retail + Pack + Volume.Sold..Gallons. + Bottle.Volume..ml., 
            data = dfLiquorSales)
 
-stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model 1 with Influencial Points")
+stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log of Bottles Sold with Influencial Points")
 ```
 
 However, several values may have undue influence on the final form of our model. Using the `influencePlot` function from the `car` package and Cooks Distance, we can see which values that have the greatest impact on our model.
@@ -365,16 +366,26 @@ We further examine our diagnostic plots for our first model.
 #Remove the influential points and update the model
 fit2 <- update(fit2,data=dfLiquorSales[c(-70,-115,-229),])
 
-par(mfrow=c(2,3))
-plot(fit2)
-plot(fit2$model$`log(Bottles.Sold)`,fit2$fitted.values, xlab="Actual Values", ylab="Fitted Values")
+stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log of Bottles Sold without Influencial Points")
 ```
+
+```{r, echo = FALSE, cache=TRUE, results='asis'}
+par(mfrow=c(2,3))
+x <- plot(fit2)
+plot(fit2$model$`log(Bottles.Sold)`, fit2$fitted.values, xlab = "Actual Values", ylab = "Fitted Values")
+```
+
+\bigskip
 
 The table of our detailed model is located in the Appendix. Interestingly, our results show that one unit increase in the cost to the State for `Bottle` will increase the log of bottles sold by 1.06 units. Candian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.75, whereas, IRISH Whiskies will decrease the log of  bottles sold by 0.76 and Scotch will decrease the log of bottles sold by 0.60. 
 
 Also, as expected, a unit increase in the retail price will decrease the log of bottles sold by 0.70 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. 
 
+\newpage
+
 #### Profit Dollars Model Development
+
+We now developed a model for the Profit Dollars for sales in Des Moines. 
 
 ```{r bottles, echo = FALSE, cache=TRUE, results='asis'}
 dfLiquorSales$ProfitDollar <- dfLiquorSales$State.Bottle.Retail - dfLiquorSales$State.Bottle.Cost
@@ -399,10 +410,11 @@ plot(fit3,4)
 fit3 <- update(fit3,data=dfLiquorSales[c(-70,-229),])
 ```
 
-```{r}
+```{r, echo = FALSE, cache=TRUE, results='asis', warning=FALSE, message=FALSE}
+par(old.par)
 par(mfrow=c(2,3))
 plot(fit3)
-plot(fit3$fitted.values,fit3$model$ProfitDollar, )
+plot(fit3$fitted.values,fit3$model$ProfitDollar, xlab = "Actual Values", ylab = "Fitted Values" )
 abline(fit3)
 stargazer(fit3, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model Profit Dollars without Influencial Points")
 ```
