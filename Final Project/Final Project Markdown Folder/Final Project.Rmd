@@ -1,15 +1,15 @@
 ---
 title: Regional Liquor Sales in Des Moines, Iowa
 author:
+  - name: Yadu Chittampalli
+    email: yadu.chittampalli@spsmail.cuny.edu
+    affiliation: CUNY School of Professional Studies
+    footnote: Authors
   - name: Christophe Hunt
     email: christophe.hunt@spsmail.cuny.edu
     affiliation: CUNY School of Professional Studies
-    footnote: Authors
   - name: Senthil Dhanapal
     email: senthil.dhanapal@spsmail.cuny.edu
-    affiliation: CUNY School of Professional Studies
-  - name: Yadu Chittampalli
-    email: yadu.chittampalli@spsmail.cuny.edu
     affiliation: CUNY School of Professional Studies
 address:
   - code: CUNY School of Professional Studies
@@ -480,10 +480,12 @@ We further remove the influential points that are outliers as we did in our prev
 #1. influence points
 par(mfrow=c(1,2))
 x <- influencePlot(fit4)
-pandoc.table(x, caption = "Influential points in Log Profit Dollars Model")
+pandoc.table(x, caption = "Influential points in Log Profit Dollars Model from influencePlot function")
 #2. Cooks distance plot
 plot(fit4,4)
 ```
+
+## Diagnostic Plots 
 
 ```{r, echo = FALSE, cache=TRUE, results='asis', warning=FALSE, message=FALSE}
 #Remove the influential points and update the model
@@ -512,9 +514,9 @@ After exploratory analysis was done on the data, it was concluded that most medi
 
 The other study that examined prediction-based inventory optimization using data mining models, the Back propagation neural network was used for training the prediction model. The idea that gave rise to this method of inventory prediction was the idea that the demand of marketing is viewed as the foundation of inventory management. On the basis of the prediction result, a simple and concise inventory policy was established. Following this, the historic sales data was used to estimate a normal distribution of demand and to calculate the inventory cost with inventory strategy (@DataMining1).
 
-Two models (Back Propagation Neural Network and Support Vector Regression) were established using three input variables (historical sales data, the frequency of searching the commodity, and the click volume of the commodity page). When the back-propagation neural network method was used, there was more accuracy shown in the performance because the predicted values almost matched the actual values in the graphs. This suggests that our Naive Forecast approach could be improved through the use of theses techniques in conjunction with historical sales to create a more robust model (@DataMining1)
+Two models (Back Propagation Neural Network and Support Vector Regression) were established using three input variables (historical sales data, the frequency of searching the commodity, and the click volume of the commodity page). When the back-propagation neural network method was used, there was more accuracy shown in the performance because the predicted values almost matched the actual values in the graphs(@DataMining1). This suggests that our Naive Forecast approach could be improved through the use of these techniques in conjunction with historical sales to create a more robust model.
 
-In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated. Which is in line with our model approach for using a single month rather than a year. The continued growth was rather owed to the number of weekends a month has (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales4. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into sales and volume of liquor sold. Additionally, reviewing the data by identifying months that has 5 weekends instead of four could provide further insights. A follow up study on how prices may have been impacted by pricing strategies in neighboring states and the number of weekends per month may offer further insights and improve the approach taken in this analysis. 
+In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated which is in line with our model approach for using a single month rather than a year. The continued growth was rather owed to the number of weekends in a month (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales4. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into bottles sold and profit dollars. Additionally, reviewing the data by identifying months that has five weekends instead of four could provide further insights. A follow up study on how prices may have been impacted by pricing strategies in neighboring states and the number of weekends per month may offer further insights and improve the approach taken in this analysis. 
 
 \newpage
 

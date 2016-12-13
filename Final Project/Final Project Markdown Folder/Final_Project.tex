@@ -87,14 +87,14 @@
 \begin{frontmatter}
 
   \title{Regional Liquor Sales in Des Moines, Iowa}
-    \author[CUNY School of Professional Studies]{Christophe Hunt\corref{c1}}
-   \ead{christophe.hunt@spsmail.cuny.edu} 
+    \author[CUNY School of Professional Studies]{Yadu Chittampalli\corref{c1}}
+   \ead{yadu.chittampalli@spsmail.cuny.edu} 
    \cortext[c1]{Authors}
+    \author[CUNY School of Professional Studies]{Christophe Hunt}
+   \ead{christophe.hunt@spsmail.cuny.edu} 
+  
     \author[CUNY School of Professional Studies]{Senthil Dhanapal}
    \ead{senthil.dhanapal@spsmail.cuny.edu} 
-  
-    \author[CUNY School of Professional Studies]{Yadu Chittampalli}
-   \ead{yadu.chittampalli@spsmail.cuny.edu} 
   
       \address[CUNY School of Professional Studies]{CUNY School of Professional Studies, Data Analytics, New York, NY}
   
@@ -847,7 +847,8 @@ our previous model by the observations illustrated by our influence plot
 and Cooks distance plot.
 
 \begin{longtable}[]{@{}cccc@{}}
-\caption{Influential points in Log Profit Dollars Model}\tabularnewline
+\caption{Influential points in Log Profit Dollars Model from
+influencePlot function}\tabularnewline
 \toprule
 \begin{minipage}[b]{0.11\columnwidth}\centering\strut
 ~\strut
@@ -885,6 +886,8 @@ CookD\strut
 \end{longtable}
 
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-21-1.pdf}
+
+\subsection{Diagnostic Plots}\label{diagnostic-plots}
 
 \begin{table}[!htbp] \centering 
   \caption{Forward Selection Linear Model Log Profit Dollars without Influencial Points} 
@@ -995,25 +998,25 @@ sales data, the frequency of searching the commodity, and the click
 volume of the commodity page). When the back-propagation neural network
 method was used, there was more accuracy shown in the performance
 because the predicted values almost matched the actual values in the
-graphs. This suggests that our Naive Forecast approach could be improved
-through the use of theses techniques in conjunction with historical
-sales to create a more robust model (Xiaoxiao Guo (2014))
+graphs(Xiaoxiao Guo (2014)). This suggests that our Naive Forecast
+approach could be improved through the use of these techniques in
+conjunction with historical sales to create a more robust model.
 
 In another study conducted in 2012 in Idaho, the monthly revenue
-generated was examined rather than the yearly revenue generated. Which
-is in line with our model approach for using a single month rather than
-a year. The continued growth was rather owed to the number of weekends a
-month has (five instead of four) and to the higher prices in neighboring
+generated was examined rather than the yearly revenue generated which is
+in line with our model approach for using a single month rather than a
+year. The continued growth was rather owed to the number of weekends in
+a month (five instead of four) and to the higher prices in neighboring
 states. In Washington, the voters approved an initiative that led the
 state to sell its liquor stores and add new distributor and retail fees,
 making prices in the neighboring states (Idaho and Oregon) look better.
 There were no changes made in marketing or pricing in response to the
 regulatory shift in Washington ({\textbf{???}}). Further research into
 the proximity of our counties to states and towns with higher prices and
-regulation may provide more insight into sales and volume of liquor
-sold. Additionally, reviewing the data by identifying months that has 5
-weekends instead of four could provide further insights. A follow up
-study on how prices may have been impacted by pricing strategies in
+regulation may provide more insight into bottles sold and profit
+dollars. Additionally, reviewing the data by identifying months that has
+five weekends instead of four could provide further insights. A follow
+up study on how prices may have been impacted by pricing strategies in
 neighboring states and the number of weekends per month may offer
 further insights and improve the approach taken in this analysis.
 
