@@ -323,12 +323,12 @@ par(mfrow=c(1,2))
 
 #1. influence points
 x <- influencePlot(fit1)
-pandoc.table(x, caption = "influencial points")
+pandoc.table(x, caption = "Influential points in Bottles Sold Model")
 #2. Cooks distance plot
 plot(fit1,4)
 ```
 
-Below are the diagnostic plots for our Model 1, without influencial points. Unfortunately, we see a non-normal distribution in residuals of the qq plot and we see a linear relationship for the fitted and actual values plot. 
+Below are the diagnostic plots for our Model 1, without influential points. Unfortunately, we see a non-normal distribution in residuals of the qq plot and we see a linear relationship for the fitted and actual values plot. 
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
 #Remove the influential points and update the model
@@ -382,9 +382,12 @@ We select the values that have the greatest influence on our model and remove th
 par(mfrow=c(1,2))
 #1. influence points
 influence <- influencePlot(fit2)
+pandoc.table(influence, caption = "Influential points in Log of Bottles Sold Model")
 #2. Cooks distance plot
 cook <- plot(fit2,4)
 ```
+
+\newpage
 
 We further examine our diagnostic plots for our first model with the log transformation. 
 
@@ -403,15 +406,15 @@ plot(fit2$model$`log(Bottles.Sold)`, fit2$fitted.values, xlab = "Actual Values",
 
 \bigskip
 
-The table of our detailed model is located in the Appendix, fortunately, we see a much more normal distribution of the residuals. Interestingly, our results show that one unit increase in the Retail will increase the log of bottles sold by .0032 units. We would expect a negative correlation with bottles price and bottles sold. Canadian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales while Single Barrel Bourbon Whiskies and Straight Rye Whiskies are approaching significance. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.62, whereas, Irish Whiskies will decrease the log of bottles sold by 0.788 and Scotch will decrease the log of bottles sold by 0.71. 
+The table of our detailed model is located in the Appendix and fortunately, we see a much more normal distribution of the residuals. Interestingly, our results show that one unit increase in the Retail will increase the log of bottles sold by .0032 units. We would expect a negative correlation with bottles price and bottles sold. Canadian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales while Single Barrel Bourbon Whiskies and Straight Rye Whiskies are approaching significance. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.62, whereas, Irish Whiskies will decrease the log of bottles sold by 0.788 and Scotch will decrease the log of bottles sold by 0.71. 
 
-Also, as expected, a unit increase in the Pack will increase the log of bottles sold by 0.05 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. The Adjusted R^2 was improved from .588 to .631 by removing the influence points. Also, the AIC of this model is `r AIC(fit2)` which is a much better AIC than `r AIC(fit1)` from our previous model. 
+Also, as expected, a unit increase in the Pack will increase the log of bottles sold by 0.05 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. The Adjusted R^2 was improved from .588 to .631 by removing the influence points. Also, the AIC of this model is `r round(AIC(fit2),3)` which is a much better AIC than `r round(AIC(fit1),3)` from our previous model. 
 
 \newpage
 
-#### Profit Dollars Model Development
+### Profit Dollars Model Development  
 
-We now developed a model for the Profit Dollars for Whiskey sales in Des Moines. Profit Dollars is the Retail Sale less the Cost of the liquor. We measure this value as pricing strategies are necessary in attempting to maximize efficient inventory control. Using the forward selection method we find that the variables `Pack` and `Bottle Volume in ml` are not significant so they will be removed from our final model. 
+We now developed a model for the Profit Dollars for Whiskey sales in Des Moines. Profit Dollars is measured as the Retail Sale less the Cost of the liquor. We measure this value as pricing strategies are necessary in attempting to maximize profit will maintaining efficient inventory control. Using the forward selection method we find that the variables `Pack` and `Bottle Volume in ml` are not significant so they will be removed from our final model. 
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
 dfLiquorSales$ProfitDollar <- dfLiquorSales$State.Bottle.Retail - dfLiquorSales$State.Bottle.Cost
@@ -428,12 +431,12 @@ fit3 <- lm(formula = ProfitDollar ~ Volume.Sold..Gallons. + Category.Name +
 
 We further remove the influential points that are outliers as we did in our previous model by the observations illustrated by our influence plot and Cooks distance plot. 
 
-```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3, fig.width=10}
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10}
 #Removal of influence points based on two methods
 #1. influence points
 par(mfrow=c(1,2))
 x <- influencePlot(fit3)
-pandoc.table(x)
+pandoc.table(x, caption = "Influential points in Profit Dollars Model")
 #2. Cooks distance plot
 plot(fit3,4)
 ```
@@ -447,6 +450,44 @@ plot(fit3)
 plot(fit3$fitted.values,fit3$model$ProfitDollar, xlab = "Actual Values", ylab = "Fitted Values" )
 abline(fit3)
 stargazer(fit3, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model Profit Dollars without Influencial Points")
+
+```
+
+
+Again, we see that the distribution of the residuals is not normally distributed and the fitted values plotted to the actual values do show a clearly linear relationship. We will need to further transform the variables in order to have a more normal distribution of our residuals. In performing a Box Cox transformation on the dependent variable we find that the lambda value is close to 0 and we should therefore perform log transformation. 
+
+### Profit Dollars Log Model
+
+The forward selection method removed the variable Pack from our final model. Removed Pack 
+
+```{r, echo = FALSE, cache=TRUE, results='asis'}
+step <- step(lm(log(ProfitDollar)~1,data = dfLiquorSales),direction = "forward",
+             scope = ~Category.Name+Pack+Sale..Dollars.+Bottle.Volume..ml.
+             + Volume.Sold..Gallons.,trace = FALSE)
+
+fit4 <- lm(formula =  log(ProfitDollar) ~ Volume.Sold..Gallons. + Category.Name + 
+    Sale..Dollars. + Bottle.Volume..ml., data = dfLiquorSales)
+```
+
+We further remove the influential points that are outliers as we did in our previous model by the observations illustrated by our influence plot and Cooks distance plot. 
+```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10}
+#Removal of influence points based on two methods
+#1. influence points
+par(mfrow=c(1,2))
+x <- influencePlot(fit4)
+pandoc.table(x, caption = "Influential points in Log Profit Dollars Model")
+#2. Cooks distance plot
+plot(fit4,4)
+```
+
+```{r, echo = FALSE, cache=TRUE, results='asis', warning=FALSE, message=FALSE}
+#Remove the influential points and update the model
+fit4 <- update(fit4, data = dfLiquorSales[c(-70,-115,-189),])
+par(mfrow=c(2,3))
+plot(fit4)
+plot(fit4$fitted.values,fit4$model$ProfitDollar, xlab = "Actual Values", ylab = "Fitted Values" )
+
+stargazer(fit4, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model Log Profit Dollars without Influencial Points")
 
 ```
 
@@ -494,13 +535,14 @@ Appendices
 # Supplemental tables and/or figures.
 
 ```{r data set decsribed, results='asis', echo=FALSE}
-describedData <- describe(dfLiquorSales)
+describedData <- describe(dfLiquorSales %>% select(-Store.Number, -Category.Name, -Store.Name, -X))
 latex(describedData, file = '')
 ```
 
-```{r}
-describe(dfLiquorSales$Store.Number)
-describe(dfLiquorSales$Category.Name)
+```{r, results='asis', echo=FALSE}
+latex(describe(dfLiquorSales$Store.Name), file = '')
+latex(describe(dfLiquorSales$Store.Number), file = '')
+latex(describe(dfLiquorSales$Category.Name), file = '')
 ```
 
 # Session Info
