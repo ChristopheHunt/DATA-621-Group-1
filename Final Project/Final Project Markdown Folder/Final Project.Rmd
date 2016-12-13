@@ -376,7 +376,7 @@ fit2 <- lm(formula = log(Bottles.Sold) ~ Category.Name +
 stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log Bottles Sold with Influencial Points")
 ```
 
-We select the values that have the greatest influence on our model and remove them to improve the model performance. The observations removed in this model is 70, 229, 272. We included 272 as indicated in the Cook's distance plot from Base R. By excluding these values from our evaluation data set we are able to fit a more appropriate model.
+We select the values that have the greatest influence on our model and remove them to improve the model performance. The observations removed in this model is 70, 229, 272. We excluded 272 as indicated in the Cook's distance plot from Base R. By excluding these values from our evaluation data set we are able to fit a more appropriate model.
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10}
 #Removal of influence points based on two methods
@@ -409,7 +409,7 @@ plot(fit2$model$`log(Bottles.Sold)`, fit2$fitted.values, xlab = "Actual Values",
 
 The table of our detailed model is located in the Appendix and fortunately, we see a much more normal distribution of the residuals. Interestingly, our results show that one unit increase in the Retail will increase the log of bottles sold by .0032 units. We would expect a negative correlation with bottles price and bottles sold. Canadian whiskies, Irish Whiskies, and Scotch were shown to be the most significant but they do represent the majority of sales while Single Barrel Bourbon Whiskies and Straight Rye Whiskies are approaching significance. In comparison to Blended Whiskey, Canadian Whiskies will increase the log of bottles sold by 0.62, whereas, Irish Whiskies will decrease the log of bottles sold by 0.788 and Scotch will decrease the log of bottles sold by 0.71. 
 
-Also, as expected, a unit increase in the Pack will increase the log of bottles sold by 0.05 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. The Adjusted R^2 was improved from .588 to .631 by removing the influence points. Also, the AIC of this model is `r round(AIC(fit2),3)` which is a much better AIC than `r round(AIC(fit1),3)` from our previous model. 
+Also, as expected, a unit increase in the Pack will increase the log of bottles sold by 0.058 units. Another interesting finding is that a unit increase in Bottle Volume will increase log of bottles sold by .0005 units, it would suggest that larger bottles are correlated with better sales. The Adjusted R^2 was improved from .588 to .631 by removing the influence points. Also, the AIC of this model is `r round(AIC(fit2),3)` which is a much better AIC than `r round(AIC(fit1),3)` from our non log previous model. 
 
 \newpage
 
