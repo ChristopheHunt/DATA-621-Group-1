@@ -326,6 +326,7 @@ x <- influencePlot(fit1)
 pandoc.table(x, caption = "Influential points in Bottles Sold Model")
 #2. Cooks distance plot
 plot(fit1,4)
+stargazer(fit1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Bottles Sold with Influencial Points")
 ```
 
 Below are the diagnostic plots for our Model 1, without influential points. Unfortunately, we see a non-normal distribution in residuals of the qq plot and we see a linear relationship for the fitted and actual values plot. 
@@ -372,7 +373,7 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 fit2 <- lm(formula = log(Bottles.Sold) ~ Category.Name + 
              State.Bottle.Retail + Pack + Volume.Sold..Gallons. + Bottle.Volume..ml., 
            data = dfLiquorSales)
-stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log of Bottles Sold with Influencial Points")
+stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log Bottles Sold with Influencial Points")
 ```
 
 We select the values that have the greatest influence on our model and remove them to improve the model performance. The observations removed in this model is 62, 115, and 221. By excluding these values from our evaluation data set we are able to fit a more appropriate model.
@@ -427,6 +428,8 @@ step <- step(lm(ProfitDollar~1,data = dfLiquorSales),direction = "forward",
 
 fit3 <- lm(formula = ProfitDollar ~ Volume.Sold..Gallons. + Category.Name + 
      Sale..Dollars., data = dfLiquorSales)
+
+stargazer(fit3, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Profit Dollars with Influencial Points")
 ```
 
 We further remove the influential points that are outliers as we did in our previous model by the observations illustrated by our influence plot and Cooks distance plot. 
@@ -449,7 +452,7 @@ par(mfrow=c(2,3))
 plot(fit3)
 plot(fit3$fitted.values,fit3$model$ProfitDollar, xlab = "Actual Values", ylab = "Fitted Values" )
 abline(fit3)
-stargazer(fit3, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model Profit Dollars without Influencial Points")
+stargazer(fit3, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Profit Dollars without Influencial Points")
 
 ```
 
@@ -458,7 +461,7 @@ Again, we see that the distribution of the residuals is not normally distributed
 
 ### Profit Dollars Log Model
 
-The forward selection method removed the variable Pack from our final model. Removed Pack 
+The forward selection method removed the variable Pack from our final model. 
 
 ```{r, echo = FALSE, cache=TRUE, results='asis'}
 step <- step(lm(log(ProfitDollar)~1,data = dfLiquorSales),direction = "forward",
@@ -467,6 +470,8 @@ step <- step(lm(log(ProfitDollar)~1,data = dfLiquorSales),direction = "forward",
 
 fit4 <- lm(formula =  log(ProfitDollar) ~ Volume.Sold..Gallons. + Category.Name + 
     Sale..Dollars. + Bottle.Volume..ml., data = dfLiquorSales)
+
+stargazer(fit4, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log of Profit Dollars with Influencial Points")
 ```
 
 We further remove the influential points that are outliers as we did in our previous model by the observations illustrated by our influence plot and Cooks distance plot. 
@@ -488,28 +493,16 @@ plot(fit4)
 plot(fit4$fitted.values,fit4$model$ProfitDollar, xlab = "Actual Values", ylab = "Fitted Values" )
 
 stargazer(fit4, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model Log Profit Dollars without Influencial Points")
-
 ```
 
-The table of our detailed model for log Profit Dollars is located in the Appendix. 
+The table of our detailed model for log Profit Dollars is located in the Appendix and fortunately, we see a much more normal distribution of the residuals. Interestingly, our results show that one unit increase in the Bottle Volume will increase the log of Profit dollars by .0004 units. In this model all Whiskies were shown to be significant  and in comparison to Blended Whiskey, Canadian Whiskies will increase the log of Profit Dollars by 1.171, whereas, Irish Whiskies will only increase the log of profit dollars by .707. None of the whiskies will reduce the log of profit dollars. 
 
-#Volume.Sold..Gallons=One unit of increase in volume sold in Gallons will increase the bottles sold by 1.70 units
-
-#Category.Name
-# CANADIAN WHISKIES is the only one that is significant. 
-# In comparison to BLENDED WHISKIES, Canadian Whiskies will increase the bottles sold by 27.88
-# In comparison to BLENDED WHISKIES, IRISH Whiskies will increase the bottles sold by 21.72
-# In comparison to BLENDED WHISKIES, SCOTCH Whiskies will increase the bottles sold by 54.76
-# In comparison to BLENDED WHISKIES, SINGLE BARREL BOURBON Whiskies will increase the bottles sold by 31.54
-# In comparison to BLENDED WHISKIES, STRAIGHT BOURBON Whiskies will increase the bottles sold by 48.00
-# In comparison to BLENDED WHISKIES, STRAIGHT RYE Whiskies will increase the bottles sold by 22.16
-# In comparison to BLENDED WHISKIES, TENNESSEE WHISKIES  will increase the bottles sold by 23.11
-
-#State..Dollars=One unit of increase in State..Dollars will decrease the bottles sold by 0.008 units
-
+Also, unexpectedly, a unit increase in the Sale Dollars will decrease the log of profit dollars by 0.05 units. This is intuitive however, because to increase sales we may have to reduce retail price and therefore reduce our profit dollars. The Adjusted R^2  from  by removing the influence points. Also, the AIC of this model is `r round(AIC(fit4),3)` which is a much better AIC than `r round(AIC(fit3),3)` from our previous model. 
 
 Discussion and Conclusions
 ============================
+
+The resulting models allow us to model for November in Des Moines for both Bottles Sold and Profit Dollars. We can utilize a naive forecast, assuming that the prior year of 2015 is predictive of the year 2016. However, there are further analysis types that may result in more robust predictions. 
 
 In one study involving pharmaceutical distribution companies, the purpose was to propose a novel method to forecast the sales of the companies. Network-based analysis was conducted to find clique sets and group members and to use the sales data of comembers. The reason for this was the lack of sufficient historic sales records of each drug. 
 
@@ -517,13 +510,15 @@ Three methods were used to build time series models forecasting sales - ARIMA me
 
 After exploratory analysis was done on the data, it was concluded that most medicines had different and specific characteristics and sales behavior, it was impractical to make a single prediction model for all medicines, and most sales records had nonlinear relationships. This may suggest that it would be more beneficial to model liquor categories individually. However, the reason why the hybrid neural network method was carried out was due to the fact that it is not acceptable to apply a fully linear or nonlinear model on sales data. The two forecast error measures that were used to evaluate and compare model performance were mean squared error and mean absolute error. The performance of the predicted data was significantly improved when the past records of comembers were used. 
 
-http://onesearch.cuny.edu/primo_library/libweb/action/display.do?tabs=detailsTab&ct=display&fn=search&doc=TN_gale_ofa425455991&indx=3&recIds=TN_gale_ofa425455991&recIdxs=2&elementId=2&renderMode=poppedOut&displayMode=full&frbrVersion=2&frbg=&&dscnt=0&scp.scps=scope%3A%28CUNY_BEPRESS%29%2Cscope%3A%28BB%29%2Cscope%3A%28BB_LIBGUIDES%29%2Cscope%3A%28AL%29%2Cprimo_central_multiple_fe&tb=t&mode=Basic&vid=bb&srt=rank&tab=default_tab&dum=true&vl(freeText0)=inventory%20prediction%20sales&dstmp=1481346949259
+ADD CITATION
 
 The other study that examined prediction-based inventory optimization using data mining models, the Back propagation neural network was used for training the prediction model. The idea that gave rise to this method of inventory prediction was the idea that the demand of marketing is viewed as the foundation of inventory management. On the basis of the prediction result, a simple and concise inventory policy was established. Following this, the historic sales data was used to estimate a normal distribution of demand and to calculate the inventory cost with inventory strategy. 
 
+ADD CITITATION 
+
 Two models (Back Propagation Neural Network and Support Vector Regression) were established using three input variables (historical sales data, the frequency of searching the commodity, and the click volume of the commodity page). When the back-propagation neural network method was used, there was more accuracy shown in the performance because the predicted values almost matched the actual values in the graphs. This suggests that our Naive Forecast approach could be improved through the use of theses techniques in conjunction with historical sales to create a more robust model. 
 
-http://onesearch.cuny.edu/primo_library/libweb/action/display.do?frbrVersion=2&tabs=detailsTab&ct=display&fn=search&doc=TN_ieee10.1109%2fCSO.2014.118&indx=10&recIds=TN_ieee10.1109%2fCSO.2014.118&recIdxs=9&elementId=9&renderMode=poppedOut&displayMode=full&frbrVersion=2&frbg=&&dscnt=0&scp.scps=scope%3A%28CUNY_BEPRESS%29%2Cscope%3A%28BB%29%2Cscope%3A%28BB_LIBGUIDES%29%2Cscope%3A%28AL%29%2Cprimo_central_multiple_fe&tb=t&mode=Basic&vid=bb&srt=rank&tab=default_tab&dum=true&vl(freeText0)=inventory%20prediction%20sales&dstmp=1481412549638
+ADD CITATION
 
 In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated. Which is in line with our model approach for using a single month rather than a year. The continued growth was rather owed to the number of weekends a month has (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales4. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into sales and volume of liquor sold. Additionally, reviewing the data by identifying months that has 5 weekends instead of four could provide further insights. A follow up study on how prices may have been impacted by pricing strategies in neighboring states and the number of weekends per month may offer further insights and improve the approach taken in this analysis. 
 

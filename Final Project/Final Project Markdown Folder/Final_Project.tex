@@ -387,6 +387,40 @@ CookD\strut
 
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-12-1.pdf}
 
+\begin{table}[!htbp] \centering 
+  \caption{Forward Selection Linear Model for Bottles Sold with Influencial Points} 
+  \label{} 
+\normalsize 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & Bottles.Sold \\ 
+\hline \\[-1.8ex] 
+ Constant & $-$26.962$^{***}$ (7.283) \\ 
+  Volume.Sold..Gallons. & 3.750$^{***}$ (0.040) \\ 
+  Category.NameCANADIAN WHISKIES & 34.750$^{***}$ (6.600) \\ 
+  Category.NameIRISH WHISKIES & $-$10.615 (7.679) \\ 
+  Category.NameSCOTCH WHISKIES & $-$14.066$^{*}$ (7.765) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & 6.983 (14.477) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & $-$7.049 (6.820) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & 11.064 (9.070) \\ 
+  Category.NameTENNESSEE WHISKIES & $-$6.569 (6.743) \\ 
+  State.Bottle.Retail & 0.084$^{***}$ (0.011) \\ 
+  Pack & 2.709$^{***}$ (0.368) \\ 
+ \hline \\[-1.8ex] 
+Observations & 376 \\ 
+R$^{2}$ & 0.984 \\ 
+Adjusted R$^{2}$ & 0.984 \\ 
+Residual Std. Error & 37.354 (df = 365) \\ 
+F Statistic & 2,259.802$^{***}$ (df = 10; 365)  (p = 0.000) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
+
 Below are the diagnostic plots for our Model 1, without influential
 points. Unfortunately, we see a non-normal distribution in residuals of
 the qq plot and we see a linear relationship for the fitted and actual
@@ -472,7 +506,7 @@ Bottle.Volume..ml. & 2.332312e+00 & 1 & 1.527191 &
 \end{longtable}
 
 \begin{table}[!htbp] \centering 
-  \caption{Forward Selection Linear Model for Log of Bottles Sold with Influencial Points} 
+  \caption{Forward Selection Linear Model for Log Bottles Sold with Influencial Points} 
   \label{} 
 \normalsize 
 \begin{tabular}{@{\extracolsep{5pt}}lc} 
@@ -638,6 +672,39 @@ control. Using the forward selection method we find that the variables
 \texttt{Pack} and \texttt{Bottle\ Volume\ in\ ml} are not significant so
 they will be removed from our final model.
 
+\begin{table}[!htbp] \centering 
+  \caption{Forward Selection Linear Model for Profit Dollars with Influencial Points} 
+  \label{} 
+\normalsize 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & ProfitDollar \\ 
+\hline \\[-1.8ex] 
+ Constant & $-$1.775 (8.092) \\ 
+  Volume.Sold..Gallons. & 1.696$^{***}$ (0.238) \\ 
+  Category.NameCANADIAN WHISKIES & 25.145$^{**}$ (10.301) \\ 
+  Category.NameIRISH WHISKIES & 23.256$^{*}$ (12.611) \\ 
+  Category.NameSCOTCH WHISKIES & 55.807$^{***}$ (12.373) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & 31.182 (22.246) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & 54.113$^{***}$ (10.599) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & 22.644 (14.061) \\ 
+  Category.NameTENNESSEE WHISKIES & 24.333$^{**}$ (11.121) \\ 
+  Sale..Dollars. & $-$0.009$^{***}$ (0.003) \\ 
+ \hline \\[-1.8ex] 
+Observations & 376 \\ 
+R$^{2}$ & 0.575 \\ 
+Adjusted R$^{2}$ & 0.565 \\ 
+Residual Std. Error & 58.462 (df = 366) \\ 
+F Statistic & 55.042$^{***}$ (df = 9; 366)  (p = 0.000) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
+
 We further remove the influential points that are outliers as we did in
 our previous model by the observations illustrated by our influence plot
 and Cooks distance plot.
@@ -683,7 +750,7 @@ CookD\strut
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-18-1.pdf}
 
 \begin{table}[!htbp] \centering 
-  \caption{Forward Selection Linear Model Profit Dollars without Influencial Points} 
+  \caption{Forward Selection Linear Model for Profit Dollars without Influencial Points} 
   \label{} 
 \normalsize 
 \begin{tabular}{@{\extracolsep{5pt}}lc} 
@@ -728,7 +795,41 @@ transformation.
 \subsubsection{Profit Dollars Log Model}\label{profit-dollars-log-model}
 
 The forward selection method removed the variable Pack from our final
-model. Removed Pack
+model.
+
+\begin{table}[!htbp] \centering 
+  \caption{Forward Selection Linear Model for Log of Profit Dollars with Influencial Points} 
+  \label{} 
+\normalsize 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & log(ProfitDollar) \\ 
+\hline \\[-1.8ex] 
+ Constant & 1.837$^{***}$ (0.208) \\ 
+  Volume.Sold..Gallons. & 0.021$^{***}$ (0.004) \\ 
+  Category.NameCANADIAN WHISKIES & 1.120$^{***}$ (0.174) \\ 
+  Category.NameIRISH WHISKIES & 0.675$^{***}$ (0.212) \\ 
+  Category.NameSCOTCH WHISKIES & 1.111$^{***}$ (0.205) \\ 
+  Category.NameSINGLE BARREL BOURBON WHISKIES & 1.016$^{***}$ (0.369) \\ 
+  Category.NameSTRAIGHT BOURBON WHISKIES & 0.833$^{***}$ (0.180) \\ 
+  Category.NameSTRAIGHT RYE WHISKIES & 0.613$^{***}$ (0.235) \\ 
+  Category.NameTENNESSEE WHISKIES & 0.916$^{***}$ (0.190) \\ 
+  Sale..Dollars. & $-$0.0002$^{***}$ (0.00004) \\ 
+  Bottle.Volume..ml. & 0.0004$^{**}$ (0.0002) \\ 
+ \hline \\[-1.8ex] 
+Observations & 376 \\ 
+R$^{2}$ & 0.364 \\ 
+Adjusted R$^{2}$ & 0.347 \\ 
+Residual Std. Error & 0.966 (df = 365) \\ 
+F Statistic & 20.901$^{***}$ (df = 10; 365)  (p = 0.000) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table}
 
 We further remove the influential points that are outliers as we did in
 our previous model by the observations illustrated by our influence plot
@@ -811,50 +912,29 @@ F Statistic & 26.827$^{***}$ (df = 10; 362)  (p = 0.000) \\
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-22-1.pdf}
 
 The table of our detailed model for log Profit Dollars is located in the
-Appendix.
+Appendix and fortunately, we see a much more normal distribution of the
+residuals. Interestingly, our results show that one unit increase in the
+Bottle Volume will increase the log of Profit dollars by .0004 units. In
+this model all Whiskies were shown to be significant and in comparison
+to Blended Whiskey, Canadian Whiskies will increase the log of Profit
+Dollars by 1.171, whereas, Irish Whiskies will only increase the log of
+profit dollars by .707. None of the whiskies will reduce the log of
+profit dollars.
 
-\section{Volume.Sold..Gallons=One unit of increase in volume sold in
-Gallons will increase the bottles sold by 1.70
-units}\label{volume.sold..gallonsone-unit-of-increase-in-volume-sold-in-gallons-will-increase-the-bottles-sold-by-1.70-units}
-
-\section{Category.Name}\label{category.name}
-
-\section{CANADIAN WHISKIES is the only one that is
-significant.}\label{canadian-whiskies-is-the-only-one-that-is-significant.}
-
-\section{In comparison to BLENDED WHISKIES, Canadian Whiskies will
-increase the bottles sold by
-27.88}\label{in-comparison-to-blended-whiskies-canadian-whiskies-will-increase-the-bottles-sold-by-27.88}
-
-\section{In comparison to BLENDED WHISKIES, IRISH Whiskies will increase
-the bottles sold by
-21.72}\label{in-comparison-to-blended-whiskies-irish-whiskies-will-increase-the-bottles-sold-by-21.72}
-
-\section{In comparison to BLENDED WHISKIES, SCOTCH Whiskies will
-increase the bottles sold by
-54.76}\label{in-comparison-to-blended-whiskies-scotch-whiskies-will-increase-the-bottles-sold-by-54.76}
-
-\section{In comparison to BLENDED WHISKIES, SINGLE BARREL BOURBON
-Whiskies will increase the bottles sold by
-31.54}\label{in-comparison-to-blended-whiskies-single-barrel-bourbon-whiskies-will-increase-the-bottles-sold-by-31.54}
-
-\section{In comparison to BLENDED WHISKIES, STRAIGHT BOURBON Whiskies
-will increase the bottles sold by
-48.00}\label{in-comparison-to-blended-whiskies-straight-bourbon-whiskies-will-increase-the-bottles-sold-by-48.00}
-
-\section{In comparison to BLENDED WHISKIES, STRAIGHT RYE Whiskies will
-increase the bottles sold by
-22.16}\label{in-comparison-to-blended-whiskies-straight-rye-whiskies-will-increase-the-bottles-sold-by-22.16}
-
-\section{In comparison to BLENDED WHISKIES, TENNESSEE WHISKIES will
-increase the bottles sold by
-23.11}\label{in-comparison-to-blended-whiskies-tennessee-whiskies-will-increase-the-bottles-sold-by-23.11}
-
-\section{State..Dollars=One unit of increase in State..Dollars will
-decrease the bottles sold by 0.008
-units}\label{state..dollarsone-unit-of-increase-in-state..dollars-will-decrease-the-bottles-sold-by-0.008-units}
+Also, unexpectedly, a unit increase in the Sale Dollars will decrease
+the log of profit dollars by 0.05 units. This is intuitive however,
+because to increase sales we may have to reduce retail price and
+therefore reduce our profit dollars. The Adjusted R\^{}2 from by
+removing the influence points. Also, the AIC of this model is 997.746
+which is a much better AIC than 4046.086 from our previous model.
 
 \section{Discussion and Conclusions}\label{discussion-and-conclusions}
+
+The resulting models allow us to model for November in Des Moines for
+both Bottles Sold and Profit Dollars. We can utilize a naive forecast,
+assuming that the prior year of 2015 is predictive of the year 2016.
+However, there are further analysis types that may result in more robust
+predictions.
 
 In one study involving pharmaceutical distribution companies, the
 purpose was to propose a novel method to forecast the sales of the
@@ -885,7 +965,7 @@ mean squared error and mean absolute error. The performance of the
 predicted data was significantly improved when the past records of
 comembers were used.
 
-http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_gale\_ofa425455991\&indx=3\&recIds=TN\_gale\_ofa425455991\&recIdxs=2\&elementId=2\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481346949259
+ADD CITATION
 
 The other study that examined prediction-based inventory optimization
 using data mining models, the Back propagation neural network was used
@@ -897,6 +977,8 @@ established. Following this, the historic sales data was used to
 estimate a normal distribution of demand and to calculate the inventory
 cost with inventory strategy.
 
+ADD CITITATION
+
 Two models (Back Propagation Neural Network and Support Vector
 Regression) were established using three input variables (historical
 sales data, the frequency of searching the commodity, and the click
@@ -907,7 +989,7 @@ graphs. This suggests that our Naive Forecast approach could be improved
 through the use of theses techniques in conjunction with historical
 sales to create a more robust model.
 
-http://onesearch.cuny.edu/primo\_library/libweb/action/display.do?frbrVersion=2\&tabs=detailsTab\&ct=display\&fn=search\&doc=TN\_ieee10.1109\%2fCSO.2014.118\&indx=10\&recIds=TN\_ieee10.1109\%2fCSO.2014.118\&recIdxs=9\&elementId=9\&renderMode=poppedOut\&displayMode=full\&frbrVersion=2\&frbg=\&\&dscnt=0\&scp.scps=scope\%3A\%28CUNY\_BEPRESS\%29\%2Cscope\%3A\%28BB\%29\%2Cscope\%3A\%28BB\_LIBGUIDES\%29\%2Cscope\%3A\%28AL\%29\%2Cprimo\_central\_multiple\_fe\&tb=t\&mode=Basic\&vid=bb\&srt=rank\&tab=default\_tab\&dum=true\&vl(freeText0)=inventory\%20prediction\%20sales\&dstmp=1481412549638
+ADD CITATION
 
 In another study conducted in 2012 in Idaho, the monthly revenue
 generated was examined rather than the yearly revenue generated. Which
