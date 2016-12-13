@@ -140,17 +140,17 @@
   
   \begin{abstract}
   In this project, forward stepwise selection for linear regression was
-  applied to predict the volume of liquor sold and the profit dollars
+  applied to predict the number of Bottles Sold and the Profit Dollars
   incurred. The dataset used consisted of data regarding sales of liquor
   from different stores in different counties within the state of Iowa.
   Due to its large size, the dataset was subsetted to only include data
   pertaining to the Whiskey liquor categories by volume sold in the month
-  of November of 2015. Before outputting the models, the influential
-  points were all removed. When the number of bottles sold was predicted,
-  two models were rendered. In the first and third models, the only
-  variable that showed significance was Canadian Whiskies. This variable
-  increases the bottles sold and the profit respectively by factors of
-  30.67 and 27.88.
+  of November of 2015 in Des Moines. Before outputting the models, the
+  influential points were all removed. When the number of bottles sold was
+  predicted, two models were rendered. In the first and third models, the
+  only variable that showed significance was Canadian Whiskies. This
+  variable increases the bottles sold and the profit respectively by
+  factors of 30.67 and 27.88.
   
   In the second model the target variable was logarithmically transformed
   to a more normal distribution. In this model, the variables that were
@@ -335,7 +335,7 @@ in Iowa so we will limit our analysis to this city.
 
 \subsubsection{Model Development}\label{model-development}
 
-\paragraph{Bottles Sold Model}\label{bottles-sold-model}
+\subsubsection{Bottles Sold Model}\label{bottles-sold-model}
 
 We used forward selection method for our initial model for the Bottles
 Sold. However, we expect some high degrees of multicollinearity as some
@@ -343,7 +343,8 @@ of our variables can be easily explained by other variables in the data
 set. We see a very high degree of multicollinearity in our independent
 variables for Bottles Sold and with good reason. If more bottles sold
 then certainly the volume sold by gallons would increase as would the
-sale dollars, we therefore removed
+sale dollars, we therefore removed volume sold by gallons. Below is the
+table highlighting the high levels of multicollinearity.
 
 \begin{longtable}[]{@{}lcccc@{}}
 \toprule
@@ -359,26 +360,77 @@ Sale..Dollars. & 33.330891 & 1 & 5.773291 & 33.330891\tabularnewline
 \bottomrule
 \end{longtable}
 
-\begin{longtable}[]{@{}lcccc@{}}
+\subsubsection{Removing Influenctial
+points}\label{removing-influenctial-points}
+
+However, several values may have undue influence on the final form of
+our model. Using the \texttt{influencePlot} function from the
+\texttt{car} package and Cooks Distance plot, we can see which values
+that have the greatest impact on our model and we removed observations
+65,70, and 227.
+
+\begin{longtable}[]{@{}cccc@{}}
+\caption{influencial points}\tabularnewline
 \toprule
-rn & GVIF & Df & GVIF\^{}(1/(2*Df)) & Adjusted\_GVIF\tabularnewline
+\begin{minipage}[b]{0.12\columnwidth}\centering\strut
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+StudRes\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+Hat\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+CookD\strut
+\end{minipage}\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{0.12\columnwidth}\centering\strut
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+StudRes\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+Hat\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+CookD\strut
+\end{minipage}\tabularnewline
 \midrule
 \endhead
-Volume.Sold..Gallons. & 2.208269 & 1 & 1.486025 &
-2.208269\tabularnewline
-Category.Name & 1.373528 & 7 & 1.022929 & 1.046384\tabularnewline
-State.Bottle.Retail & 2.286351 & 1 & 1.512069 & 2.286351\tabularnewline
-Pack & 1.243523 & 1 & 1.115134 & 1.243523\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering\strut
+\textbf{70}\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+-1.216\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+0.4126\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+0.09429\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering\strut
+\textbf{74}\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+7.415\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+0.01616\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+0.07151\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering\strut
+\textbf{227}\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+5.591\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+0.04581\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+0.126\strut
+\end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
 
-\begin{verbatim}
-  StudRes        Hat      CookD
-\end{verbatim}
-
-70 -1.216045 0.41255823 0.09428831 74 7.415261 0.01615678 0.07151257 227
-5.590855 0.04581225 0.12598651
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+Below are the diagnostic plots for our Model 1, without influencial
+points. Unfortunately, we see a non-normal distribution in residuals of
+the qq plot and we see a linear relationship for the fitted and actual
+values plot.
 
 \begin{table}[!htbp] \centering 
   \caption{Forward Selection Linear Model for Bottles Sold without Influencial Points} 
@@ -417,7 +469,7 @@ F Statistic & 1,833.018$^{***}$ (df = 10; 362)  (p = 0.000) \\
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-13-1.pdf}
 
 Our model has an extremely good Adjusted \(R^2\) at 0.98 but we see that
-the distribution of the residuals is not normally distributed. The
+the distribution of the residuals is not normally distributed and the
 fitted values plotted to the actual values do show a clearly linear
 relationship. We will need to further transform the variables in order
 to have a more normal distribution of our residuals. We have an
@@ -426,15 +478,18 @@ have a .0723 increase in the number of bottles sold. The expectation
 would be that as retail price increases the number of bottles sold would
 decrease.
 
+\subsubsection{Bottles Sold Model with Log
+Transformation}\label{bottles-sold-model-with-log-transformation}
+
 Our adjusted model uses the same selection method of forward and keeps
 Bottles Sold as our dependent variable. However, we use the BoxCox
 transformation method to transform our dependent variable. The resulting
-\(\lambda\) is 0 so our tranformation is log. In using this selection
+\(\lambda\) is 0 so our transformation is log. In using this selection
 method and dependent variable transformation, the final model excludes
 the Sales Dollars variable. Additionally, we have high multicollinearity
-between the Bottle Cost and the Retail variables, which is inituitive
+between the Bottle Cost and the Retail variables, which is intuitive
 because Bottle Cost has a high impact on Retail price. We remove the
-bottle cost variable as we have more interest in the impacts Retail
+Bottle Cost variable as we have more interest in the impacts Retail
 Price may have on our dependent variable.
 
 \begin{longtable}[]{@{}lcccc@{}}
@@ -491,17 +546,15 @@ F Statistic & 46.203$^{***}$ (df = 11; 364)  (p = 0.000) \\
 \end{tabular} 
 \end{table}
 
-However, several values may have undue influence on the final form of
-our model. Using the \texttt{influencePlot} function from the
-\texttt{car} package and Cooks Distance, we can see which values that
-have the greatest impact on our model.
+We select the values that have the greatest influence on our model and
+remove them to improve the model performance. The observations removed
+in this model is 62, 115, and 221. By excluding these values from our
+evaluation data set we are able to fit a more appropriate model.
 
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-14-1.pdf}
 
-By excluding the values \texttt{70}, \texttt{229}, and \texttt{272} from
-our evaluation data set we are able to fit a more appropriate model.
-
-We further examine our diagnostic plots for our first model.
+We further examine our diagnostic plots for our first model with the log
+transformation.
 
 \begin{table}[!htbp] \centering 
   \caption{Forward Selection Linear Model for Log of Bottles Sold without Influencial Points} 
@@ -570,15 +623,15 @@ Development}\label{profit-dollars-model-development}
 
 We now developed a model for the Profit Dollars for Whiskey sales in Des
 Moines. Profit Dollars is the Retail Sale less the Cost of the liquor.
-We measure this value as pricing stragies are necessary in attempting to
-maximize effecient inventory control. Using the forward selection method
-we find that the variables \texttt{Pack} and
+We measure this value as pricing strategies are necessary in attempting
+to maximize efficient inventory control. Using the forward selection
+method we find that the variables \texttt{Pack} and
 \texttt{Bottle\ Volume\ in\ ml} are not significant so they will be
 removed from our final model.
 
-We further remove influencial points as we did in our previous model by
-those observations illustrated by our influence plot and Cooks distance
-plot.
+We further remove the influential points that are outliers as we did in
+our previous model by the observations illustrated by our influence plot
+and Cooks distance plot.
 
 \begin{longtable}[]{@{}cccc@{}}
 \toprule
@@ -697,11 +750,11 @@ this was the lack of sufficient historic sales records of each drug.
 Three methods were used to build time series models forecasting sales -
 ARIMA methodology, neural network, and an advanced hybrid neural network
 approach. The performance of the proposed method was evaluated using a
-real dataset provided by one of the leading pharmacy distribution
+real data set provided by one of the leading pharmacy distribution
 companies in Iran. The results of the evaluation indicated that the
 proposed method can cope with the low number of past records while
 accurately forecasting medicine sales. An evaluation of the liquor data
-set using these techinques may provide greater insight as the vast
+set using these techniques may provide greater insight as the vast
 number of records could produce a more accurate model.
 
 After exploratory analysis was done on the data, it was concluded that
