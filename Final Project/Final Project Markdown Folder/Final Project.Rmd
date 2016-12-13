@@ -540,8 +540,9 @@ describedData <- describe(dfLiquorSales)
 latex(describedData, file = '')
 ```
 
-```{r, results='asis', echo=FALSE}
-latex(describe(abbreviate(dfLiquorSales$Store.Name)), file = '')
+```{r, results='asis', echo=FALSE, eval=FALSE}
+Store.Names <- as.character(abbreviate(dfLiquorSales$Store.Name))
+latex(describe(Store.Names), file = '')
 latex(describe(dfLiquorSales$Store.Number), file = '')
 latex(describe(dfLiquorSales$Category.Name), file = '')
 ```
