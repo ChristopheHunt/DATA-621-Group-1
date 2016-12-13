@@ -99,25 +99,30 @@
       \address[CUNY School of Professional Studies]{CUNY School of Professional Studies, Data Analytics, New York, NY}
   
   \begin{abstract}
-  In this project, forward stepwise selection for linear regression was
-  applied to predict the number of Bottles Sold and the Profit Dollars
-  incurred. The dataset used consisted of data regarding sales of liquor
-  from different stores in different counties within the state of Iowa.
-  Due to its large size, the dataset was subsetted to only include data
-  pertaining to the Whiskey liquor categories by volume sold in the month
-  of November of 2015 in Des Moines. Before outputting the models, the
-  influential points were all removed. When the number of bottles sold was
-  predicted, two models were rendered. In the first and third models, the
-  only variable that showed significance was Canadian Whiskies. This
-  variable increases the bottles sold and the profit respectively by
-  factors of 30.67 and 27.88.
+  The forward stepwise selection method was used in conjunction with
+  linear regression which was applied to predict the bottles sold and the
+  profit incurred. The dataset used consisted of data regarding sales of
+  liquor from different stores in different counties within the state of
+  Iowa. Due to its large size, the dataset was subsetted to only include
+  data pertaining to whiskies sold in Des Moines in the month of November,
+  2015. Before outputting the models, the influential points were all
+  removed. For each target variable, two models were rendered. In the
+  first and third models, the only variable that showed significance was
+  Canadian Whiskies. This variable increases the bottles sold and the
+  profit respectively by factors of 30.67 and 27.88.
   
-  In the second model the target variable was logarithmically transformed
-  to a more normal distribution. In this model, the variables that were
-  highly significant were Canadian Whiskies, Scotch, and Irish. Canadian
-  Whiskies increases the bottles sold logarithm by a factor of 0.75.
-  Scotch and Irish will both decrease the logarithm respectively by
-  factors of 0.6 and 0.76.
+  In the second model and fourth models, the target variable was
+  logarithmically transformed to a more normal distribution. In the second
+  model, the variables that were highly significant were Canadian
+  Whiskies, Scotch, Irish, State Bottle Retail, Pack, and Volume Sold.
+  Canadian Whiskies, State Bottle Retail, Pack, and Volume Sold increase
+  the logarithm of Bottles Sold respectively by factors of 0.626, 0.003,
+  0.058, and 0.008. Scotch and Irish will both decrease the logarithm of
+  Bottles Sold respectively by factors of 0.6 and 0.76. In the fourth
+  model, the variables that were highly significant were Volume Sold, all
+  of the Whiskies, and Sale Dollars. All of these significant variables
+  increase the logarithm except Sale Dollars. Sale Dollars decreases the
+  logarithm of Profit by a factor of 0.0002.
   \end{abstract}
   
  \end{frontmatter}
@@ -125,7 +130,7 @@
 \section{Problem}\label{problem}
 
 The objective of this report is to create a statistical model for the
-volume sold of liquor in gallons and the profit dollars in the City of
+number of bottles sold of whiskey and the profit dollars in the City of
 Des Moines which is within the state of Iowa. This can help us make
 informed decisions on inventory prediction, sales, and assist wholesale
 distributors to plan for the predicted volume of distribution.
@@ -152,8 +157,8 @@ the City of Des Moines for only whiskey sales in the month of November.
 In 2000 the State of Iowa reported sales at a record pace during the
 last half of 2000 (Boshart (2001)). The later part of the year has an
 increase in sales so planning to meet capacity is a suitable goal for
-any company. Our years of interest for this analysis will be the month
-of November for 2015 and 2016.
+any company. Our time of interest for this analysis will be the month of
+November for 2015.
 
 \section{Research Background}\label{research-background}
 
@@ -249,18 +254,14 @@ and our dependent variables are \texttt{Volume\ sold\ in\ Gallons} and
 By modeling \texttt{Bottles\ Sold} and \texttt{Profit\ Dollars} we aim
 to predict the volume of production needed and the possible profit
 dollars when producing at the predicted volume. We first began by using
-linear regression to model the Volume Sold in Gallons, however, the
-distribution was initially non-normal so we used the BoxCox method to
-transform our dependent variable to a more normal distribution. We then
-used forward selection method to determine the final form for the model
-of Volume Sold in Gallons. We further removed points that had unusually
-high influence on the model.
-
-We then modeled our second dependent variable of
-\texttt{Profit\ Dollars}, which is the difference between the sale price
-and retail price, by using linear regression. After using forward
-selection and removing highly influence points in the second model we
-were able more accurately model the data set.
+linear regression to model both the Bottles Sold and Profit Dollars,
+however, the distributions of the residuals were initially non-normal
+for both. So we used the BoxCox method to transform both dependent
+variables to a more normal distribution. We then used forward selection
+method to determine the final form for the model of Bottles Sold and
+Profit Dollars. We further removed points that had unusually high
+influence on the model. We used the AIC of each model to make our final
+selection for both dependent variable models.
 
 \section{Experimentation and Results}\label{experimentation-and-results}
 
@@ -287,6 +288,8 @@ categories.
 
 \includegraphics{Final_Project_files/figure-latex/unnamed-chunk-6-1.pdf}
 
+\newpage
+
 We can further see that Des Moines accounts for a significant portion of
 the liquor sales in Polk County. Polk County is the most populous county
 in Iowa so we will limit our analysis to this city.
@@ -304,7 +307,8 @@ set. We see a very high degree of multicollinearity in our independent
 variables for Bottles Sold and with good reason. If more bottles sold
 then certainly the volume sold by gallons would increase as would the
 sale dollars, we therefore removed volume sold by gallons. Below is the
-table highlighting the high levels of multicollinearity.
+table that highlights the high levels of multicollinearity for Volume
+Sold by Gallons and Sale Dollars.
 
 \begin{longtable}[]{@{}lcccc@{}}
 \toprule
@@ -326,11 +330,16 @@ points}\label{removing-influenctial-points}
 However, several values may have undue influence on the final form of
 our model. Using the \texttt{influencePlot} function from the
 \texttt{car} package and Cooks Distance plot, we can see which values
-that have the greatest impact on our model and we removed observations
-65,70, and 227.
+that have the greatest impact on our model and we removed the
+observations indicated in the Cook's distance plot for 65, 70, and 227.
+We do see that the influenceplot function indicated observation 74,
+however, we chose to include this observation due to our comfort with
+the Cook's distance plot from Base R which did not indicate the same
+observation.
 
 \begin{longtable}[]{@{}cccc@{}}
-\caption{Influential points in Bottles Sold Model}\tabularnewline
+\caption{Influential points in Bottles Sold Model for influencePlot
+function}\tabularnewline
 \toprule
 \begin{minipage}[b]{0.12\columnwidth}\centering\strut
 ~\strut
@@ -542,11 +551,13 @@ F Statistic & 46.203$^{***}$ (df = 11; 364)  (p = 0.000) \\
 
 We select the values that have the greatest influence on our model and
 remove them to improve the model performance. The observations removed
-in this model is 62, 115, and 221. By excluding these values from our
+in this model is 70, 229, 272. We included 272 as indicated in the
+Cook's distance plot from Base R. By excluding these values from our
 evaluation data set we are able to fit a more appropriate model.
 
 \begin{longtable}[]{@{}cccc@{}}
-\caption{Influential points in Log of Bottles Sold Model}\tabularnewline
+\caption{Influential points in Log of Bottles Sold Model from
+influencePlot function}\tabularnewline
 \toprule
 \begin{minipage}[b]{0.12\columnwidth}\centering\strut
 ~\strut
@@ -924,9 +935,10 @@ profit dollars.
 Also, unexpectedly, a unit increase in the Sale Dollars will decrease
 the log of profit dollars by 0.05 units. This is intuitive however,
 because to increase sales we may have to reduce retail price and
-therefore reduce our profit dollars. The Adjusted R\^{}2 from by
-removing the influence points. Also, the AIC of this model is 997.746
-which is a much better AIC than 4046.086 from our previous model.
+therefore reduce our profit dollars. The Adjusted R\^{}2 for this model
+was increased from .347 to .410 by removing the influencial points.
+Also, the AIC of this model is 997.746 which is a much better than the
+AIC of the non log transformed model at 4046.086.
 
 \section{Discussion and Conclusions}\label{discussion-and-conclusions}
 
@@ -940,7 +952,8 @@ In one study involving pharmaceutical distribution companies, the
 purpose was to propose a novel method to forecast the sales of the
 companies. Network-based analysis was conducted to find clique sets and
 group members and to use the sales data of comembers. The reason for
-this was the lack of sufficient historic sales records of each drug.
+this was the lack of sufficient historic sales records of each drug
+(Neda Khalil Zadeh and Farvaresh (2014))
 
 Three methods were used to build time series models forecasting sales -
 ARIMA methodology, neural network, and an advanced hybrid neural network
@@ -950,7 +963,8 @@ companies in Iran. The results of the evaluation indicated that the
 proposed method can cope with the low number of past records while
 accurately forecasting medicine sales. An evaluation of the liquor data
 set using these techniques may provide greater insight as the vast
-number of records could produce a more accurate model.
+number of records could produce a more accurate model (Neda Khalil Zadeh
+and Farvaresh (2014)).
 
 After exploratory analysis was done on the data, it was concluded that
 most medicines had different and specific characteristics and sales
@@ -963,9 +977,7 @@ fully linear or nonlinear model on sales data. The two forecast error
 measures that were used to evaluate and compare model performance were
 mean squared error and mean absolute error. The performance of the
 predicted data was significantly improved when the past records of
-comembers were used.
-
-ADD CITATION
+comembers were used (Neda Khalil Zadeh and Farvaresh (2014)).
 
 The other study that examined prediction-based inventory optimization
 using data mining models, the Back propagation neural network was used
@@ -975,9 +987,7 @@ is viewed as the foundation of inventory management. On the basis of the
 prediction result, a simple and concise inventory policy was
 established. Following this, the historic sales data was used to
 estimate a normal distribution of demand and to calculate the inventory
-cost with inventory strategy.
-
-ADD CITITATION
+cost with inventory strategy (Xiaoxiao Guo (2014)).
 
 Two models (Back Propagation Neural Network and Support Vector
 Regression) were established using three input variables (historical
@@ -987,9 +997,7 @@ method was used, there was more accuracy shown in the performance
 because the predicted values almost matched the actual values in the
 graphs. This suggests that our Naive Forecast approach could be improved
 through the use of theses techniques in conjunction with historical
-sales to create a more robust model.
-
-ADD CITATION
+sales to create a more robust model (Xiaoxiao Guo (2014))
 
 In another study conducted in 2012 in Idaho, the monthly revenue
 generated was examined rather than the yearly revenue generated. Which
@@ -1013,11 +1021,54 @@ further insights and improve the approach taken in this analysis.
 
 \section{Appendices}\label{appendices}
 
-\section{Supplemental tables and/or
-figures.}\label{supplemental-tables-andor-figures.}
+\section{AIC Value Comparison}\label{aic-value-comparison}
+
+\begin{longtable}[]{@{}cc@{}}
+\caption{AIC Values}\tabularnewline
+\toprule
+\begin{minipage}[b]{0.29\columnwidth}\centering\strut
+Model Name\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+AIC\strut
+\end{minipage}\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{0.29\columnwidth}\centering\strut
+Model Name\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering\strut
+AIC\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+Bottles Sold\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+3697.202\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+Log Bottles Sold\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+1039.469\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+Profit Dollars\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+4046.086\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+Log of Profit Dollars\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering\strut
+997.746\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{Supplemental tables and
+figures.}\label{supplemental-tables-and-figures.}
 
 \begin{spacing}{0.7}
-\begin{center}\textbf{ dfLiquorSales \\ 11 Variables~~~~~ 376 ~Observations}\end{center}
+\begin{center}\textbf{ dfLiquorSales \\ 14 Variables~~~~~ 376 ~Observations}\end{center}
 \smallskip\hrule\smallskip{\small
 \noindent\textbf{Month}
 
@@ -1058,6 +1109,201 @@ n&missing&distinct&value \\
 Value      DES MOINES
 Frequency         376
 Proportion          1
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Category.Name}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){86}}
+\put(188,0){\line(0,1){100}}
+\put(375,0){\line(0,1){55}}
+\put(562,0){\line(0,1){58}}
+\put(750,0){\line(0,1){11}}
+\put(938,0){\line(0,1){93}}
+\put(1125,0){\line(0,1){38}}
+\put(1312,0){\line(0,1){89}}
+\end{picture}
+
+{\smaller
+\begin{tabular}{ rrr }
+n&missing&distinct \\
+376&0&8 \end{tabular}
+\begin{verbatim}
+
+BLENDED WHISKIES (61, 0.162), CANADIAN WHISKIES (71, 0.189), IRISH WHISKIES (39, 0.104),
+SCOTCH WHISKIES (41, 0.109), SINGLE BARREL BOURBON WHISKIES (8, 0.021), STRAIGHT BOURBON
+WHISKIES (66, 0.176), STRAIGHT RYE WHISKIES (27, 0.072), TENNESSEE WHISKIES (63, 0.168)
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Store.Number}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){100}}
+\put(29,0){\line(0,1){100}}
+\put(167,0){\line(0,1){100}}
+\put(168,0){\line(0,1){88}}
+\put(170,0){\line(0,1){88}}
+\put(184,0){\line(0,1){100}}
+\put(217,0){\line(0,1){100}}
+\put(217,0){\line(0,1){75}}
+\put(220,0){\line(0,1){100}}
+\put(221,0){\line(0,1){88}}
+\put(328,0){\line(0,1){25}}
+\put(329,0){\line(0,1){62}}
+\put(601,0){\line(0,1){75}}
+\put(739,0){\line(0,1){88}}
+\put(748,0){\line(0,1){75}}
+\put(786,0){\line(0,1){50}}
+\put(789,0){\line(0,1){62}}
+\put(792,0){\line(0,1){75}}
+\put(812,0){\line(0,1){75}}
+\put(838,0){\line(0,1){62}}
+\put(927,0){\line(0,1){88}}
+\put(930,0){\line(0,1){75}}
+\put(968,0){\line(0,1){75}}
+\put(969,0){\line(0,1){75}}
+\put(983,0){\line(0,1){38}}
+\put(991,0){\line(0,1){75}}
+\put(1034,0){\line(0,1){75}}
+\put(1045,0){\line(0,1){62}}
+\put(1048,0){\line(0,1){38}}
+\put(1069,0){\line(0,1){50}}
+\put(1078,0){\line(0,1){62}}
+\put(1086,0){\line(0,1){50}}
+\put(1136,0){\line(0,1){75}}
+\put(1153,0){\line(0,1){75}}
+\put(1194,0){\line(0,1){50}}
+\put(1194,0){\line(0,1){50}}
+\put(1195,0){\line(0,1){50}}
+\put(1195,0){\line(0,1){50}}
+\put(1196,0){\line(0,1){25}}
+\put(1196,0){\line(0,1){50}}
+\put(1197,0){\line(0,1){50}}
+\put(1197,0){\line(0,1){38}}
+\put(1198,0){\line(0,1){38}}
+\put(1205,0){\line(0,1){75}}
+\put(1208,0){\line(0,1){38}}
+\put(1217,0){\line(0,1){50}}
+\put(1231,0){\line(0,1){50}}
+\put(1294,0){\line(0,1){62}}
+\put(1294,0){\line(0,1){62}}
+\put(1296,0){\line(0,1){38}}
+\put(1296,0){\line(0,1){38}}
+\put(1297,0){\line(0,1){62}}
+\put(1297,0){\line(0,1){88}}
+\put(1298,0){\line(0,1){50}}
+\put(1298,0){\line(0,1){50}}
+\put(1311,0){\line(0,1){100}}
+\put(1321,0){\line(0,1){25}}
+\put(1359,0){\line(0,1){25}}
+\put(1367,0){\line(0,1){38}}
+\put(1383,0){\line(0,1){38}}
+\put(1394,0){\line(0,1){88}}
+\put(1421,0){\line(0,1){50}}
+\put(1424,0){\line(0,1){62}}
+\put(1458,0){\line(0,1){75}}
+\put(1458,0){\line(0,1){88}}
+\put(1459,0){\line(0,1){88}}
+\put(1459,0){\line(0,1){88}}
+\put(1460,0){\line(0,1){88}}
+\put(1461,0){\line(0,1){62}}
+\put(1461,0){\line(0,1){62}}
+\put(1464,0){\line(0,1){38}}
+\put(1468,0){\line(0,1){75}}
+\put(1479,0){\line(0,1){50}}
+\end{picture}
+
+{\smaller
+\begin{tabular}{ rrr }
+n&missing&distinct \\
+376&0&73 \end{tabular}
+\begin{verbatim}
+
+lowest : 2190 2248 2527 2528 2532, highest: 5131 5132 5137 5145 5169
+\end{verbatim}
+}
+\smallskip\hrule\smallskip
+\noindent\textbf{Store.Name}\setlength{\unitlength}{0.001in}\hfill\begin{picture}(1.5,.1)(1500,0)\linethickness{0.6pt}
+\put(0,0){\line(0,1){44}}
+\put(21,0){\line(0,1){44}}
+\put(42,0){\line(0,1){22}}
+\put(62,0){\line(0,1){67}}
+\put(83,0){\line(0,1){78}}
+\put(104,0){\line(0,1){89}}
+\put(125,0){\line(0,1){89}}
+\put(146,0){\line(0,1){22}}
+\put(167,0){\line(0,1){56}}
+\put(188,0){\line(0,1){78}}
+\put(208,0){\line(0,1){33}}
+\put(229,0){\line(0,1){56}}
+\put(250,0){\line(0,1){67}}
+\put(271,0){\line(0,1){67}}
+\put(292,0){\line(0,1){22}}
+\put(312,0){\line(0,1){67}}
+\put(333,0){\line(0,1){67}}
+\put(354,0){\line(0,1){89}}
+\put(375,0){\line(0,1){89}}
+\put(396,0){\line(0,1){78}}
+\put(417,0){\line(0,1){78}}
+\put(438,0){\line(0,1){89}}
+\put(458,0){\line(0,1){89}}
+\put(479,0){\line(0,1){67}}
+\put(500,0){\line(0,1){78}}
+\put(521,0){\line(0,1){89}}
+\put(542,0){\line(0,1){44}}
+\put(562,0){\line(0,1){33}}
+\put(583,0){\line(0,1){33}}
+\put(604,0){\line(0,1){56}}
+\put(625,0){\line(0,1){44}}
+\put(646,0){\line(0,1){67}}
+\put(667,0){\line(0,1){67}}
+\put(688,0){\line(0,1){56}}
+\put(708,0){\line(0,1){100}}
+\put(729,0){\line(0,1){56}}
+\put(750,0){\line(0,1){78}}
+\put(771,0){\line(0,1){78}}
+\put(792,0){\line(0,1){78}}
+\put(812,0){\line(0,1){44}}
+\put(833,0){\line(0,1){22}}
+\put(854,0){\line(0,1){44}}
+\put(875,0){\line(0,1){44}}
+\put(896,0){\line(0,1){56}}
+\put(917,0){\line(0,1){33}}
+\put(938,0){\line(0,1){44}}
+\put(958,0){\line(0,1){44}}
+\put(979,0){\line(0,1){44}}
+\put(1000,0){\line(0,1){33}}
+\put(1021,0){\line(0,1){33}}
+\put(1042,0){\line(0,1){44}}
+\put(1062,0){\line(0,1){67}}
+\put(1083,0){\line(0,1){78}}
+\put(1104,0){\line(0,1){67}}
+\put(1125,0){\line(0,1){67}}
+\put(1146,0){\line(0,1){67}}
+\put(1167,0){\line(0,1){67}}
+\put(1188,0){\line(0,1){33}}
+\put(1208,0){\line(0,1){33}}
+\put(1229,0){\line(0,1){56}}
+\put(1250,0){\line(0,1){78}}
+\put(1271,0){\line(0,1){67}}
+\put(1292,0){\line(0,1){44}}
+\put(1312,0){\line(0,1){67}}
+\put(1333,0){\line(0,1){56}}
+\put(1354,0){\line(0,1){56}}
+\put(1375,0){\line(0,1){33}}
+\put(1396,0){\line(0,1){56}}
+\put(1417,0){\line(0,1){78}}
+\put(1438,0){\line(0,1){44}}
+\put(1458,0){\line(0,1){44}}
+\put(1479,0){\line(0,1){33}}
+\end{picture}
+
+{\smaller
+\begin{tabular}{ rrr }
+n&missing&distinct \\
+376&0&72 \end{tabular}
+\begin{verbatim}
+
+lowest : AV Superstop                  Best Food Mart / Des Moines   C Fresh Market                Cash Saver  /  E Euclid Ave   Cash Saver  /  Fleur         
+highest: Walgreens #05852 / Des Moines Walgreens #07452 / Des Moines Walgreens #07453 / Des Moines Walgreens #07833 / Des Moines Walgreens #07968 / Des Moines
 \end{verbatim}
 }
 \smallskip\hrule\smallskip
@@ -1466,24 +1712,23 @@ lowest :   1.61   1.73   1.75   2.05   2.20, highest: 444.17 459.89 523.01 687.2
   \item Other packages: car~2.1-4, data.table~1.10.0, dplyr~0.5.0,
     fitdistrplus~1.0-7, forecast~7.3, Formula~1.2-1,
     ggplot2~2.2.0, Hmisc~4.0-1, knitr~1.15.1, lattice~0.20-34,
-    logspline~2.1.9, MASS~7.3-45, pacman~0.4.1, pander~0.6.0,
-    purrr~0.2.2, RColorBrewer~1.1-2, readr~1.0.0, stargazer~5.2,
-    survival~2.40-1, tibble~1.2, tidyr~0.6.0, tidyverse~1.0.0,
-    timeDate~3012.100, zoo~1.7-13
+    logspline~2.1.9, magrittr~1.5, MASS~7.3-45, pacman~0.4.1,
+    pander~0.6.0, purrr~0.2.2, RColorBrewer~1.1-2, readr~1.0.0,
+    stargazer~5.2, survival~2.40-1, tibble~1.2, tidyr~0.6.0,
+    tidyverse~1.0.0, timeDate~3012.100, zoo~1.7-13
   \item Loaded via a namespace (and not attached): acepack~1.4.1,
     assertthat~0.1, backports~1.0.4, base64~2.0, cluster~2.0.5,
-    colorspace~1.3-1, DBI~0.5-1, digest~0.6.10, evaluate~0.10,
-    foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2, gridExtra~2.2.1,
-    gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
+    codetools~0.2-15, colorspace~1.3-1, DBI~0.5-1, digest~0.6.10,
+    evaluate~0.10, foreign~0.8-67, fracdiff~1.4-2, grid~3.3.2,
+    gridExtra~2.2.1, gtable~0.2.0, htmlTable~1.7, htmltools~0.3.5,
     latticeExtra~0.6-28, lazyeval~0.2.0, lme4~1.1-12,
-    magrittr~1.5, Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16,
-    minqa~1.2.4, munsell~0.4.3, nlme~3.1-128, nloptr~1.0.4,
-    nnet~7.3-12, openssl~0.9.5, parallel~3.3.2, pbkrtest~0.4-6,
-    plyr~1.8.4, quadprog~1.5-5, quantreg~5.29, R6~2.2.0,
-    Rcpp~0.12.8, rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1,
-    rticles~0.2, scales~0.4.1, SparseM~1.74, splines~3.3.2,
-    stringi~1.1.2, stringr~1.1.0, tools~3.3.2, tseries~0.10-35,
-    yaml~2.1.14
+    Matrix~1.2-7.1, MatrixModels~0.4-1, mgcv~1.8-16, minqa~1.2.4,
+    munsell~0.4.3, nlme~3.1-128, nloptr~1.0.4, nnet~7.3-12,
+    openssl~0.9.5, parallel~3.3.2, pbkrtest~0.4-6, plyr~1.8.4,
+    quadprog~1.5-5, quantreg~5.29, R6~2.2.0, Rcpp~0.12.8,
+    rmarkdown~1.2, rpart~4.1-10, rprojroot~1.1, rticles~0.2,
+    scales~0.4.1, SparseM~1.74, splines~3.3.2, stringi~1.1.2,
+    stringr~1.1.0, tools~3.3.2, tseries~0.10-35, yaml~2.1.14
 \end{itemize}
 
 \section{R statistical programming
@@ -1519,6 +1764,20 @@ Industry} 107.4: 14--16, 18.
 \hypertarget{ref-Demand1}{}
 Kumar, Abhishek. 2012. ``Demand Forecast Process and Inventory
 Management.''
+
+\hypertarget{ref-Pharma2}{}
+Neda Khalil Zadeh, Mohammad Mehdi Sepehri, and Hamid Farvaresh. 2014.
+``Intelligent Sales Prediction for Pharmaceutical Distribution
+Companies: A Data Mining Based Approach.'' \emph{Mathematical Problems
+in Engineering}.
+doi:\href{https://doi.org/http://dx.doi.org.remote.baruch.cuny.edu/10.1155/2014/420310}{http://dx.doi.org.remote.baruch.cuny.edu/10.1155/2014/420310}.
+
+\hypertarget{ref-DataMining1}{}
+Xiaoxiao Guo, Wei Xu, Chang Liu. 2014. ``A Prediction-Based Inventory
+Optimization Using Data Mining Models.'' \emph{2014 Seventh
+International Joint Conference on Computational Sciences and
+Optimization}, 611--15.
+doi:\href{https://doi.org/10.1109/CSO.2014.118}{10.1109/CSO.2014.118}.
 
 \end{document}
 

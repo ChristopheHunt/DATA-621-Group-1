@@ -16,9 +16,9 @@ address:
     address: CUNY School of Professional Studies, Data Analytics, New York, NY
 abstract: | 
 
-          In this project, forward stepwise selection for linear regression was applied to predict the number of Bottles Sold and the Profit Dollars incurred. The dataset used consisted of data regarding sales of liquor from different stores in different counties within the state of Iowa. Due to its large size, the dataset was subsetted to only include data pertaining to the Whiskey liquor categories by volume sold in the month of November of 2015 in Des Moines. Before outputting the models, the influential points were all removed. When the number of bottles sold was predicted, two models were rendered. In the first and third models, the only variable that showed significance was Canadian Whiskies. This variable increases the bottles sold and the profit respectively by factors of 30.67 and 27.88. 
-          
-          In the second model the target variable was logarithmically transformed to a more normal distribution. In this model, the variables that were highly significant were Canadian Whiskies, Scotch, and Irish. Canadian Whiskies increases the bottles sold logarithm by a factor of 0.75. Scotch and Irish will both decrease the logarithm respectively by factors of 0.6 and 0.76.
+          The forward stepwise selection method was used in conjunction with linear regression which was applied to predict the bottles sold and the profit incurred. The dataset used consisted of data regarding sales of liquor from different stores in different counties within the state of Iowa. Due to its large size, the dataset was subsetted to only include data pertaining to whiskies sold in Des Moines in the month of November, 2015. Before outputting the models, the influential points were all removed. For each target variable, two models were rendered. In the first and third models, the only variable that showed significance was Canadian Whiskies. This variable increases the bottles sold and the profit respectively by factors of 30.67 and 27.88. 
+
+          In the second model and fourth models, the target variable was logarithmically transformed to a more normal distribution. In the second model, the variables that were highly significant were Canadian Whiskies, Scotch, Irish, State Bottle Retail, Pack, and Volume Sold. Canadian Whiskies, State Bottle Retail, Pack, and Volume Sold increase the logarithm of Bottles Sold respectively by factors of 0.626, 0.003, 0.058, and 0.008. Scotch and Irish will both decrease the logarithm of Bottles Sold respectively by factors of 0.6 and 0.76. In the fourth model, the variables that were highly significant were Volume Sold, all of the Whiskies, and Sale Dollars. All of these significant variables increase the logarithm except Sale Dollars. Sale Dollars decreases the logarithm of Profit by a factor of 0.0002.  
 
   #Keywords:  Liquor Sales, Naive Forecast, Linear Regression, Inventory Forecast*
 
@@ -45,14 +45,14 @@ p_load(ggplot2, fitdistrplus, logspline, pander, Hmisc, tidyverse, stargazer, da
 Problem
 =================
 
-The objective of this report is to create a statistical model for the volume sold of liquor in gallons and the profit dollars in the City of Des Moines which is within the state of Iowa. This can help us make informed decisions on inventory prediction, sales, and assist wholesale distributors to plan for the predicted volume of distribution.  
+The objective of this report is to create a statistical model for the number of bottles sold of whiskey and the profit dollars in the City of Des Moines which is within the state of Iowa. This can help us make informed decisions on inventory prediction, sales, and assist wholesale distributors to plan for the predicted volume of distribution.  
 
 Introduction
 =================
 
 In February, the Distilled Spirits Council (DISCUS), announced that spirits had an estimated retail sales of nearly $72 billion in 2015. Additionally, DISCUS credits the continuous growth of the distilled spirits industry to several key factors - continuous fascination with American Whiskeys in the United States and abroad, innovations in flavors, permutation across all spirits categories leading to consumer interest, improved regulatory and tax environment resulting in expanded market access and a relatively low number of state tax threats, and the growth of small distillers, which expanded grassroots and overall interest in the spirits category (@KeepingSpiritsHigh1). 
 
-This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more thoroughly understand what impact specific store sights may have accounting for the seasonal impact in November that might effect liquor sales. We will limit the analysis to the City of Des Moines for only whiskey sales in the month of November. In 2000 the State of Iowa reported sales at a record pace during the last half of 2000 (@IowaSetsRecord2). The later part of the year has an increase in sales so planning to meet capacity is a suitable goal for any company. Our years of interest for this analysis will be the month of November for 2015 and 2016.
+This establishes that spirit sales in the Unites States is a valuable market worth exploring for a more detailed and statistical understanding of sales and volume. We hope to more thoroughly understand what impact specific store sights may have accounting for the seasonal impact in November that might effect liquor sales. We will limit the analysis to the City of Des Moines for only whiskey sales in the month of November. In 2000 the State of Iowa reported sales at a record pace during the last half of 2000 (@IowaSetsRecord2). The later part of the year has an increase in sales so planning to meet capacity is a suitable goal for any company. Our time of interest for this analysis will be the month of November for 2015.
 
 Research Background
 =================
@@ -84,9 +84,7 @@ We accomplished this by looking into volume of sales by the largest `County` for
 
 Therefore, our final evaluation data set is the following subset of variables for largest city in Iowa of Des Moines as follows; `Vendor Name`, `Pack` (pack size of bottles sold) `Bottle Volume`, `State Bottle Cost`, `State Bottle Retail`, `Sales Dollars` (Total sales), and our dependent variables are `Volume sold in Gallons` and `Profit Dollars`. 
 
-By modeling `Bottles Sold` and `Profit Dollars` we aim to predict the volume of production needed and the possible profit dollars when producing at the predicted volume. We first began by using linear regression to model the Volume Sold in Gallons, however, the distribution was initially non-normal so we used the BoxCox method to transform our dependent variable to a more normal distribution. We then used forward selection method to determine the final form for the model of Volume Sold in Gallons. We further removed points that had unusually high influence on the model. 
-
-We then modeled our second dependent variable of `Profit Dollars`, which is the difference between the sale price and retail price, by using linear regression. After using forward selection and removing highly influence points in the second model we were able more accurately model the data set. 
+By modeling `Bottles Sold` and `Profit Dollars` we aim to predict the volume of production needed and the possible profit dollars when producing at the predicted volume. We first began by using linear regression to model both the Bottles Sold and Profit Dollars, however, the distributions of the residuals were initially non-normal for both. So we used the BoxCox method to transform both dependent variables to a more normal distribution. We then used forward selection method to determine the final form for the model of Bottles Sold and Profit Dollars. We further removed points that had unusually high influence on the model. We used the AIC of each model to make our final selection for both dependent variable models. 
 
 Experimentation and Results
 =============================
@@ -214,6 +212,8 @@ ggplot(iowaDataReducedTop, aes(x = Category.Name, y = Volume.Sold..Gallons., fil
       ggtitle("Volume of Liquor Category Sales by Gallons Sold")
 ```
 
+\newpage
+
 We can further see that Des Moines accounts for a significant portion of the liquor sales in Polk County. Polk County is the most populous county in Iowa so we will limit our analysis to this city.
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=FALSE}
@@ -283,14 +283,14 @@ ggplot(iowaCounties %>% filter(County == "POLK"), aes(x = County, y = `Volume So
       guides(fill = guide_legend(keywidth = 2, keyheight = .75)) + 
       xlab("County") + 
       ylab("Volume Sold by Gallons\n") +
-      ggtitle("Gallons Sold by Polk County and City for Whiskey Categories")
+      ggtitle("Gallons Sold for all whiskey categories for each City in Polk County")
 ```
 
 ### Model Development  
 
 ### Bottles Sold Model   
 
-We used forward selection method for our initial model for the Bottles Sold. However, we expect some high degrees of multicollinearity as some of our variables can be easily explained by other variables in the data set. We see a very high degree of multicollinearity in our independent variables for Bottles Sold and with good reason. If more bottles sold then certainly the volume sold by gallons would increase as would the sale dollars, we therefore removed volume sold by gallons. Below is the table highlighting the high levels of multicollinearity.  
+We used forward selection method for our initial model for the Bottles Sold. However, we expect some high degrees of multicollinearity as some of our variables can be easily explained by other variables in the data set. We see a very high degree of multicollinearity in our independent variables for Bottles Sold and with good reason. If more bottles sold then certainly the volume sold by gallons would increase as would the sale dollars, we therefore removed volume sold by gallons. Below is the table that highlights the high levels of multicollinearity for Volume Sold by Gallons and Sale Dollars.  
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, eval=TRUE}
 dfLiquorSales <- read.csv("https://raw.githubusercontent.com/ChristopheHunt/DATA-621-Group-1/master/Final%20Project/iowa_data_reduced%2012.10.2016.csv") %>% mutate(Store.Number = factor(Store.Number))
@@ -312,7 +312,7 @@ kable(dfVifFit, align = c("l", "c", "c", "c", "c"))
 
 ### Removing Influenctial points 
 
-However, several values may have undue influence on the final form of our model. Using the `influencePlot` function from the `car` package and Cooks Distance plot, we can see which values that have the greatest impact on our model and we removed observations 65,70, and 227. 
+However, several values may have undue influence on the final form of our model. Using the `influencePlot` function from the `car` package and Cooks Distance plot, we can see which values that have the greatest impact on our model and we removed the observations indicated in the Cook's distance plot for 65, 70, and 227. We do see that the influenceplot function indicated observation 74, however, we chose to include this observation due to our comfort with the Cook's distance plot from Base R which did not indicate the same observation. 
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3, fig.width=10}
 fit1 <- lm(formula = Bottles.Sold ~ Volume.Sold..Gallons. + Category.Name + State.Bottle.Retail + 
@@ -323,7 +323,7 @@ par(mfrow=c(1,2))
 
 #1. influence points
 x <- influencePlot(fit1)
-pandoc.table(x, caption = "Influential points in Bottles Sold Model")
+pandoc.table(x, caption = "Influential points in Bottles Sold Model for influencePlot function")
 #2. Cooks distance plot
 plot(fit1,4)
 stargazer(fit1, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Bottles Sold with Influencial Points")
@@ -376,14 +376,14 @@ fit2 <- lm(formula = log(Bottles.Sold) ~ Category.Name +
 stargazer(fit2, header = FALSE, no.space = TRUE, style = "all2", font.size = "normalsize", single.row = TRUE, intercept.bottom = FALSE, title = "Forward Selection Linear Model for Log Bottles Sold with Influencial Points")
 ```
 
-We select the values that have the greatest influence on our model and remove them to improve the model performance. The observations removed in this model is 62, 115, and 221. By excluding these values from our evaluation data set we are able to fit a more appropriate model.
+We select the values that have the greatest influence on our model and remove them to improve the model performance. The observations removed in this model is 70, 229, 272. We included 272 as indicated in the Cook's distance plot from Base R. By excluding these values from our evaluation data set we are able to fit a more appropriate model.
 
 ```{r, echo = FALSE, results='asis', warning = FALSE, message = FALSE, cache=TRUE, fig.height=3.5, fig.width=10}
 #Removal of influence points based on two methods
 par(mfrow=c(1,2))
 #1. influence points
 influence <- influencePlot(fit2)
-pandoc.table(influence, caption = "Influential points in Log of Bottles Sold Model")
+pandoc.table(influence, caption = "Influential points in Log of Bottles Sold Model from influencePlot function")
 #2. Cooks distance plot
 cook <- plot(fit2,4)
 ```
@@ -497,28 +497,22 @@ stargazer(fit4, header = FALSE, no.space = TRUE, style = "all2", font.size = "no
 
 The table of our detailed model for log Profit Dollars is located in the Appendix and fortunately, we see a much more normal distribution of the residuals. Interestingly, our results show that one unit increase in the Bottle Volume will increase the log of Profit dollars by .0004 units. In this model all Whiskies were shown to be significant  and in comparison to Blended Whiskey, Canadian Whiskies will increase the log of Profit Dollars by 1.171, whereas, Irish Whiskies will only increase the log of profit dollars by .707. None of the whiskies will reduce the log of profit dollars. 
 
-Also, unexpectedly, a unit increase in the Sale Dollars will decrease the log of profit dollars by 0.05 units. This is intuitive however, because to increase sales we may have to reduce retail price and therefore reduce our profit dollars. The Adjusted R^2  from  by removing the influence points. Also, the AIC of this model is `r round(AIC(fit4),3)` which is a much better AIC than `r round(AIC(fit3),3)` from our previous model. 
+Also, unexpectedly, a unit increase in the Sale Dollars will decrease the log of profit dollars by 0.05 units. This is intuitive however, because to increase sales we may have to reduce retail price and therefore reduce our profit dollars. The Adjusted R^2 for this model was increased from .347 to .410 by removing the influencial points. Also, the AIC of this model is `r round(AIC(fit4),3)` which is a much better than the AIC of the non log transformed model at `r round(AIC(fit3),3)`.  
 
 Discussion and Conclusions
 ============================
 
 The resulting models allow us to model for November in Des Moines for both Bottles Sold and Profit Dollars. We can utilize a naive forecast, assuming that the prior year of 2015 is predictive of the year 2016. However, there are further analysis types that may result in more robust predictions. 
 
-In one study involving pharmaceutical distribution companies, the purpose was to propose a novel method to forecast the sales of the companies. Network-based analysis was conducted to find clique sets and group members and to use the sales data of comembers. The reason for this was the lack of sufficient historic sales records of each drug. 
+In one study involving pharmaceutical distribution companies, the purpose was to propose a novel method to forecast the sales of the companies. Network-based analysis was conducted to find clique sets and group members and to use the sales data of comembers. The reason for this was the lack of sufficient historic sales records of each drug (@Pharma2)
 
-Three methods were used to build time series models forecasting sales - ARIMA methodology, neural network, and an advanced hybrid neural network approach. The performance of the proposed method was evaluated using a real data set provided by one of the leading pharmacy distribution companies in Iran. The results of the evaluation indicated that the proposed method can cope with the low number of past records while accurately forecasting medicine sales. An evaluation of the liquor data set using these techniques may provide greater insight as the vast number of records could produce a more accurate model. 
+Three methods were used to build time series models forecasting sales - ARIMA methodology, neural network, and an advanced hybrid neural network approach. The performance of the proposed method was evaluated using a real data set provided by one of the leading pharmacy distribution companies in Iran. The results of the evaluation indicated that the proposed method can cope with the low number of past records while accurately forecasting medicine sales. An evaluation of the liquor data set using these techniques may provide greater insight as the vast number of records could produce a more accurate model (@Pharma2). 
 
-After exploratory analysis was done on the data, it was concluded that most medicines had different and specific characteristics and sales behavior, it was impractical to make a single prediction model for all medicines, and most sales records had nonlinear relationships. This may suggest that it would be more beneficial to model liquor categories individually. However, the reason why the hybrid neural network method was carried out was due to the fact that it is not acceptable to apply a fully linear or nonlinear model on sales data. The two forecast error measures that were used to evaluate and compare model performance were mean squared error and mean absolute error. The performance of the predicted data was significantly improved when the past records of comembers were used. 
+After exploratory analysis was done on the data, it was concluded that most medicines had different and specific characteristics and sales behavior, it was impractical to make a single prediction model for all medicines, and most sales records had nonlinear relationships. This may suggest that it would be more beneficial to model liquor categories individually. However, the reason why the hybrid neural network method was carried out was due to the fact that it is not acceptable to apply a fully linear or nonlinear model on sales data. The two forecast error measures that were used to evaluate and compare model performance were mean squared error and mean absolute error. The performance of the predicted data was significantly improved when the past records of comembers were used (@Pharma2). 
 
-ADD CITATION
+The other study that examined prediction-based inventory optimization using data mining models, the Back propagation neural network was used for training the prediction model. The idea that gave rise to this method of inventory prediction was the idea that the demand of marketing is viewed as the foundation of inventory management. On the basis of the prediction result, a simple and concise inventory policy was established. Following this, the historic sales data was used to estimate a normal distribution of demand and to calculate the inventory cost with inventory strategy (@DataMining1).
 
-The other study that examined prediction-based inventory optimization using data mining models, the Back propagation neural network was used for training the prediction model. The idea that gave rise to this method of inventory prediction was the idea that the demand of marketing is viewed as the foundation of inventory management. On the basis of the prediction result, a simple and concise inventory policy was established. Following this, the historic sales data was used to estimate a normal distribution of demand and to calculate the inventory cost with inventory strategy. 
-
-ADD CITITATION 
-
-Two models (Back Propagation Neural Network and Support Vector Regression) were established using three input variables (historical sales data, the frequency of searching the commodity, and the click volume of the commodity page). When the back-propagation neural network method was used, there was more accuracy shown in the performance because the predicted values almost matched the actual values in the graphs. This suggests that our Naive Forecast approach could be improved through the use of theses techniques in conjunction with historical sales to create a more robust model. 
-
-ADD CITATION
+Two models (Back Propagation Neural Network and Support Vector Regression) were established using three input variables (historical sales data, the frequency of searching the commodity, and the click volume of the commodity page). When the back-propagation neural network method was used, there was more accuracy shown in the performance because the predicted values almost matched the actual values in the graphs. This suggests that our Naive Forecast approach could be improved through the use of theses techniques in conjunction with historical sales to create a more robust model (@DataMining1)
 
 In another study conducted in 2012 in Idaho, the monthly revenue generated was examined rather than the yearly revenue generated. Which is in line with our model approach for using a single month rather than a year. The continued growth was rather owed to the number of weekends a month has (five instead of four) and to the higher prices in neighboring states. In Washington, the voters approved an initiative that led the state to sell its liquor stores and add new distributor and retail fees, making prices in the neighboring states (Idaho and Oregon) look better. There were no changes made in marketing or pricing in response to the regulatory shift in Washington @IdahoSales4. Further research into the proximity of our counties to states and towns with higher prices and regulation may provide more insight into sales and volume of liquor sold. Additionally, reviewing the data by identifying months that has 5 weekends instead of four could provide further insights. A follow up study on how prices may have been impacted by pricing strategies in neighboring states and the number of weekends per month may offer further insights and improve the approach taken in this analysis. 
 
@@ -527,16 +521,27 @@ In another study conducted in 2012 in Idaho, the monthly revenue generated was e
 Appendices
 =============
 
-# Supplemental tables and/or figures.
+# AIC Value Comparison
+
+```{r, results='asis', echo=FALSE}
+x <- c(round(AIC(fit1),3), round(AIC(fit2),3), round(AIC(fit3),3), round(AIC(fit4),3))
+y <- c("Bottles Sold", "Log Bottles Sold", "Profit Dollars", "Log of Profit Dollars")
+z <- cbind(y,x)
+colnames(z) <- c("Model Name", "AIC")
+pandoc.table(z, caption = "AIC Values")
+```
+
+
+# Supplemental tables and figures.
 
 ```{r data set decsribed, results='asis', echo=FALSE}
-dfLiquorSales <- dfLiquorSales %>% select(-Store.Number, -Category.Name, -Store.Name, -X)
+dfLiquorSales <- dfLiquorSales %>% select(-X)
 describedData <- describe(dfLiquorSales)
 latex(describedData, file = '')
 ```
 
 ```{r, results='asis', echo=FALSE, eval=FALSE}
-Store.Names <- as.character(abbreviate(dfLiquorSales$Store.Name))
+Store.Names <- gsub("#", "", as.character(abbreviate(dfLiquorSales$Store.Name)))
 latex(describe(Store.Names), file = '')
 latex(describe(dfLiquorSales$Store.Number), file = '')
 latex(describe(dfLiquorSales$Category.Name), file = '')
