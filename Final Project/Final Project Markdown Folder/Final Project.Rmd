@@ -19,8 +19,8 @@ abstract: |
           The forward stepwise selection method was used in conjunction with linear regression which was applied to predict the bottles sold and the profit incurred. The dataset used consisted of data regarding sales of liquor from different stores in different counties within the state of Iowa. Due to its large size, the dataset was subsetted to only include data pertaining to whiskies sold in Des Moines in the month of November, 2015. Before outputting the models, the influential points were all removed. For each target variable, two models were rendered. In the first and third models, the only variable that showed significance was Canadian Whiskies. This variable increases the bottles sold and the profit respectively by factors of 30.67 and 27.88. 
 
           In the second model and fourth models, the target variable was logarithmically transformed to a more normal distribution. In the second model, the variables that were highly significant were Canadian Whiskies, Scotch, Irish, State Bottle Retail, Pack, and Volume Sold. Canadian Whiskies, State Bottle Retail, Pack, and Volume Sold increase the logarithm of Bottles Sold respectively by factors of 0.626, 0.003, 0.058, and 0.008. Scotch and Irish will both decrease the logarithm of Bottles Sold respectively by factors of 0.6 and 0.76. In the fourth model, the variables that were highly significant were Volume Sold, all of the Whiskies, and Sale Dollars. All of these significant variables increase the logarithm except Sale Dollars. Sale Dollars decreases the logarithm of Profit by a factor of 0.0002.  
-
-  #Keywords:  Liquor Sales, Naive Forecast, Linear Regression, Inventory Forecast*
+          
+keywords:  Liquor Sales, Naive Forecast, Linear Regression, Inventory Forecast*
 
 bibliography: mybibfile.bib
 output: rticles::elsevier_article
